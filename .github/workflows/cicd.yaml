@@ -29,26 +29,6 @@ jobs:
       - name: build
         run: |
           make build SQL_PYSDK_ENABLE=ON SQL_JAVASDK_ENABLE=ON TESTING_ENABLE=ON
-          # GitHub runner disk space is limited
-          # delete thirdparty build directory($ROOT/.deps/) to save disk space
-          make thirdpartybuild-clean
-
-      - name: pack OpenMLDB
-        if: ${{ github.event_name == 'push' }}
-        run: |
-          VERSION="snapshot"
-          if [[ "${{ github.ref }}" == "refs/tags/v"* ]]; then
-            VERSION=$(echo "${{ github.ref }}" | sed -e 's,.*/\(.*\),\1,')
-            VERSION=$(echo $VERSION | sed -e 's/^v//')
-          fi
-          bash steps/package_openmldb.sh $VERSION ${{ env.OS }}
-
-      - name: upload artifacts
-        if: ${{ github.event_name == 'push' }}
-        uses: actions/upload-artifact@v2
-        with:
-          path: openmldb-*.tar.gz
-          name: release-artifacts
 
       - name: run cpp
         run: |
@@ -79,6 +59,7 @@ jobs:
       - name: build pysdk and sqlalchemy
         run: |
           make pythonsdk
+
       - name: test sqlalchemy
         run: |
           python3 -m easy_install nose pip

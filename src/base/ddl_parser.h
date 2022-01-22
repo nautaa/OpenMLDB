@@ -54,7 +54,7 @@ class DDLParser {
     static std::string Explain(const std::string& sql, const ::hybridse::type::Database& db);
 
     static std::shared_ptr<hybridse::sdk::Schema> GetOutputSchema(const std::string& sql,
-                                                                    const hybridse::type::Database& db);
+                                                                  const hybridse::type::Database& db);
     static std::shared_ptr<hybridse::sdk::Schema> GetOutputSchema(
         const std::string& sql, const std::map<std::string, std::vector<::openmldb::common::ColumnDesc>>& schemas);
 

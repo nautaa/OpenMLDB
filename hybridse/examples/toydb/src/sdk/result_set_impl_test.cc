@@ -20,6 +20,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "brpc/controller.h"
 #include "codec/fe_row_codec.h"
 #include "codec/fe_schema_codec.h"
@@ -179,8 +180,7 @@ TEST_P(ResultSetImplTest, test_normal) {
     for (uint32_t i = 0; i < args->response->count(); i++) {
         const std::string& row = args->rows[i];
         ASSERT_TRUE(rs.Next());
-        row_view.Reset(reinterpret_cast<const int8_t*>(row.c_str()),
-                       row.size());
+        row_view.Reset(reinterpret_cast<const int8_t*>(row.c_str()), row.size());
         for (int32_t j = 0; j < schema.size(); j++) {
             const type::ColumnDef& column = schema.Get(j);
             switch (column.type()) {
@@ -242,8 +242,7 @@ TEST_P(ResultSetImplTest, test_normal) {
     }
     delete args;
 }
-INSTANTIATE_TEST_SUITE_P(ResultSetImplTestPrefix, ResultSetImplTest,
-                        testing::ValuesIn(GetTestCase()));
+INSTANTIATE_TEST_SUITE_P(ResultSetImplTestPrefix, ResultSetImplTest, testing::ValuesIn(GetTestCase()));
 
 }  // namespace sdk
 }  // namespace hybridse

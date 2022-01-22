@@ -15,7 +15,9 @@
  */
 
 #include <sys/time.h>
+
 #include <string>
+
 #include "codec/fe_row_codec.h"
 #include "gtest/gtest.h"
 #include "storage/table_impl.h"
@@ -103,8 +105,7 @@ TEST_F(TableTest, SingleIndexIterator) {
     while (iter->Valid()) {
         const char* ch = nullptr;
         uint32_t length = 0;
-        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()),
-                      2, &ch, &length);
+        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()), 2, &ch, &length);
         ASSERT_STREQ("value2", std::string(ch, length).c_str());
         iter->Next();
         count++;
@@ -119,8 +120,7 @@ TEST_F(TableTest, SingleIndexIterator) {
     while (iter->Valid()) {
         const char* ch = nullptr;
         uint32_t length = 0;
-        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()),
-                      2, &ch, &length);
+        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()), 2, &ch, &length);
         ASSERT_STREQ("value2", std::string(ch, length).c_str());
         iter->Next();
         count++;
@@ -269,8 +269,7 @@ TEST_F(TableTest, MultiIndexIterator) {
     while (iter->Valid()) {
         const char* ch = nullptr;
         uint32_t length = 0;
-        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()),
-                      0, &ch, &length);
+        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()), 0, &ch, &length);
         ASSERT_STREQ("i1_k1", std::string(ch, length).c_str());
         iter->Next();
         count++;
@@ -282,8 +281,7 @@ TEST_F(TableTest, MultiIndexIterator) {
     while (iter->Valid()) {
         const char* ch = nullptr;
         uint32_t length = 0;
-        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()),
-                      2, &ch, &length);
+        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()), 2, &ch, &length);
         ASSERT_STREQ("i2_k1", std::string(ch, length).c_str());
         iter->Next();
         count++;
@@ -297,8 +295,7 @@ TEST_F(TableTest, MultiIndexIterator) {
     while (iter->Valid()) {
         const char* ch = nullptr;
         uint32_t length = 0;
-        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()),
-                      2, &ch, &length);
+        view.GetValue(reinterpret_cast<const int8_t*>(iter->GetValue().data()), 2, &ch, &length);
         ASSERT_STREQ("i2_k1", std::string(ch, length).c_str());
         iter->Next();
         count++;
@@ -462,8 +459,7 @@ TEST_F(TableTest, DecodeKeysAndTsTest) {
     auto index_map = table.GetIndexMap();
     int64_t time = 1;
     std::string key;
-    ASSERT_TRUE(table.DecodeKeysAndTs(index_map["index1"], row.c_str(),
-                                      row.length(), key, &time));
+    ASSERT_TRUE(table.DecodeKeysAndTs(index_map["index1"], row.c_str(), row.length(), key, &time));
     ASSERT_EQ("i1_k1|21", key);
     ASSERT_EQ(11L, time);
 }

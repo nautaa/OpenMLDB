@@ -18,11 +18,13 @@
 #define HYBRIDSE_INCLUDE_NODE_PLAN_NODE_H_
 
 #include <glog/logging.h>
+
 #include <list>
 #include <memory>
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "node/node_enum.h"
 #include "node/sql_node.h"
 namespace hybridse {
@@ -123,9 +125,7 @@ class TablePlanNode : public LeafPlanNode {
     virtual bool Equals(const PlanNode *that) const;
     const bool IsPrimary() const { return is_primary_; }
     void SetIsPrimary(bool is_primary) { is_primary_ = is_primary; }
-    const std::string GetPathString() const {
-        return db_.empty() ? table_ : db_ + "." + table_;
-    }
+    const std::string GetPathString() const { return db_.empty() ? table_ : db_ + "." + table_; }
 
     const std::string db_;
     const std::string table_;
@@ -315,10 +315,8 @@ class ProjectListNode : public LeafPlanNode {
         }
     }
     const WindowPlanNode *GetW() const { return w_ptr_; }
-    const ExprNode* GetHavingCondition() const { return having_condition_;}
-    void SetHavingCondition(const node::ExprNode* having_condition) {
-        this->having_condition_ = having_condition;
-    }
+    const ExprNode *GetHavingCondition() const { return having_condition_; }
+    void SetHavingCondition(const node::ExprNode *having_condition) { this->having_condition_ = having_condition; }
     const bool HasRowProject() const { return has_row_project_; }
     const bool HasAggProject() const { return has_agg_project_; }
     const bool IsWindowProject() const { return nullptr != w_ptr_; }
@@ -333,7 +331,7 @@ class ProjectListNode : public LeafPlanNode {
     bool IsSimpleProjectList();
 
  private:
-    const ExprNode* having_condition_;
+    const ExprNode *having_condition_;
     PlanNodeList projects;
 };
 
@@ -356,10 +354,8 @@ class ProjectPlanNode : public UnaryPlanNode {
 
 class CreatePlanNode : public LeafPlanNode {
  public:
-    CreatePlanNode(const std::string& db_name,
-                   const std::string &table_name, int replica_num, int partition_num,
-                   NodePointVector column_list,
-                   NodePointVector distribution_list)
+    CreatePlanNode(const std::string &db_name, const std::string &table_name, int replica_num, int partition_num,
+                   NodePointVector column_list, NodePointVector distribution_list)
         : LeafPlanNode(kPlanTypeCreate),
           database_(db_name),
           table_name_(table_name),
@@ -463,11 +459,11 @@ class DeletePlanNode : public LeafPlanNode {
         : LeafPlanNode(kPlanTypeDelete), target_(target), job_id_(job_id) {}
     ~DeletePlanNode() {}
 
-    bool Equals(const PlanNode* that) const override;
-    void Print(std::ostream& output, const std::string& tab) const override;
+    bool Equals(const PlanNode *that) const override;
+    void Print(std::ostream &output, const std::string &tab) const override;
 
     const DeleteTarget GetTarget() const { return target_; }
-    const std::string& GetJobId() const { return job_id_; }
+    const std::string &GetJobId() const { return job_id_; }
 
  private:
     const DeleteTarget target_;
@@ -476,21 +472,21 @@ class DeletePlanNode : public LeafPlanNode {
 
 class DeployPlanNode : public LeafPlanNode {
  public:
-    explicit DeployPlanNode(const std::string& name, const SqlNode* stmt, const std::string& stmt_str,
+    explicit DeployPlanNode(const std::string &name, const SqlNode *stmt, const std::string &stmt_str,
                             bool if_not_exist)
         : LeafPlanNode(kPlanTypeDeploy), name_(name), stmt_(stmt), stmt_str_(stmt_str), if_not_exist_(if_not_exist) {}
     ~DeployPlanNode() {}
 
-    const std::string& Name() const { return name_; }
-    const SqlNode* Stmt() const { return stmt_; }
+    const std::string &Name() const { return name_; }
+    const SqlNode *Stmt() const { return stmt_; }
     bool IsIfNotExists() const { return if_not_exist_; }
-    const std::string& StmtStr() const { return stmt_str_; }
+    const std::string &StmtStr() const { return stmt_str_; }
 
-    void Print(std::ostream& output, const std::string& tab) const override;
+    void Print(std::ostream &output, const std::string &tab) const override;
 
  private:
     const std::string name_;
-    const SqlNode* stmt_ = nullptr;
+    const SqlNode *stmt_ = nullptr;
     const std::string stmt_str_;
     const bool if_not_exist_ = false;
 };
@@ -509,16 +505,16 @@ class SelectIntoPlanNode : public LeafPlanNode {
 
     ~SelectIntoPlanNode() {}
 
-    PlanNode* Query() const { return query_; }
-    const std::string& QueryStr() const { return query_str_; }
-    const std::string& OutFile() const { return out_file_; }
+    PlanNode *Query() const { return query_; }
+    const std::string &QueryStr() const { return query_str_; }
+    const std::string &OutFile() const { return out_file_; }
     const std::shared_ptr<OptionsMap> Options() const { return options_; }
     const std::shared_ptr<OptionsMap> ConfigOptions() const { return config_options_; }
 
-    void Print(std::ostream& output, const std::string& tab) const override;
+    void Print(std::ostream &output, const std::string &tab) const override;
 
  private:
-    PlanNode* query_;
+    PlanNode *query_;
     const std::string query_str_;
     const std::string out_file_;
     // optional options for load data, e.g csv related options
@@ -539,9 +535,9 @@ class LoadDataPlanNode : public LeafPlanNode {
           config_options_(config_options) {}
     ~LoadDataPlanNode() {}
 
-    const std::string& File() const { return file_; }
-    const std::string& Db() const { return db_; }
-    const std::string& Table() const { return table_; }
+    const std::string &File() const { return file_; }
+    const std::string &Db() const { return db_; }
+    const std::string &Table() const { return table_; }
     const std::shared_ptr<OptionsMap> Options() const { return options_; }
     const std::shared_ptr<OptionsMap> ConfigOptions() const { return config_options_; }
 
@@ -559,20 +555,20 @@ class LoadDataPlanNode : public LeafPlanNode {
 
 class SetPlanNode : public LeafPlanNode {
  public:
-    explicit SetPlanNode(const node::VariableScope scope, const std::string& key, const ConstNode* value)
+    explicit SetPlanNode(const node::VariableScope scope, const std::string &key, const ConstNode *value)
         : LeafPlanNode(kPlanTypeSet), scope_(scope), key_(key), value_(value) {}
     ~SetPlanNode() {}
 
     const node::VariableScope Scope() const { return scope_; }
-    const std::string& Key() const { return key_; }
-    const ConstNode* Value() const { return value_; }
+    const std::string &Key() const { return key_; }
+    const ConstNode *Value() const { return value_; }
 
-    void Print(std::ostream& output, const std::string& org_tab) const override;
+    void Print(std::ostream &output, const std::string &org_tab) const override;
 
  private:
     const node::VariableScope scope_;
     const std::string key_;
-    const ConstNode* value_;
+    const ConstNode *value_;
 };
 
 class InsertPlanNode : public LeafPlanNode {

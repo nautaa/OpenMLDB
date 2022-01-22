@@ -21,9 +21,9 @@
 
 #include <iostream>
 #include <map>
-#include <unordered_map>
 #include <memory>
 #include <string>
+#include <unordered_map>
 #include <vector>
 
 #include "boost/algorithm/string.hpp"
@@ -44,7 +44,7 @@ namespace node {
 
 class ConstNode;
 
-typedef std::unordered_map<std::string, const ConstNode*> OptionsMap;
+typedef std::unordered_map<std::string, const ConstNode *> OptionsMap;
 
 // Global methods
 std::string NameOfSqlNodeType(const SqlNodeType &type);
@@ -493,9 +493,7 @@ class ExprNode : public SqlNode {
     void AddChild(ExprNode *expr) { children_.push_back(expr); }
     void SetChild(size_t idx, ExprNode *expr) { children_[idx] = expr; }
     ExprNode *GetChild(size_t idx) const { return children_[idx]; }
-    ExprNode *GetChildOrNull(size_t idx) const {
-        return idx < GetChildNum() ? GetChild(idx) : nullptr;
-    }
+    ExprNode *GetChildOrNull(size_t idx) const { return idx < GetChildNum() ? GetChild(idx) : nullptr; }
     uint32_t GetChildNum() const { return children_.size(); }
 
     const ExprType GetExprType() const { return expr_type_; }
@@ -574,15 +572,15 @@ class ExprNode : public SqlNode {
                                       const TypeNode **output_type);
 
     static Status BitwiseLogicalTypeAccept(node::NodeManager *nm, const TypeNode *lhs, const TypeNode *rhs,
-                                      const TypeNode **output_type);
+                                           const TypeNode **output_type);
 
-    static Status BitwiseNotTypeAccept(node::NodeManager* nm, const TypeNode* rhs, const TypeNode** output_type);
+    static Status BitwiseNotTypeAccept(node::NodeManager *nm, const TypeNode *rhs, const TypeNode **output_type);
 
-    static Status BetweenTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* low,
-                                    const TypeNode* high, const TypeNode** output_type);
+    static Status BetweenTypeAccept(node::NodeManager *nm, const TypeNode *lhs, const TypeNode *low,
+                                    const TypeNode *high, const TypeNode **output_type);
 
-    static Status LikeTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
-                                 const TypeNode** output);
+    static Status LikeTypeAccept(node::NodeManager *nm, const TypeNode *lhs, const TypeNode *rhs,
+                                 const TypeNode **output);
 
  private:
     const TypeNode *output_type_ = nullptr;
@@ -1690,9 +1688,8 @@ class GetFieldExpr : public ExprNode {
 
 class BetweenExpr : public ExprNode {
  public:
-    BetweenExpr(ExprNode *expr, ExprNode *left, ExprNode *right):
-        BetweenExpr(expr, left, right, false) {}
-    BetweenExpr(ExprNode* lhs, ExprNode* low, ExprNode* high, bool is_not_between)
+    BetweenExpr(ExprNode *expr, ExprNode *left, ExprNode *right) : BetweenExpr(expr, left, right, false) {}
+    BetweenExpr(ExprNode *lhs, ExprNode *low, ExprNode *high, bool is_not_between)
         : ExprNode(kExprBetween), is_not_between_(is_not_between) {
         AddChild(lhs);
         AddChild(low);
@@ -1708,9 +1705,9 @@ class BetweenExpr : public ExprNode {
     void set_is_not_between(const bool flag) { is_not_between_ = flag; }
     const bool is_not_between() const { return is_not_between_; }
 
-    ExprNode* GetLhs() const { return GetChildNum() > 0 ? GetChild(0) : nullptr; }
-    ExprNode* GetLow() const { return GetChildNum() > 1 ? GetChild(1) : nullptr; }
-    ExprNode* GetHigh() const { return GetChildNum() > 2 ? GetChild(2) : nullptr; }
+    ExprNode *GetLhs() const { return GetChildNum() > 0 ? GetChild(0) : nullptr; }
+    ExprNode *GetLow() const { return GetChildNum() > 1 ? GetChild(1) : nullptr; }
+    ExprNode *GetHigh() const { return GetChildNum() > 2 ? GetChild(2) : nullptr; }
 
     Status InferAttr(ExprAnalysisContext *ctx) override;
 
@@ -1720,16 +1717,15 @@ class BetweenExpr : public ExprNode {
 
 class InExpr : public ExprNode {
  public:
-    explicit InExpr(ExprNode* lhs, ExprNode* in_list, bool is_not)
-        : ExprNode(kExprIn), is_not_(is_not) {
+    explicit InExpr(ExprNode *lhs, ExprNode *in_list, bool is_not) : ExprNode(kExprIn), is_not_(is_not) {
         AddChild(lhs);
         AddChild(in_list);
     }
     ~InExpr() {}
 
     const bool IsNot() const { return is_not_; }
-    ExprNode* GetLhs() const { return GetChildOrNull(0); }
-    ExprNode* GetInList() const { return GetChildOrNull(1); }
+    ExprNode *GetLhs() const { return GetChildOrNull(0); }
+    ExprNode *GetInList() const { return GetChildOrNull(1); }
 
     void Print(std::ostream &output, const std::string &org_tab) const override;
     const std::string GetExprString() const override;
@@ -1745,8 +1741,7 @@ class InExpr : public ExprNode {
 
 class EscapedExpr : public ExprNode {
  public:
-    EscapedExpr(ExprNode* pattern, ExprNode* escape)
-        : ExprNode(kExprEscaped) {
+    EscapedExpr(ExprNode *pattern, ExprNode *escape) : ExprNode(kExprEscaped) {
         AddChild(pattern);
         AddChild(escape);
     }
@@ -1757,13 +1752,9 @@ class EscapedExpr : public ExprNode {
     EscapedExpr *ShadowCopy(NodeManager *) const override;
     Status InferAttr(ExprAnalysisContext *ctx) override;
 
-    ExprNode* GetPattern() const {
-        return GetChildOrNull(0);
-    }
+    ExprNode *GetPattern() const { return GetChildOrNull(0); }
 
-    ExprNode* GetEscape() const {
-        return GetChildOrNull(1);
-    }
+    ExprNode *GetEscape() const { return GetChildOrNull(1); }
 };
 
 class ResTarget : public SqlNode {
@@ -1802,7 +1793,7 @@ class ColumnDefNode : public SqlNode {
 
     DataType GetColumnType() const { return column_type_; }
 
-    ExprNode* GetDefaultValue() const { return default_value_; }
+    ExprNode *GetDefaultValue() const { return default_value_; }
 
     bool GetIsNotNull() const { return op_not_null_; }
     void Print(std::ostream &output, const std::string &org_tab) const;
@@ -1811,7 +1802,7 @@ class ColumnDefNode : public SqlNode {
     std::string column_name_;
     DataType column_type_;
     bool op_not_null_;
-    ExprNode* default_value_ = nullptr;
+    ExprNode *default_value_ = nullptr;
 };
 
 class InsertStmt : public SqlNode {
@@ -2068,22 +2059,19 @@ class CmdNode : public SqlNode {
     std::vector<std::string> args_;
 };
 
-enum class DeleteTarget {
-    JOB
-};
+enum class DeleteTarget { JOB };
 std::string DeleteTargetString(DeleteTarget target);
 
 class DeleteNode : public SqlNode {
  public:
-    explicit DeleteNode(DeleteTarget t, std::string job_id)
-    : SqlNode(kDeleteStmt, 0, 0), target_(t), job_id_(job_id) {}
+    explicit DeleteNode(DeleteTarget t, std::string job_id) : SqlNode(kDeleteStmt, 0, 0), target_(t), job_id_(job_id) {}
     ~DeleteNode() {}
 
     void Print(std::ostream &output, const std::string &org_tab) const override;
     std::string GetTargetString() const;
 
     const DeleteTarget GetTarget() const { return target_; }
-    const std::string& GetJobId() const { return job_id_; }
+    const std::string &GetJobId() const { return job_id_; }
 
  private:
     const DeleteTarget target_;
@@ -2093,7 +2081,7 @@ class DeleteNode : public SqlNode {
 class SelectIntoNode : public SqlNode {
  public:
     explicit SelectIntoNode(const QueryNode *query, const std::string &query_str, const std::string &out,
-                            const std::shared_ptr<OptionsMap>&& options, const std::shared_ptr<OptionsMap>&& op2)
+                            const std::shared_ptr<OptionsMap> &&options, const std::shared_ptr<OptionsMap> &&op2)
         : SqlNode(kSelectIntoStmt, 0, 0),
           query_(query),
           query_str_(query_str),
@@ -2102,16 +2090,16 @@ class SelectIntoNode : public SqlNode {
           config_options_(op2) {}
     ~SelectIntoNode() {}
 
-    const QueryNode* Query() const { return query_; }
-    const std::string& QueryStr() const { return query_str_; }
-    const std::string& OutFile() const { return out_file_; }
+    const QueryNode *Query() const { return query_; }
+    const std::string &QueryStr() const { return query_str_; }
+    const std::string &OutFile() const { return out_file_; }
     const std::shared_ptr<OptionsMap> Options() const { return options_; }
     const std::shared_ptr<OptionsMap> ConfigOptions() const { return config_options_; }
 
-    void Print(std::ostream& output, const std::string& org_tab) const override;
+    void Print(std::ostream &output, const std::string &org_tab) const override;
 
  private:
-    const QueryNode* query_;
+    const QueryNode *query_;
     const std::string query_str_;
     const std::string out_file_;
     // optional options for load data, e.g csv related options
@@ -2123,13 +2111,13 @@ class SelectIntoNode : public SqlNode {
 class LoadDataNode : public SqlNode {
  public:
     explicit LoadDataNode(const std::string &f, const std::string &db, const std::string &table,
-                          const std::shared_ptr<OptionsMap>&& op, const std::shared_ptr<OptionsMap>&& op2)
+                          const std::shared_ptr<OptionsMap> &&op, const std::shared_ptr<OptionsMap> &&op2)
         : SqlNode(kLoadDataStmt, 0, 0), file_(f), db_(db), table_(table), options_(op), config_options_(op2) {}
     ~LoadDataNode() {}
 
-    const std::string& File() const { return file_; }
-    const std::string& Db() const { return db_; }
-    const std::string& Table() const { return table_; }
+    const std::string &File() const { return file_; }
+    const std::string &Db() const { return db_; }
+    const std::string &Table() const { return table_; }
     const std::shared_ptr<OptionsMap> Options() const { return options_; }
     const std::shared_ptr<OptionsMap> ConfigOptions() const { return config_options_; }
 
@@ -2149,20 +2137,20 @@ class LoadDataNode : public SqlNode {
 
 class SetNode : public SqlNode {
  public:
-    explicit SetNode(const node::VariableScope scope, const std::string& key, const ConstNode* value)
+    explicit SetNode(const node::VariableScope scope, const std::string &key, const ConstNode *value)
         : SqlNode(kSetStmt, 0, 0), scope_(scope), key_(key), value_(value) {}
     ~SetNode() {}
 
     const node::VariableScope Scope() const { return scope_; }
-    const std::string& Key() const { return key_; }
-    const ConstNode* Value() const { return value_; }
+    const std::string &Key() const { return key_; }
+    const ConstNode *Value() const { return value_; }
 
-    void Print(std::ostream& output, const std::string& org_tab) const override;
+    void Print(std::ostream &output, const std::string &org_tab) const override;
 
  private:
     const node::VariableScope scope_;
     const std::string key_;
-    const ConstNode* value_;
+    const ConstNode *value_;
 };
 
 class CreateIndexNode : public SqlNode {
@@ -2188,20 +2176,20 @@ class ExplainNode : public SqlNode {
 
 class DeployNode : public SqlNode {
  public:
-    explicit DeployNode(const std::string& name, const SqlNode* stmt, const std::string& stmt_str, bool if_not_exists)
+    explicit DeployNode(const std::string &name, const SqlNode *stmt, const std::string &stmt_str, bool if_not_exists)
         : SqlNode(kDeployStmt, 0, 0), name_(name), stmt_(stmt), stmt_str_(stmt_str), if_not_exists_(if_not_exists) {}
     ~DeployNode() {}
 
-    const std::string& Name() const { return name_; }
-    const SqlNode* Stmt() const { return stmt_; }
+    const std::string &Name() const { return name_; }
+    const SqlNode *Stmt() const { return stmt_; }
     const bool IsIfNotExists() const { return if_not_exists_; }
-    const std::string& StmtStr() const { return stmt_str_; }
+    const std::string &StmtStr() const { return stmt_str_; }
 
-    void Print(std::ostream& output, const std::string& tab) const override;
+    void Print(std::ostream &output, const std::string &tab) const override;
 
  private:
     const std::string name_;
-    const SqlNode* stmt_ = nullptr;
+    const SqlNode *stmt_ = nullptr;
     const std::string stmt_str_;
     const bool if_not_exists_ = false;
 };
@@ -2709,9 +2697,9 @@ bool SqlListEquals(const SqlNodeList *left, const SqlNodeList *right);
 bool ExprEquals(const ExprNode *left, const ExprNode *right);
 bool FnDefEquals(const FnDefNode *left, const FnDefNode *right);
 bool TypeEquals(const TypeNode *left, const TypeNode *right);
-bool WindowOfExpression(const std::map<std::string, const WindowDefNode *>& windows, ExprNode *node_ptr,
+bool WindowOfExpression(const std::map<std::string, const WindowDefNode *> &windows, ExprNode *node_ptr,
                         const WindowDefNode **output);
-bool IsAggregationExpression(const udf::UdfLibrary* lib, const node::ExprNode* node_ptr);
+bool IsAggregationExpression(const udf::UdfLibrary *lib, const node::ExprNode *node_ptr);
 void ColumnOfExpression(const ExprNode *node_ptr,
                         std::vector<const node::ExprNode *> *columns);  // NOLINT
 void FillSqlNodeList2NodeVector(SqlNodeList *node_list_ptr,
@@ -2727,8 +2715,8 @@ void PrintValue(std::ostream &output, const std::string &org_tab, const std::str
 void PrintValue(std::ostream &output, const std::string &org_tab, const std::vector<std::string> &vec,
                 const std::string &item_name, bool last_child);
 
-void PrintValue(std::ostream &output, const std::string &org_tab, const OptionsMap* value,
-                const std::string &item_name, bool last_child);
+void PrintValue(std::ostream &output, const std::string &org_tab, const OptionsMap *value, const std::string &item_name,
+                bool last_child);
 }  // namespace node
 }  // namespace hybridse
 #endif  // HYBRIDSE_INCLUDE_NODE_SQL_NODE_H_

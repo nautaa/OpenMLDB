@@ -15,9 +15,11 @@
  */
 
 #include "codegen/buf_ir_builder.h"
+
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "codec/fe_row_codec.h"
 #include "codegen/date_ir_builder.h"
 #include "codegen/ir_base_builder.h"
@@ -308,9 +310,11 @@ base::Status BufNativeEncoderIRBuilder::BuildEncode(::llvm::Value* output_ptr) {
                     }
                 } else if (codegen::TypeIRBuilder::IsDatePtr(val.GetType())) {
                     if (val.IsConstNull()) {
-                        CHECK_STATUS(AppendPrimary(i8_ptr,
-                                           NativeValue::CreateWithFlag(builder.getInt32(0), builder.getInt1(true)), idx,
-                                           offset), "Fail to encode date column ", column.name())
+                        CHECK_STATUS(
+                            AppendPrimary(i8_ptr,
+                                          NativeValue::CreateWithFlag(builder.getInt32(0), builder.getInt1(true)), idx,
+                                          offset),
+                            "Fail to encode date column ", column.name())
                     } else {
                         ::llvm::Value* days;
                         DateIRBuilder date_builder(block_->getModule());
@@ -319,9 +323,10 @@ base::Status BufNativeEncoderIRBuilder::BuildEncode(::llvm::Value* output_ptr) {
                                      "Fail to encode date column ", column.name())
                     }
                 } else if (TypeIRBuilder::IsNull(val.GetType())) {
-                    CHECK_STATUS(AppendPrimary(
-                        i8_ptr, NativeValue::CreateWithFlag(builder.getInt1(true), builder.getInt1(true)), idx, offset),
-                                 "Fail to encode NULL column ", column.name())
+                    CHECK_STATUS(
+                        AppendPrimary(i8_ptr, NativeValue::CreateWithFlag(builder.getInt1(true), builder.getInt1(true)),
+                                      idx, offset),
+                        "Fail to encode NULL column ", column.name())
                 } else {
                     FAIL_STATUS(common::kCodegenEncodeError,
                                 "Invalid column type, number/timestamp/date type is required but ",
@@ -363,9 +368,9 @@ base::Status BufNativeEncoderIRBuilder::BuildEncode(::llvm::Value* output_ptr) {
 }
 
 base::Status BufNativeEncoderIRBuilder::AppendString(::llvm::Value* i8_ptr, ::llvm::Value* buf_size, uint32_t field_idx,
-                                             const NativeValue& str_val, ::llvm::Value* str_addr_space,
-                                             ::llvm::Value* str_body_offset, uint32_t str_field_idx,
-                                             ::llvm::Value** output) {
+                                                     const NativeValue& str_val, ::llvm::Value* str_addr_space,
+                                                     ::llvm::Value* str_body_offset, uint32_t str_field_idx,
+                                                     ::llvm::Value** output) {
     ::llvm::IRBuilder<> builder(block_);
     StringIRBuilder string_ir_builder(block_->getModule());
     ::llvm::Type* str_ty = string_ir_builder.GetType();
@@ -429,7 +434,7 @@ bool BufNativeEncoderIRBuilder::CalcStrBodyStart(::llvm::Value** output, ::llvm:
 }
 
 base::Status BufNativeEncoderIRBuilder::AppendPrimary(::llvm::Value* i8_ptr, const NativeValue& val, size_t field_idx,
-                                              uint32_t field_offset) {
+                                                      uint32_t field_offset) {
     ::llvm::IRBuilder<> builder(block_);
     ::llvm::Value* offset = builder.getInt32(field_offset);
     if (val.IsNullable()) {
@@ -466,7 +471,7 @@ base::Status BufNativeEncoderIRBuilder::AppendHeader(::llvm::Value* i8_ptr, ::ll
 
     ::llvm::Value* output = NULL;
     CHECK_TRUE(BuildGetPtrOffset(builder, i8_ptr, builder.getInt32(6), builder.getInt8PtrTy(), &output),
-    common::kCodegenEncodeError, "fail to encode data to row")
+               common::kCodegenEncodeError, "fail to encode data to row")
     builder.CreateMemSet(output, builder.getInt8(0), bitmap_size, 1u);
     return base::Status::OK();
 }
@@ -506,7 +511,6 @@ base::Status BufNativeEncoderIRBuilder::CalcTotalSize(::llvm::Value** output_ptr
 
             ::llvm::Value* fe_str_size = builder.CreateLoad(size_ty, size_i32_ptr, "load_str_length");
             fe_str_size = builder.CreateSelect(fe_str.GetIsNull(&builder), builder.getInt32(0), fe_str_size);
-
 
             total_size = builder.CreateAdd(fe_str_size, total_size, "add_str_length");
         }

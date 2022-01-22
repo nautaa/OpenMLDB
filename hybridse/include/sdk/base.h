@@ -18,6 +18,7 @@
 #define HYBRIDSE_INCLUDE_SDK_BASE_H_
 
 #include <stdint.h>
+
 #include <memory>
 #include <string>
 #include <vector>
@@ -27,8 +28,7 @@ namespace sdk {
 
 struct Status {
     Status() : code(0), msg("ok") {}
-    Status(int status_code, const std::string& msg_str)
-        : code(status_code), msg(msg_str) {}
+    Status(int status_code, const std::string& msg_str) : code(status_code), msg(msg_str) {}
     int code;
     std::string trace;
     std::string msg;
@@ -77,12 +77,8 @@ class Schema {
     Schema() : empty() {}
     virtual ~Schema() {}
     virtual int32_t GetColumnCnt() const { return 0; }
-    virtual const std::string& GetColumnName(uint32_t index) const {
-        return empty;
-    }
-    virtual const DataType GetColumnType(uint32_t index) const {
-        return kTypeUnknow;
-    }
+    virtual const std::string& GetColumnName(uint32_t index) const { return empty; }
+    virtual const DataType GetColumnType(uint32_t index) const { return kTypeUnknow; }
     virtual const bool IsColumnNotNull(uint32_t index) const { return false; }
     virtual const bool IsConstant(uint32_t index) const { return false; }
 
@@ -97,9 +93,7 @@ class Table {
     virtual const std::string& GetName() { return empty; }
     virtual const std::string& GetCatalog() { return empty; }
     virtual uint64_t GetCreateTime() { return 0; }
-    virtual const std::shared_ptr<Schema> GetSchema() {
-        return std::shared_ptr<Schema>();
-    }
+    virtual const std::shared_ptr<Schema> GetSchema() { return std::shared_ptr<Schema>(); }
 
  private:
     std::string empty;
@@ -108,9 +102,7 @@ class Table {
 class ColumnTypes {
  public:
     ColumnTypes() : types_() {}
-    void AddColumnType(hybridse::sdk::DataType type) {
-        types_.push_back(type);
-    }
+    void AddColumnType(hybridse::sdk::DataType type) { types_.push_back(type); }
     const hybridse::sdk::DataType GetColumnType(size_t idx) const { return types_[idx]; }
     const size_t GetTypeSize() const { return types_.size(); }
 
@@ -123,9 +115,7 @@ class TableSet {
     TableSet() {}
     virtual ~TableSet() {}
     virtual bool Next() { return false; }
-    virtual const std::shared_ptr<Table> GetTable() {
-        return std::shared_ptr<Table>();
-    }
+    virtual const std::shared_ptr<Table> GetTable() { return std::shared_ptr<Table>(); }
     virtual int32_t Size() { return 0; }
 };
 

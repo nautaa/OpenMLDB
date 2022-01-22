@@ -171,8 +171,8 @@ void PrintValue(std::ostream &output, const std::string &org_tab, const std::vec
     output << org_tab << SPACE_ST << item_name << ": " << ss.str();
 }
 
-void PrintValue(std::ostream &output, const std::string &org_tab, const OptionsMap* value,
-                const std::string &item_name, bool last_child) {
+void PrintValue(std::ostream &output, const std::string &org_tab, const OptionsMap *value, const std::string &item_name,
+                bool last_child) {
     output << org_tab << SPACE_ST << item_name << ":";
     if (value == nullptr || value->empty()) {
         output << " <nil>";

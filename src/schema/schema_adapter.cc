@@ -15,18 +15,20 @@
  */
 
 #include "schema/schema_adapter.h"
+
 #include <map>
 #include <set>
 #include <string>
 #include <vector>
+
 #include "glog/logging.h"
 
 namespace openmldb {
 namespace schema {
 
 bool SchemaAdapter::ConvertSchemaAndIndex(const ::hybridse::vm::Schema& sql_schema,
-        const ::hybridse::vm::IndexList& index,
-        PBSchema* schema_output, PBIndex* index_output) {
+                                          const ::hybridse::vm::IndexList& index, PBSchema* schema_output,
+                                          PBIndex* index_output) {
     if (nullptr == schema_output || nullptr == index_output) {
         LOG(WARNING) << "schema or index output ptr is null";
         return false;
@@ -56,7 +58,8 @@ bool SchemaAdapter::ConvertSchemaAndIndex(const ::hybridse::vm::Schema& sql_sche
 }
 
 bool SchemaAdapter::SubSchema(const ::hybridse::vm::Schema* schema,
-                      const ::google::protobuf::RepeatedField<uint32_t>& projection, hybridse::vm::Schema* output) {
+                              const ::google::protobuf::RepeatedField<uint32_t>& projection,
+                              hybridse::vm::Schema* output) {
     if (output == nullptr) {
         LOG(WARNING) << "output ptr is null";
         return false;
@@ -114,8 +117,7 @@ bool SchemaAdapter::ConvertSchema(const PBSchema& schema, ::hybridse::vm::Schema
                 new_column->set_type(::hybridse::type::kVarchar);
                 break;
             default:
-                LOG(WARNING) << "type " << ::openmldb::type::DataType_Name(column.data_type())
-                             << " is not supported";
+                LOG(WARNING) << "type " << ::openmldb::type::DataType_Name(column.data_type()) << " is not supported";
                 return false;
         }
     }
@@ -255,7 +257,7 @@ bool SchemaAdapter::ConvertType(openmldb::type::DataType oepnmldb_type, hybridse
     return true;
 }
 
-bool SchemaAdapter::ConvertType(hybridse::sdk::DataType type, hybridse::type::Type *cased_type) {
+bool SchemaAdapter::ConvertType(hybridse::sdk::DataType type, hybridse::type::Type* cased_type) {
     switch (type) {
         case hybridse::sdk::DataType::kTypeBool:
             *cased_type = hybridse::type::kBool;
@@ -288,7 +290,7 @@ bool SchemaAdapter::ConvertType(hybridse::sdk::DataType type, hybridse::type::Ty
             return false;
     }
 }
-bool SchemaAdapter::ConvertType(hybridse::sdk::DataType type, openmldb::type::DataType *cased_type) {
+bool SchemaAdapter::ConvertType(hybridse::sdk::DataType type, openmldb::type::DataType* cased_type) {
     switch (type) {
         case hybridse::sdk::DataType::kTypeBool:
             *cased_type = openmldb::type::kBool;

@@ -15,6 +15,7 @@
  */
 
 #include "vm/simple_catalog.h"
+
 #include "gtest/gtest.h"
 
 namespace hybridse {

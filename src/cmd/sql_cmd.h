@@ -31,6 +31,7 @@
 #include "base/file_util.h"
 #include "base/linenoise.h"
 #include "base/texttable.h"
+#include "boost/regex.hpp"
 #include "client/taskmanager_client.h"
 #include "cmd/display.h"
 #include "cmd/file_option_parser.h"
@@ -46,7 +47,6 @@
 #include "sdk/node_adapter.h"
 #include "sdk/sql_cluster_router.h"
 #include "version.h"  // NOLINT
-#include "boost/regex.hpp"
 
 DEFINE_string(database, "", "Set database");
 DECLARE_string(zk_cluster);
@@ -357,7 +357,7 @@ void PrintProcedureInfo(const hybridse::sdk::ProcedureInfo& sp_info) {
         std::string pattern_blank = "(.*)(\\(.*\\) )(BEGIN )(.*)( END;)";
         sql = boost::regex_replace(sql, boost::regex(pattern_blank), "$1$4");
     }
-    
+
     PrintItemTable(std::cout, {"DB", type_name}, {vec});
     std::vector<std::string> items{sql};
     PrintItemTable(std::cout, {"SQL"}, {items}, true);

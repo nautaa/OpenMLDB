@@ -19,9 +19,9 @@
 #include <memory>
 #include <vector>
 
-#include "vm/engine.h"
 #include "gflags/gflags.h"
 #include "gtest/gtest.h"
+#include "vm/engine.h"
 
 namespace openmldb {
 namespace cmd {

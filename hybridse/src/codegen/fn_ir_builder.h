@@ -18,6 +18,7 @@
 #define HYBRIDSE_SRC_CODEGEN_FN_IR_BUILDER_H_
 
 #include <vector>
+
 #include "base/fe_status.h"
 #include "codegen/scope_var.h"
 #include "llvm/IR/Module.h"
@@ -35,11 +36,9 @@ class FnIRBuilder {
     bool Build(::hybridse::node::FnNodeFnDef* node, ::llvm::Function** result,
                base::Status& status);  // NOLINT
 
-    bool CreateFunction(const ::hybridse::node::FnNodeFnHeander* fn_def,
-                        bool return_by_arg, ::llvm::Function** fn,
+    bool CreateFunction(const ::hybridse::node::FnNodeFnHeander* fn_def, bool return_by_arg, ::llvm::Function** fn,
                         base::Status& status);  // NOLINT
-    bool BuildFnHead(const ::hybridse::node::FnNodeFnHeander* fn_def,
-                     CodeGenContext* ctx, ::llvm::Function** fn,
+    bool BuildFnHead(const ::hybridse::node::FnNodeFnHeander* fn_def, CodeGenContext* ctx, ::llvm::Function** fn,
                      base::Status& status);  // NOLINT
 
  private:
@@ -47,8 +46,7 @@ class FnIRBuilder {
                     std::vector<::llvm::Type*>& paras,  // NOLINT
                     base::Status& status);              // NOLINT
 
-    bool FillArgs(const ::hybridse::node::FnNodeList* node, ScopeVar* sv,
-                  bool return_by_arg, ::llvm::Function* fn,
+    bool FillArgs(const ::hybridse::node::FnNodeList* node, ScopeVar* sv, bool return_by_arg, ::llvm::Function* fn,
                   base::Status& status);  // NOLINT
     ::llvm::Module* module_;
 };

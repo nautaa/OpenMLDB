@@ -19,17 +19,18 @@
 
 #include <stdint.h>
 #include <string.h>
+
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "proto/fe_type.pb.h"
 namespace hybridse {
 namespace sdk {
 
 struct Status {
     Status() : code(0), msg("ok") {}
-    Status(int status_code, const std::string& msg_str)
-        : code(status_code), msg(msg_str) {}
+    Status(int status_code, const std::string& msg_str) : code(status_code), msg(msg_str) {}
     int code;
     std::string msg;
 };

@@ -18,29 +18,24 @@
 #define HYBRIDSE_EXAMPLES_TOYDB_SRC_BM_CLIENT_BM_CASE_H_
 #include <stdio.h>
 #include <stdlib.h>
+
 #include "benchmark/benchmark.h"
 #include "testing/toydb_engine_test_base.h"
 namespace hybridse {
 namespace bm {
 enum MODE { BENCHMARK, TEST };
-void SIMPLE_CASE1_QUERY(benchmark::State *state_ptr, MODE mode,
-                        bool is_batch_mode, int64_t group_size,
+void SIMPLE_CASE1_QUERY(benchmark::State *state_ptr, MODE mode, bool is_batch_mode, int64_t group_size,
                         int64_t max_window_size);
-void WINDOW_CASE1_QUERY(benchmark::State *state_ptr, MODE mode,
-                        bool is_batch_mode, int64_t group_size,
+void WINDOW_CASE1_QUERY(benchmark::State *state_ptr, MODE mode, bool is_batch_mode, int64_t group_size,
                         int64_t max_window_size);
-void WINDOW_CASE2_QUERY(benchmark::State *state_ptr, MODE mode,
-                        bool is_batch_mode, int64_t group_size,
+void WINDOW_CASE2_QUERY(benchmark::State *state_ptr, MODE mode, bool is_batch_mode, int64_t group_size,
                         int64_t max_window_size);
-void WINDOW_CASE3_QUERY(benchmark::State *state_ptr, MODE mode,
-                        bool is_batch_mode, int64_t group_size,
+void WINDOW_CASE3_QUERY(benchmark::State *state_ptr, MODE mode, bool is_batch_mode, int64_t group_size,
                         int64_t max_window_size);
-void WINDOW_CASE0_QUERY(benchmark::State *state_ptr, MODE mode,
-                        bool is_batch_mode, int64_t group_size,
+void WINDOW_CASE0_QUERY(benchmark::State *state_ptr, MODE mode, bool is_batch_mode, int64_t group_size,
                         int64_t max_window_size);
 
-void GROUPBY_CASE0_QUERY(benchmark::State *state_ptr, MODE mode,
-                         bool is_batch_mode, int64_t group_size,
+void GROUPBY_CASE0_QUERY(benchmark::State *state_ptr, MODE mode, bool is_batch_mode, int64_t group_size,
                          int64_t max_window_size);
 
 }  // namespace bm

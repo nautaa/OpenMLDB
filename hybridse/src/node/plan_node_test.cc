@@ -15,6 +15,7 @@
  */
 
 #include "node/plan_node.h"
+
 #include "gtest/gtest.h"
 #include "node/node_manager.h"
 
@@ -37,8 +38,8 @@ TEST_F(PlanNodeTest, PlanNodeEqualsTest) {
     PlanNode *table3 = manager_->MakeTablePlanNode("db2", "t2");
     PlanNode *primary_table1 = manager_->MakeTablePlanNode("db1", "t1");
     PlanNode *primary_table2 = manager_->MakeTablePlanNode("db1", "t1");
-    dynamic_cast<TablePlanNode*>(primary_table1)->SetIsPrimary(true);
-    dynamic_cast<TablePlanNode*>(primary_table2)->SetIsPrimary(true);
+    dynamic_cast<TablePlanNode *>(primary_table1)->SetIsPrimary(true);
+    dynamic_cast<TablePlanNode *>(primary_table2)->SetIsPrimary(true);
     ASSERT_TRUE(table1->Equals(table1));
     ASSERT_TRUE(table1->Equals(table2));
     ASSERT_FALSE(table1->Equals(table3));

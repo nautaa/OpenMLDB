@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+
 #include "brpc/controller.h"
 #include "butil/iobuf.h"
 #include "codec/fe_row_codec.h"
@@ -32,8 +33,7 @@ namespace sdk {
 
 class ResultSetImpl : public ResultSet {
  public:
-    ResultSetImpl(std::unique_ptr<tablet::QueryResponse> response,
-                  std::unique_ptr<brpc::Controller> cntl);
+    ResultSetImpl(std::unique_ptr<tablet::QueryResponse> response, std::unique_ptr<brpc::Controller> cntl);
 
     ~ResultSetImpl();
 

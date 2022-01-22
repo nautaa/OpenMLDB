@@ -15,14 +15,14 @@
  */
 
 #include <utility>
+
 #include "codec/fe_schema_codec.h"
 #include "gtest/gtest.h"
 
 namespace hybridse {
 namespace codec {
 
-class SchemaCodecTest
-    : public ::testing::TestWithParam<std::pair<vm::Schema, uint32_t>> {
+class SchemaCodecTest : public ::testing::TestWithParam<std::pair<vm::Schema, uint32_t>> {
  public:
     SchemaCodecTest() {}
     ~SchemaCodecTest() {}
@@ -170,8 +170,7 @@ TEST_P(SchemaCodecTest, test_normal) {
     CompareSchema(pair.first, schema);
 }
 
-INSTANTIATE_TEST_SUITE_P(SchemaCodecTestPrefix, SchemaCodecTest,
-                        testing::ValuesIn(GenTestInput()));
+INSTANTIATE_TEST_SUITE_P(SchemaCodecTestPrefix, SchemaCodecTest, testing::ValuesIn(GenTestInput()));
 
 }  // namespace codec
 }  // namespace hybridse

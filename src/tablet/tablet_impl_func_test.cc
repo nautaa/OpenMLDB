@@ -80,8 +80,9 @@ void CreateBaseTable(::openmldb::storage::Table*& table,  // NOLINT
     table->Init();
     codec::SDKCodec codec(table_meta);
     for (int i = 0; i < 1000; i++) {
-        std::vector<std::string> row = {"card" + std::to_string(i % 100), "mcc" + std::to_string(i),
-            "13", std::to_string(start_ts + i), std::to_string(start_ts + i), "value" + std::to_string(i)};
+        std::vector<std::string> row = {
+            "card" + std::to_string(i % 100), "mcc" + std::to_string(i),    "13",
+            std::to_string(start_ts + i),     std::to_string(start_ts + i), "value" + std::to_string(i)};
         ::openmldb::api::PutRequest request;
         ::openmldb::api::Dimension* dim = request.add_dimensions();
         dim->set_idx(0);

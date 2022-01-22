@@ -275,7 +275,6 @@ TEST_F(SnapshotReplicaTest, LeaderAndFollowerTS) {
     ret = client.Put(tid, pid, cur_time, value, dimensions);
     ASSERT_TRUE(ret);
 
-
     FLAGS_db_root_path = "/tmp/" + ::GenRand();
     FLAGS_endpoint = "127.0.0.1:18530";
     ::openmldb::tablet::TabletImpl* tablet1 = new ::openmldb::tablet::TabletImpl();

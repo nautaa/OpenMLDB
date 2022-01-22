@@ -21,13 +21,13 @@
 #include <memory>
 #include <set>
 #include <string>
+#include <unordered_set>
 #include <utility>
 #include <vector>
-#include <unordered_set>
 
+#include "base/lru_cache.h"
 #include "base/random.h"
 #include "base/spinlock.h"
-#include "base/lru_cache.h"
 #include "client/tablet_client.h"
 #include "sdk/db_sdk.h"
 #include "sdk/sql_router.h"
@@ -53,8 +53,11 @@ static std::shared_ptr<::hybridse::sdk::Schema> ConvertToSchema(
 struct SQLCache {
     SQLCache(std::shared_ptr<::openmldb::nameserver::TableInfo> table_info, DefaultValueMap default_map,
              uint32_t str_length, uint32_t limit_cnt = 0)
-        : table_info(table_info), default_map(default_map), column_schema(),
-          str_length(str_length), limit_cnt(limit_cnt) {
+        : table_info(table_info),
+          default_map(default_map),
+          column_schema(),
+          str_length(str_length),
+          limit_cnt(limit_cnt) {
         column_schema = openmldb::sdk::ConvertToSchema(table_info);
     }
     SQLCache(std::shared_ptr<::hybridse::sdk::Schema> column_schema, const ::hybridse::vm::Router& input_router,
@@ -119,7 +122,7 @@ class SQLClusterRouter : public SQLRouter {
     bool DropTable(const std::string& db, const std::string& table, hybridse::sdk::Status* status);
 
     bool ShowDB(std::vector<std::string>* dbs, hybridse::sdk::Status* status) override;
-    
+
     std::vector<std::string> GetAllTables() override;
 
     bool ExecuteDDL(const std::string& db, const std::string& sql, hybridse::sdk::Status* status) override;
@@ -194,12 +197,12 @@ class SQLClusterRouter : public SQLRouter {
     std::shared_ptr<::openmldb::client::TabletClient> GetTabletClient(
         const std::string& db, const std::string& sql, const ::hybridse::vm::EngineMode engine_mode,
         const std::shared_ptr<SQLRequestRow>& row, const std::shared_ptr<SQLRequestRow>& parameter_row);
-    std::shared_ptr<SQLCache> GetSQLCache(
-        const std::string& db, const std::string& sql, const ::hybridse::vm::EngineMode engine_mode,
-        const std::shared_ptr<SQLRequestRow>& parameter_row);
+    std::shared_ptr<SQLCache> GetSQLCache(const std::string& db, const std::string& sql,
+                                          const ::hybridse::vm::EngineMode engine_mode,
+                                          const std::shared_ptr<SQLRequestRow>& parameter_row);
     bool GetTabletClientsForClusterOnlineBatchQuery(
         const std::string& db, const std::string& sql, const std::shared_ptr<SQLRequestRow>& parameter_row,
-        std::unordered_set<std::shared_ptr<::openmldb::client::TabletClient>>& clients); //NOLINT
+        std::unordered_set<std::shared_ptr<::openmldb::client::TabletClient>>& clients);  // NOLINT
 
     std::shared_ptr<hybridse::sdk::Schema> GetTableSchema(const std::string& db,
                                                           const std::string& table_name) override;
@@ -231,18 +234,15 @@ class SQLClusterRouter : public SQLRouter {
                                                  const std::string& default_db,
                                                  ::openmldb::taskmanager::JobInfo& job_info) override;
 
-    ::openmldb::base::Status ImportOnlineData(const std::string& sql,
-                                              const std::map<std::string, std::string>& config,
+    ::openmldb::base::Status ImportOnlineData(const std::string& sql, const std::map<std::string, std::string>& config,
                                               const std::string& default_db,
                                               ::openmldb::taskmanager::JobInfo& job_info) override;
 
-    ::openmldb::base::Status ImportOfflineData(const std::string& sql,
-                                               const std::map<std::string, std::string>& config,
+    ::openmldb::base::Status ImportOfflineData(const std::string& sql, const std::map<std::string, std::string>& config,
                                                const std::string& default_db,
                                                ::openmldb::taskmanager::JobInfo& job_info) override;
 
-    ::openmldb::base::Status ExportOfflineData(const std::string& sql,
-                                               const std::map<std::string, std::string>& config,
+    ::openmldb::base::Status ExportOfflineData(const std::string& sql, const std::map<std::string, std::string>& config,
                                                const std::string& default_db,
                                                ::openmldb::taskmanager::JobInfo& job_info) override;
 
@@ -259,8 +259,8 @@ class SQLClusterRouter : public SQLRouter {
     std::shared_ptr<SQLCache> GetCache(const std::string& db, const std::string& sql,
                                        const hybridse::vm::EngineMode engine_mode);
 
-    void SetCache(const std::string& db, const std::string& sql,
-                  const hybridse::vm::EngineMode engine_mode, const std::shared_ptr<SQLCache>& router_cache);
+    void SetCache(const std::string& db, const std::string& sql, const hybridse::vm::EngineMode engine_mode,
+                  const std::shared_ptr<SQLCache>& router_cache);
 
     bool GetSQLPlan(const std::string& sql, ::hybridse::node::NodeManager* nm, ::hybridse::node::PlanNodeList* plan);
 
@@ -287,9 +287,8 @@ class SQLClusterRouter : public SQLRouter {
  private:
     SQLRouterOptions options_;
     DBSDK* cluster_sdk_;
-    std::map<std::string,
-             std::map<hybridse::vm::EngineMode,
-                      base::lru_cache<std::string, std::shared_ptr<SQLCache>>>> input_lru_cache_;
+    std::map<std::string, std::map<hybridse::vm::EngineMode, base::lru_cache<std::string, std::shared_ptr<SQLCache>>>>
+        input_lru_cache_;
     ::openmldb::base::SpinMutex mu_;
     ::openmldb::base::Random rand_;
 };

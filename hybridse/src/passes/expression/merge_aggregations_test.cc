@@ -15,6 +15,7 @@
  */
 
 #include "passes/expression/merge_aggregations.h"
+
 #include "passes/expression/expr_pass_test.h"
 #include "passes/expression/simplify.h"
 #include "passes/resolve_fn_and_attrs.h"
@@ -37,8 +38,7 @@ TEST_F(MergeAggregationsTest, Test) {
                                                 "sum(col_0 + lag(col_0, 1)) over w1"};
 
     std::vector<std::string> merge_cases = {"sum(col_0 + 1) over w1", "sum(col_1 + 1) over w1",
-                                            "distinct_count(col_2) over w1",
-                                            "fz_topn_frequency(col_3, 3) over w1 "};
+                                            "distinct_count(col_2) over w1", "fz_topn_frequency(col_3, 3) over w1 "};
 
     std::string sql = "select \n";
     for (size_t i = 0; i < non_merge_cases.size(); ++i) {
@@ -73,31 +73,23 @@ TEST_F(MergeAggregationsTest, Test) {
     ASSERT_TRUE(status.isOK()) << status;
 
     auto is_opt = [](const node::ExprNode* expr) {
-        return expr->GetExprType() == node::kExprGetField &&
-               expr->GetChild(0)->GetExprType() == node::kExprCall &&
-               dynamic_cast<node::CallExprNode*>(expr->GetChild(0))
-                       ->GetFnDef()
-                       ->GetName()
-                       .rfind("merged_window_agg") == 0;
+        return expr->GetExprType() == node::kExprGetField && expr->GetChild(0)->GetExprType() == node::kExprCall &&
+               dynamic_cast<node::CallExprNode*>(expr->GetChild(0))->GetFnDef()->GetName().rfind("merged_window_agg") ==
+                   0;
     };
 
-    ASSERT_EQ(merge_cases.size() + non_merge_cases.size(),
-              output->GetChildNum());
+    ASSERT_EQ(merge_cases.size() + non_merge_cases.size(), output->GetChildNum());
     for (size_t i = 0; i < non_merge_cases.size(); ++i) {
         auto expr = output->GetChild(i);
-        ASSERT_TRUE(!is_opt(expr))
-            << "Illegal optimized at " << i << ": " << non_merge_cases[i];
+        ASSERT_TRUE(!is_opt(expr)) << "Illegal optimized at " << i << ": " << non_merge_cases[i];
     }
     node::ExprNode* merged = nullptr;
     for (size_t i = 0; i < merge_cases.size(); ++i) {
         size_t offset = non_merge_cases.size();
         auto expr = output->GetChild(offset + i);
-        ASSERT_TRUE(is_opt(expr))
-            << "Not optimized at " << i << ": " << merge_cases[i];
-        auto output_index =
-            dynamic_cast<node::GetFieldExpr*>(expr)->GetColumnID();
-        LOG(INFO) << "Optimize " << merge_cases[i] << " -> [" << output_index
-                  << "]"
+        ASSERT_TRUE(is_opt(expr)) << "Not optimized at " << i << ": " << merge_cases[i];
+        auto output_index = dynamic_cast<node::GetFieldExpr*>(expr)->GetColumnID();
+        LOG(INFO) << "Optimize " << merge_cases[i] << " -> [" << output_index << "]"
                   << "\nBefore optimize: \n"
                   << origin->GetChild(offset + i)->GetTreeString();
         if (i == 0) {

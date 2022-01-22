@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "base/fe_status.h"
 #include "codec/fe_row_codec.h"
 #include "node/sql_node.h"
@@ -94,36 +95,30 @@ class SchemasContext {
      * Given relation name and column name, return schema slice
      * index and column index within current context.
      */
-    base::Status ResolveColumnIndexByName(const std::string& db_name,
-                                          const std::string& relation_name,
-                                          const std::string& column_name,
-                                          size_t* schema_idx,
-                                          size_t* col_idx) const;
+    base::Status ResolveColumnIndexByName(const std::string& db_name, const std::string& relation_name,
+                                          const std::string& column_name, size_t* schema_idx, size_t* col_idx) const;
 
     /**
      * Given unique column id, return schema slice index and
      * column index within schema slice within current context.
      */
-    base::Status ResolveColumnIndexByID(size_t column_id, size_t* schema_idx,
-                                        size_t* col_idx) const;
+    base::Status ResolveColumnIndexByID(size_t column_id, size_t* schema_idx, size_t* col_idx) const;
 
     /**
      * Given unique column id, return column name.
      */
-    base::Status ResolveColumnNameByID(size_t column_id,
-                                       std::string* name) const;
+    base::Status ResolveColumnNameByID(size_t column_id, std::string* name) const;
 
     /**
-    * Given unique column id, return db, table, column name.
-    */
-    base::Status ResolveDbTableColumnByID(size_t column_id,
-                                       std::string*db, std::string *table, std::string* column) const;
+     * Given unique column id, return db, table, column name.
+     */
+    base::Status ResolveDbTableColumnByID(size_t column_id, std::string* db, std::string* table,
+                                          std::string* column) const;
 
     /**
      * Resolve index for column reference expression
      */
-    base::Status ResolveColumnRefIndex(const node::ColumnRefNode* column_ref,
-                                       size_t* schema_idx,
+    base::Status ResolveColumnRefIndex(const node::ColumnRefNode* column_ref, size_t* schema_idx,
                                        size_t* col_idx) const;
     /**
      * Resolve column id with given column expression [ColumnRefNode, ColumnId]
@@ -134,10 +129,8 @@ class SchemasContext {
      * Given relation name and column name, return column unique id
      * under current context.
      */
-    base::Status ResolveColumnID(const std::string& db_name,
-                                 const std::string& relation_name,
-                                 const std::string& column_name,
-                                 size_t* column_id) const;
+    base::Status ResolveColumnID(const std::string& db_name, const std::string& relation_name,
+                                 const std::string& column_name, size_t* column_id) const;
 
     /**
      * Resolve source column by relation name and column name recursively.
@@ -145,23 +138,18 @@ class SchemasContext {
      * else `child_path_id` is the index of the child which the column
      * is resolved from.
      */
-    base::Status ResolveColumnID(const std::string& db_name,
-                                 const std::string& relation_name,
-                                 const std::string& column_name,
-                                 size_t* column_id, int* child_path_idx,
-                                 size_t* child_column_id,
-                                 size_t* source_column_id,
+    base::Status ResolveColumnID(const std::string& db_name, const std::string& relation_name,
+                                 const std::string& column_name, size_t* column_id, int* child_path_idx,
+                                 size_t* child_column_id, size_t* source_column_id,
                                  const PhysicalOpNode** source_node) const;
 
     /**
      * Resolve all columns input expression will depend on.
      * Return column id list.
      */
+    base::Status ResolveExprDependentColumns(const node::ExprNode* expr, std::set<size_t>* column_ids) const;
     base::Status ResolveExprDependentColumns(const node::ExprNode* expr,
-                                             std::set<size_t>* column_ids) const;
-    base::Status ResolveExprDependentColumns(
-        const node::ExprNode* expr,
-        std::vector<const node::ExprNode*>* columns) const;
+                                             std::vector<const node::ExprNode*>* columns) const;
 
     /**
      * Get the relation name for this schema context, default ""
@@ -220,8 +208,7 @@ class SchemasContext {
      * The source informations are set to traceback which child column
      * the new column is from.
      */
-    void MergeWithNewID(size_t child_idx, const SchemasContext* child,
-                        PhysicalPlanContext* plan_ctx);
+    void MergeWithNewID(size_t child_idx, const SchemasContext* child, PhysicalPlanContext* plan_ctx);
 
     void Clear();
     void Build();

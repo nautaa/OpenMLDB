@@ -17,21 +17,21 @@
 #ifndef SRC_CODEC_SCHEMA_CODEC_H_
 #define SRC_CODEC_SCHEMA_CODEC_H_
 
+#include <boost/algorithm/string.hpp>
 #include <cstring>
 #include <iostream>
 #include <map>
 #include <memory>
 #include <string>
 #include <unordered_map>
-#include <vector>
 #include <utility>
+#include <vector>
 
 #include "base/status.h"
 #include "codec/codec.h"
 #include "codec/fe_row_codec.h"
 #include "codec/field_codec.h"
 #include "proto/name_server.pb.h"
-#include <boost/algorithm/string.hpp>
 
 namespace openmldb {
 namespace codec {

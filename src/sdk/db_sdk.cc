@@ -297,8 +297,8 @@ std::vector<std::shared_ptr<::openmldb::nameserver::TableInfo>> DBSDK::GetTables
     }
     return tables;
 }
-    
-std::vector<std::string> DBSDK::GetAllTables(){
+
+std::vector<std::string> DBSDK::GetAllTables() {
     std::map<std::string, std::shared_ptr<nameserver::TableInfo>> table_map;
     std::vector<std::string> all_tables;
     for (auto db_name_iter = table_to_tablets_.begin(); db_name_iter != table_to_tablets_.end(); db_name_iter++) {

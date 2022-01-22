@@ -25,9 +25,9 @@
 #include <vector>
 
 #include "brpc/server.h"
+#include "codec/sdk_codec.h"
 #include "gflags/gflags.h"
 #include "nameserver/name_server_impl.h"
-#include "codec/sdk_codec.h"
 #include "tablet/tablet_impl.h"
 
 DECLARE_string(endpoint);
@@ -101,8 +101,8 @@ std::string DecodeV(const std::string& value) {
     return meta;
 }
 
-::openmldb::api::LogEntry PackKVEntry(uint64_t offset, const std::string& key,
-        const std::string& value, uint64_t ts, uint64_t term) {
+::openmldb::api::LogEntry PackKVEntry(uint64_t offset, const std::string& key, const std::string& value, uint64_t ts,
+                                      uint64_t term) {
     auto meta = GetTableMeta({"key", "value"});
     SchemaCodec::SetIndex(meta.add_column_key(), "key1", "key", "", ::openmldb::type::kAbsoluteTime, 10, 0);
     ::openmldb::codec::SDKCodec sdk_codec(meta);

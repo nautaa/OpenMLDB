@@ -29,8 +29,8 @@
 #include "base/glog_wapper.h"
 #include "base/hash.h"
 #include "base/ip.h"
-#include "base/linenoise.h"
 #include "base/kv_iterator.h"
+#include "base/linenoise.h"
 #include "base/server_name.h"
 #include "base/strings.h"
 #if defined(__linux__) || defined(__mac_tablet__)
@@ -267,8 +267,8 @@ void StartTablet() {
         exit(1);
     }
 #ifdef PZFPGA_ENABLE
-    PDLOG(INFO, "start tablet on endpoint %s with version %s with fpga",
-          real_endpoint.c_str(), OPENMLDB_VERSION.c_str());
+    PDLOG(INFO, "start tablet on endpoint %s with version %s with fpga", real_endpoint.c_str(),
+          OPENMLDB_VERSION.c_str());
 #else
     PDLOG(INFO, "start tablet on endpoint %s with version %s", real_endpoint.c_str(), OPENMLDB_VERSION.c_str());
 #endif
@@ -326,14 +326,13 @@ int PutData(uint32_t tid, const std::map<uint32_t, std::vector<std::pair<std::st
             printf("put failed. tid %u pid %u endpoint %s ts %lu \n", tid, pid, endpoint.c_str(), ts);
             return -1;
         }
-
     }
     std::cout << "Put ok" << std::endl;
     return 0;
 }
 
 ::openmldb::base::Status PutSchemaData(const ::openmldb::nameserver::TableInfo& table_info, uint64_t ts,
-                                          const std::vector<std::string>& input_value) {
+                                       const std::vector<std::string>& input_value) {
     std::string value;
     ::openmldb::codec::SDKCodec codec(table_info);
     std::map<uint32_t, ::openmldb::codec::Dimension> dimensions;
@@ -2211,7 +2210,7 @@ int GenTableInfo(const std::string& path,
     if (table_info.has_key_entry_max_height()) {
         if (table_info.key_entry_max_height() > FLAGS_skiplist_max_height) {
             printf("Fail to create table. key_entry_max_height %u is greater than the max heght %u\n",
-                table_info.key_entry_max_height(), FLAGS_skiplist_max_height);
+                   table_info.key_entry_max_height(), FLAGS_skiplist_max_height);
             return -1;
         }
         if (table_info.key_entry_max_height() == 0) {
@@ -4215,7 +4214,7 @@ void StartAPIServer() {
         }
         int32_t port = 0;
         try {
-             port = boost::lexical_cast<uint32_t>(vec[1]);
+            port = boost::lexical_cast<uint32_t>(vec[1]);
         } catch (std::exception const& e) {
             PDLOG(WARNING, "Invalid nameserver format");
             exit(1);

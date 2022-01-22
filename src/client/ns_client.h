@@ -211,7 +211,7 @@ class NsClient : public Client {
                   std::string& msg);  // NOLINT
 
     base::Status AddMultiIndex(const std::string& table_name,
-            const std::vector<::openmldb::common::ColumnKey>& column_keys);
+                               const std::vector<::openmldb::common::ColumnKey>& column_keys);
 
     bool DeleteIndex(const std::string& table_name, const std::string& idx_name,
                      std::string& msg);  // NOLINT

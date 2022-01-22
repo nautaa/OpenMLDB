@@ -80,7 +80,7 @@ bool TabletTableHandler::Init(const ClientManager& client_manager) {
 }
 
 bool TabletTableHandler::UpdateIndex(
-        const ::google::protobuf::RepeatedPtrField<::openmldb::common::ColumnKey>& indexs) {
+    const ::google::protobuf::RepeatedPtrField<::openmldb::common::ColumnKey>& indexs) {
     index_list_.Clear();
     index_hint_.clear();
     if (!schema::IndexUtil::ConvertIndex(indexs, &index_list_)) {

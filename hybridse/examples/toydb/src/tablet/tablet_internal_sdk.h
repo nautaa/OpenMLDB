@@ -18,6 +18,7 @@
 #define HYBRIDSE_EXAMPLES_TOYDB_SRC_TABLET_TABLET_INTERNAL_SDK_H_
 
 #include <string>
+
 #include "brpc/channel.h"
 #include "proto/fe_tablet.pb.h"
 

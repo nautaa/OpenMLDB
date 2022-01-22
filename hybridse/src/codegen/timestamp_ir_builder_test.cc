@@ -15,8 +15,10 @@
  */
 
 #include "codegen/timestamp_ir_builder.h"
+
 #include <memory>
 #include <utility>
+
 #include "codegen/ir_base_builder.h"
 #include "gtest/gtest.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
@@ -41,10 +43,9 @@ TEST_F(TimestampIRBuilderTest, BuildTimestampWithTs_TEST) {
     TimestampIRBuilder timestamp_builder(m.get());
     Int64IRBuilder int64_builder;
     ::llvm::Type *timestamp_type = timestamp_builder.GetType();
-    Function *load_fn = Function::Create(
-        FunctionType::get(timestamp_type->getPointerTo(),
-                          {int64_builder.GetType(m.get())}, false),
-        Function::ExternalLinkage, "build_timestamp", m.get());
+    Function *load_fn =
+        Function::Create(FunctionType::get(timestamp_type->getPointerTo(), {int64_builder.GetType(m.get())}, false),
+                         Function::ExternalLinkage, "build_timestamp", m.get());
 
     auto iter = load_fn->arg_begin();
     Argument *arg0 = &(*iter);
@@ -60,11 +61,9 @@ TEST_F(TimestampIRBuilderTest, BuildTimestampWithTs_TEST) {
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto load_fn_jit = ExitOnErr(J->lookup("build_timestamp"));
-    codec::Timestamp *(*decode)(int64_t) =
-        (codec::Timestamp * (*)(int64_t)) load_fn_jit.getAddress();
+    codec::Timestamp *(*decode)(int64_t) = (codec::Timestamp * (*)(int64_t)) load_fn_jit.getAddress();
 
-    ASSERT_EQ(static_cast<int64_t>(decode(1590115420000L)->ts_),
-              1590115420000L);
+    ASSERT_EQ(static_cast<int64_t>(decode(1590115420000L)->ts_), 1590115420000L);
     ASSERT_EQ(static_cast<int64_t>(decode(1L)->ts_), 1L);
 }
 
@@ -73,10 +72,9 @@ TEST_F(TimestampIRBuilderTest, GetTsTest) {
     auto m = make_unique<Module>("timestamp_test", *ctx);
     TimestampIRBuilder timestamp_builder(m.get());
     Int64IRBuilder int64_builder;
-    Function *load_fn = Function::Create(
-        FunctionType::get(int64_builder.GetType(m.get()),
-                          {int64_builder.GetType(m.get())}, false),
-        Function::ExternalLinkage, "build_timestamp", m.get());
+    Function *load_fn =
+        Function::Create(FunctionType::get(int64_builder.GetType(m.get()), {int64_builder.GetType(m.get())}, false),
+                         Function::ExternalLinkage, "build_timestamp", m.get());
     auto iter = load_fn->arg_begin();
     Argument *arg0 = &(*iter);
     iter++;
@@ -104,8 +102,7 @@ TEST_F(TimestampIRBuilderTest, MinuteTest) {
     TimestampIRBuilder timestamp_builder(m.get());
     Int64IRBuilder int64_builder;
     Function *load_fn = Function::Create(
-        FunctionType::get(Int32IRBuilder::GetType(m.get()),
-                          {timestamp_builder.GetType()->getPointerTo()}, false),
+        FunctionType::get(Int32IRBuilder::GetType(m.get()), {timestamp_builder.GetType()->getPointerTo()}, false),
         Function::ExternalLinkage, "minute", m.get());
     auto iter = load_fn->arg_begin();
     Argument *arg0 = &(*iter);
@@ -122,8 +119,7 @@ TEST_F(TimestampIRBuilderTest, MinuteTest) {
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto load_fn_jit = ExitOnErr(J->lookup("minute"));
-    int32_t (*decode)(codec::Timestamp *) =
-        (int32_t(*)(codec::Timestamp *))load_fn_jit.getAddress();
+    int32_t (*decode)(codec::Timestamp *) = (int32_t(*)(codec::Timestamp *))load_fn_jit.getAddress();
 
     codec::Timestamp time(1590115420000L);
     ASSERT_EQ(43, decode(&time));
@@ -134,8 +130,7 @@ TEST_F(TimestampIRBuilderTest, SecondTest) {
     TimestampIRBuilder timestamp_builder(m.get());
     Int64IRBuilder int64_builder;
     Function *load_fn = Function::Create(
-        FunctionType::get(Int32IRBuilder::GetType(m.get()),
-                          {timestamp_builder.GetType()->getPointerTo()}, false),
+        FunctionType::get(Int32IRBuilder::GetType(m.get()), {timestamp_builder.GetType()->getPointerTo()}, false),
         Function::ExternalLinkage, "second", m.get());
     auto iter = load_fn->arg_begin();
     Argument *arg0 = &(*iter);
@@ -152,8 +147,7 @@ TEST_F(TimestampIRBuilderTest, SecondTest) {
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto load_fn_jit = ExitOnErr(J->lookup("second"));
-    int32_t (*decode)(codec::Timestamp *) =
-        (int32_t(*)(codec::Timestamp *))load_fn_jit.getAddress();
+    int32_t (*decode)(codec::Timestamp *) = (int32_t(*)(codec::Timestamp *))load_fn_jit.getAddress();
 
     codec::Timestamp time(1590115420000L);
     ASSERT_EQ(40, decode(&time));
@@ -164,8 +158,7 @@ TEST_F(TimestampIRBuilderTest, HourTest) {
     TimestampIRBuilder timestamp_builder(m.get());
     Int64IRBuilder int64_builder;
     Function *load_fn = Function::Create(
-        FunctionType::get(Int32IRBuilder::GetType(m.get()),
-                          {timestamp_builder.GetType()->getPointerTo()}, false),
+        FunctionType::get(Int32IRBuilder::GetType(m.get()), {timestamp_builder.GetType()->getPointerTo()}, false),
         Function::ExternalLinkage, "hour", m.get());
 
     auto iter = load_fn->arg_begin();
@@ -183,8 +176,7 @@ TEST_F(TimestampIRBuilderTest, HourTest) {
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto load_fn_jit = ExitOnErr(J->lookup("hour"));
-    int32_t (*decode)(codec::Timestamp *) =
-        (int32_t(*)(codec::Timestamp *))load_fn_jit.getAddress();
+    int32_t (*decode)(codec::Timestamp *) = (int32_t(*)(codec::Timestamp *))load_fn_jit.getAddress();
 
     codec::Timestamp time(1590115420000L);
     ASSERT_EQ(10, decode(&time));
@@ -196,9 +188,7 @@ TEST_F(TimestampIRBuilderTest, SetTsTest) {
     Int64IRBuilder int64_builder;
     Function *load_fn = Function::Create(
         FunctionType::get(::llvm::Type::getVoidTy(m->getContext()),
-                          {timestamp_builder.GetType()->getPointerTo(),
-                           int64_builder.GetType(m.get())},
-                          false),
+                          {timestamp_builder.GetType()->getPointerTo(), int64_builder.GetType(m.get())}, false),
         Function::ExternalLinkage, "build_timestamp", m.get());
     auto iter = load_fn->arg_begin();
     Argument *arg0 = &(*iter);
@@ -216,8 +206,7 @@ TEST_F(TimestampIRBuilderTest, SetTsTest) {
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto load_fn_jit = ExitOnErr(J->lookup("build_timestamp"));
-    void (*set_ts)(codec::Timestamp *, int64_t) =
-        (void (*)(codec::Timestamp *, int64_t))load_fn_jit.getAddress();
+    void (*set_ts)(codec::Timestamp *, int64_t) = (void (*)(codec::Timestamp *, int64_t))load_fn_jit.getAddress();
 
     codec::Timestamp data;
     set_ts(&data, 1590115420000L);

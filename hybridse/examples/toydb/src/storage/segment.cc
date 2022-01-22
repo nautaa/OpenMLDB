@@ -15,14 +15,13 @@
  */
 
 #include "storage/segment.h"
+
 #include <mutex>  //NOLINT
 
 namespace hybridse {
 namespace storage {
 
-Segment::Segment() : entries_(NULL), mu_() {
-    entries_ = new KeyEntry(KEY_ENTRY_MAX_HEIGHT, 4, scmp);
-}
+Segment::Segment() : entries_(NULL), mu_() { entries_ = new KeyEntry(KEY_ENTRY_MAX_HEIGHT, 4, scmp); }
 
 Segment::~Segment() { delete entries_; }
 

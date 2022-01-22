@@ -15,6 +15,7 @@
  */
 
 #include "passes/lambdafy_projects.h"
+
 #include "gtest/gtest.h"
 #include "plan/plan_api.h"
 #include "udf/default_udf_library.h"
@@ -49,13 +50,11 @@ TEST_F(LambdafyProjectsTest, Test) {
     auto query_plan = dynamic_cast<node::QueryPlanNode *>(trees[0]);
     ASSERT_TRUE(query_plan != nullptr);
 
-    auto project_plan =
-        dynamic_cast<node::ProjectPlanNode *>(query_plan->GetChildren()[0]);
+    auto project_plan = dynamic_cast<node::ProjectPlanNode *>(query_plan->GetChildren()[0]);
     ASSERT_TRUE(project_plan != nullptr);
 
     project_plan->Print(std::cerr, "");
-    auto project_list_node = dynamic_cast<node::ProjectListNode *>(
-        project_plan->project_list_vec_[0]);
+    auto project_list_node = dynamic_cast<node::ProjectListNode *>(project_plan->project_list_vec_[0]);
     ASSERT_TRUE(project_list_node != nullptr);
 
     std::vector<const node::ExprNode *> exprs;

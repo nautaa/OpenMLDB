@@ -870,7 +870,7 @@ bool NsClient::AddIndex(const std::string& table_name, const ::openmldb::common:
 }
 
 base::Status NsClient::AddMultiIndex(const std::string& table_name,
-        const std::vector<::openmldb::common::ColumnKey>& column_keys) {
+                                     const std::vector<::openmldb::common::ColumnKey>& column_keys) {
     ::openmldb::nameserver::AddIndexRequest request;
     ::openmldb::nameserver::GeneralResponse response;
     if (column_keys.empty()) {

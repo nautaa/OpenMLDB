@@ -112,8 +112,8 @@ void CreateBaseTablet(::openmldb::tablet::TabletImpl& tablet,  // NOLINT
         dim->set_key(k2);
         uint64_t time = start_ts + i;
         auto value = request.mutable_value();
-        std::vector<std::string> row = {k1, k2, "11", std::to_string(time), std::to_string(time),
-            "value" + std::to_string(i)};
+        std::vector<std::string> row = {
+            k1, k2, "11", std::to_string(time), std::to_string(time), "value" + std::to_string(i)};
         sdk_codec.EncodeRow(row, value);
         ::openmldb::api::PutResponse response;
         MockClosure closure;
@@ -253,8 +253,8 @@ void CreateAdvanceTablet(::openmldb::tablet::TabletImpl& tablet,  // NOLINT
         dim->set_key(k2);
         time = start_ts + i * (60 * 1000);
         auto value = request.mutable_value();
-        std::vector<std::string> row = {k1, k2, "11", std::to_string(time), std::to_string(time),
-            "value" + std::to_string(i)};
+        std::vector<std::string> row = {
+            k1, k2, "11", std::to_string(time), std::to_string(time), "value" + std::to_string(i)};
         sdk_codec.EncodeRow(row, value);
         ::openmldb::api::PutResponse response;
         MockClosure closure;

@@ -18,6 +18,7 @@
 
 #include <algorithm>
 #include <utility>
+
 #include "base/glog_wapper.h"
 #include "boost/bind.hpp"
 #include "common/timer.h"
@@ -94,7 +95,7 @@ void ClusterInfo::UpdateNSClient(const std::vector<std::string>& children) {
 
 int ClusterInfo::Init(std::string& msg) {
     zk_client_ = std::make_shared<::openmldb::zk::ZkClient>(cluster_add_.zk_endpoints(), FLAGS_zk_session_timeout, "",
-                                            cluster_add_.zk_path(), cluster_add_.zk_path() + "/leader");
+                                                            cluster_add_.zk_path(), cluster_add_.zk_path() + "/leader");
     bool ok = zk_client_->Init();
     for (int i = 1; i < 3; i++) {
         if (ok) {

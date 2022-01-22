@@ -84,14 +84,15 @@ public class SqlEngine implements AutoCloseable {
      * @throws UnsupportedHybridSeException throws exception when fail to compile queries
      */
     public SqlEngine(String sql, List<TypeOuterClass.Database> databases, EngineOptions engineOptions,
-                     String defaultDbName) throws UnsupportedHybridSeException {
+            String defaultDbName) throws UnsupportedHybridSeException {
         this.initilize(sql, databases, engineOptions, defaultDbName);
     }
 
     /**
      * Create default engine option.
      * 
-     * <p>- Enable store ir results into SQL context
+     * <p>
+     * - Enable store ir results into SQL context
      * - Only compile SQL
      * - Disable performance sensitive mode.
      *
@@ -114,12 +115,11 @@ public class SqlEngine implements AutoCloseable {
      * @throws UnsupportedHybridSeException throw when query unsupported or has syntax error
      */
     public void initilize(String sql, List<TypeOuterClass.Database> databases, EngineOptions engineOptions,
-                          String defaultDbName)
-            throws UnsupportedHybridSeException {
+            String defaultDbName) throws UnsupportedHybridSeException {
         options = engineOptions;
         catalog = new SimpleCatalog();
         session = new BatchRunSession();
-        for (TypeOuterClass.Database database: databases) {
+        for (TypeOuterClass.Database database : databases) {
             catalog.AddDatabase(database);
         }
         engine = new Engine(catalog, options);
@@ -153,7 +153,7 @@ public class SqlEngine implements AutoCloseable {
     }
 
     @Override
-     public synchronized void close() throws Exception {
+    public synchronized void close() throws Exception {
         engine.delete();
         engine = null;
 

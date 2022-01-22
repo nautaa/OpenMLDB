@@ -27,7 +27,7 @@ using hybridse::base::Status;
 
 const char INDENT[] = "  ";
 
-void printOptionsMap(std::ostream &output, const node::OptionsMap* value, const std::string_view item_name) {
+void printOptionsMap(std::ostream& output, const node::OptionsMap* value, const std::string_view item_name) {
     output << ", " << item_name << "=";
     if (value == nullptr || value->empty()) {
         output << "<nil>";
@@ -380,8 +380,7 @@ Status PhysicalProjectNode::WithNewChildren(node::NodeManager* nm, const std::ve
             // Renew Having Condition
             ConditionFilter new_having_condition;
             {
-                auto& having_condition =
-                    dynamic_cast<PhysicalAggrerationNode*>(this)->having_condition_;
+                auto& having_condition = dynamic_cast<PhysicalAggrerationNode*>(this)->having_condition_;
                 std::vector<const node::ExprNode*> having_condition_depend_columns;
                 having_condition.ResolvedRelatedColumns(&having_condition_depend_columns);
                 passes::ExprReplacer having_replacer;
@@ -399,8 +398,7 @@ Status PhysicalProjectNode::WithNewChildren(node::NodeManager* nm, const std::ve
             // Renew Having Condition
             ConditionFilter new_having_condition;
             {
-                auto& having_condition =
-                    dynamic_cast<PhysicalGroupAggrerationNode*>(this)->having_condition_;
+                auto& having_condition = dynamic_cast<PhysicalGroupAggrerationNode*>(this)->having_condition_;
                 std::vector<const node::ExprNode*> having_condition_depend_columns;
                 having_condition.ResolvedRelatedColumns(&having_condition_depend_columns);
                 passes::ExprReplacer having_replacer;
@@ -424,8 +422,8 @@ Status PhysicalProjectNode::WithNewChildren(node::NodeManager* nm, const std::ve
                 }
                 CHECK_STATUS(group.ReplaceExpr(group_replacer, nm, &new_group));
             }
-            op = new PhysicalGroupAggrerationNode(
-                children[0], new_projects, new_having_condition.condition(), new_group.keys());
+            op = new PhysicalGroupAggrerationNode(children[0], new_projects, new_having_condition.condition(),
+                                                  new_group.keys());
             break;
         }
         default:
@@ -512,9 +510,7 @@ PhysicalWindowAggrerationNode* PhysicalWindowAggrerationNode::CastFrom(PhysicalO
     return dynamic_cast<PhysicalWindowAggrerationNode*>(node);
 }
 
-
-void PhysicalAggrerationNode::Print(std::ostream& output,
-                                         const std::string& tab) const {
+void PhysicalAggrerationNode::Print(std::ostream& output, const std::string& tab) const {
     PhysicalOpNode::Print(output, tab);
     output << "(type=" << ProjectTypeName(project_type_);
     if (having_condition_.ValidCondition()) {
@@ -527,8 +523,7 @@ void PhysicalAggrerationNode::Print(std::ostream& output,
     output << "\n";
     PrintChildren(output, tab);
 }
-void PhysicalGroupAggrerationNode::Print(std::ostream& output,
-                                         const std::string& tab) const {
+void PhysicalGroupAggrerationNode::Print(std::ostream& output, const std::string& tab) const {
     PhysicalOpNode::Print(output, tab);
     output << "(type=" << ProjectTypeName(project_type_) << ", "
            << "group_" << group_.ToString();
@@ -1263,7 +1258,8 @@ Status PhysicalSelectIntoNode::WithNewChildren(node::NodeManager* nm, const std:
 
 void PhysicalSelectIntoNode::Print(std::ostream& output, const std::string& tab) const {
     PhysicalOpNode::Print(output, tab);
-    output << "(" << "out_file=" << OutFile();
+    output << "("
+           << "out_file=" << OutFile();
 
     if (options_) {
         printOptionsMap(output, options_.get(), "options");

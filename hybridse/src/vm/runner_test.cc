@@ -16,6 +16,7 @@
 
 #include <memory>
 #include <utility>
+
 #include "boost/algorithm/string.hpp"
 #include "case/sql_case.h"
 #include "gtest/gtest.h"
@@ -44,37 +45,28 @@ ExitOnError ExitOnErr;
 namespace hybridse {
 namespace vm {
 using hybridse::sqlcase::SqlCase;
-const std::vector<std::string> FILTERS({"runner-unsupport", "physical-plan-unsupport",
-                                        "zetasql-unsupport", "logical-plan-unsupport"});
+const std::vector<std::string> FILTERS({"runner-unsupport", "physical-plan-unsupport", "zetasql-unsupport",
+                                        "logical-plan-unsupport"});
 Runner* GetFirstRunnerOfType(Runner* root, const RunnerType type);
 
-
 class RunnerTest : public ::testing::TestWithParam<SqlCase> {};
-INSTANTIATE_TEST_SUITE_P(
-    SqlSimpleQueryParse, RunnerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlWindowQueryParse, RunnerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlTableUdafQueryPlan, RunnerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/table_aggregation_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlWherePlan, RunnerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/where_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlSimpleQueryParse, RunnerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlWindowQueryParse, RunnerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlTableUdafQueryPlan, RunnerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/table_aggregation_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlWherePlan, RunnerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/where_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlGroupPlan, RunnerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/group_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlHavingPlan, RunnerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/having_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlJoinPlan, RunnerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/join_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlGroupPlan, RunnerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/group_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlHavingPlan, RunnerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/having_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlJoinPlan, RunnerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/join_query.yaml", FILTERS)));
 
-void RunnerCheck(std::shared_ptr<Catalog> catalog, const std::string sql,
-                 const vm::Schema& parameter_types,
+void RunnerCheck(std::shared_ptr<Catalog> catalog, const std::string sql, const vm::Schema& parameter_types,
                  EngineMode engine_mode) {
     SqlCompiler sql_compiler(catalog);
     SqlContext sql_context;
@@ -177,8 +169,6 @@ TEST_P(RunnerTest, request_mode_test) {
     table_def4.set_name("t4");
     table_def5.set_name("t5");
     table_def6.set_name("t6");
-
-
 
     hybridse::type::Database db;
     db.set_name("db");
@@ -361,8 +351,7 @@ TEST_F(RunnerTest, KeyGeneratorTest) {
     ASSERT_TRUE(sql_compiler.BuildClusterJob(sql_context, compile_status));
     ASSERT_TRUE(sql_context.physical_plan != nullptr);
 
-    auto root = GetFirstRunnerOfType(
-        sql_context.cluster_job.GetTask(0).GetRoot(), kRunnerGroup);
+    auto root = GetFirstRunnerOfType(sql_context.cluster_job.GetTask(0).GetRoot(), kRunnerGroup);
     auto group_runner = dynamic_cast<GroupRunner*>(root);
     std::vector<Row> rows;
     hybridse::type::TableDef temp_table;
@@ -408,8 +397,7 @@ TEST_F(RunnerTest, RunnerPrintDataTest) {
     source->SetSchema(&table_def.columns());
 
     // Print Empty Set
-    std::shared_ptr<MemTableHandler> table_handler =
-        std::shared_ptr<MemTableHandler>(new MemTableHandler());
+    std::shared_ptr<MemTableHandler> table_handler = std::shared_ptr<MemTableHandler>(new MemTableHandler());
     {
         std::ostringstream oss;
         Runner::PrintData(oss, &schemas_ctx, table_handler);
@@ -440,8 +428,7 @@ TEST_F(RunnerTest, RunnerPrintDataTest) {
     }
 
     // Print Row
-    std::shared_ptr<MemRowHandler> row_handler =
-        std::shared_ptr<MemRowHandler>(new MemRowHandler(rows[0]));
+    std::shared_ptr<MemRowHandler> row_handler = std::shared_ptr<MemRowHandler>(new MemRowHandler(rows[0]));
     {
         std::ostringstream oss;
         Runner::PrintData(oss, &schemas_ctx, table_handler);
@@ -514,8 +501,7 @@ TEST_F(RunnerTest, RunnerPrintDataMemTimeTableTest) {
     }
 
     // Print Row
-    std::shared_ptr<MemRowHandler> row_handler =
-        std::shared_ptr<MemRowHandler>(new MemRowHandler(rows[0]));
+    std::shared_ptr<MemRowHandler> row_handler = std::shared_ptr<MemRowHandler>(new MemRowHandler(rows[0]));
     {
         std::ostringstream oss;
         Runner::PrintData(oss, &schemas_ctx, table_handler);

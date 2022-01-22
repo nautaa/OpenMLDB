@@ -17,6 +17,7 @@
 #define HYBRIDSE_INCLUDE_SDK_CODEC_SDK_H_
 
 #include <vector>
+
 #include "butil/iobuf.h"
 #include "codec/fe_row_codec.h"
 
@@ -115,9 +116,8 @@ inline double GetDoubleField(const butil::IOBuf& row, uint32_t offset) {
     return value;
 }
 
-int32_t GetStrField(const butil::IOBuf& row, uint32_t str_field_offset,
-                    uint32_t next_str_field_offset, uint32_t str_start_offset,
-                    uint32_t addr_space, butil::IOBuf* output);
+int32_t GetStrField(const butil::IOBuf& row, uint32_t str_field_offset, uint32_t next_str_field_offset,
+                    uint32_t str_start_offset, uint32_t addr_space, butil::IOBuf* output);
 
 }  // namespace v1
 

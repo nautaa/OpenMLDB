@@ -39,32 +39,32 @@ class Status {
 
     // Return error status of an appropriate type.
     static Status NotFound(const ::openmldb::base::Slice& msg,
-            const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
+                           const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
         return Status(kNotFound, msg, msg2);
     }
 
     static Status Corruption(const ::openmldb::base::Slice& msg,
-            const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
+                             const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
         return Status(kCorruption, msg, msg2);
     }
 
     static Status NotSupported(const ::openmldb::base::Slice& msg,
-            const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
+                               const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
         return Status(kNotSupported, msg, msg2);
     }
 
     static Status InvalidArgument(const ::openmldb::base::Slice& msg,
-            const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
+                                  const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
         return Status(kInvalidArgument, msg, msg2);
     }
 
     static Status IOError(const ::openmldb::base::Slice& msg,
-            const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
+                          const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
         return Status(kIOError, msg, msg2);
     }
 
     static Status InvalidRecord(const ::openmldb::base::Slice& msg,
-            const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
+                                const ::openmldb::base::Slice& msg2 = ::openmldb::base::Slice()) {
         return Status(kInvalidRecord, msg, msg2);
     }
 

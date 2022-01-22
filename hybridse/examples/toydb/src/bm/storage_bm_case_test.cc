@@ -15,6 +15,7 @@
  */
 
 #include "bm/storage_bm_case.h"
+
 #include "gtest/gtest.h"
 namespace hybridse {
 namespace bm {

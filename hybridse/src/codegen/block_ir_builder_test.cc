@@ -15,6 +15,7 @@
  */
 
 #include <string>
+
 #include "codegen/fn_ir_builder.h"
 #include "gtest/gtest.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"

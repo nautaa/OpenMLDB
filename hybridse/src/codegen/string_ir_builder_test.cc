@@ -15,9 +15,11 @@
  */
 
 #include "codegen/string_ir_builder.h"
+
 #include <memory>
 #include <string>
 #include <utility>
+
 #include "codegen/ir_base_builder.h"
 #include "gtest/gtest.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
@@ -41,10 +43,9 @@ TEST_F(StringIRBuilderTest, NewStringTest) {
     auto m = make_unique<Module>("string_ir_test", *ctx);
     StringIRBuilder string_ir_builder(m.get());
     Int64IRBuilder int64_builder;
-    Function *load_fn = Function::Create(
-        FunctionType::get(::llvm::Type::getVoidTy(m->getContext()),
-                          {string_ir_builder.GetType()->getPointerTo()}, false),
-        Function::ExternalLinkage, "new_empty_string", m.get());
+    Function *load_fn = Function::Create(FunctionType::get(::llvm::Type::getVoidTy(m->getContext()),
+                                                           {string_ir_builder.GetType()->getPointerTo()}, false),
+                                         Function::ExternalLinkage, "new_empty_string", m.get());
 
     BasicBlock *entry_block = BasicBlock::Create(*ctx, "EntryBlock", load_fn);
     IRBuilder<> builder(entry_block);
@@ -65,8 +66,7 @@ TEST_F(StringIRBuilderTest, NewStringTest) {
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto load_fn_jit = ExitOnErr(J->lookup("new_empty_string"));
-    void (*decode)(codec::StringRef *) =
-        (void (*)(codec::StringRef *))load_fn_jit.getAddress();
+    void (*decode)(codec::StringRef *) = (void (*)(codec::StringRef *))load_fn_jit.getAddress();
     codec::StringRef dist;
     decode(&dist);
     ASSERT_EQ("", dist.ToString());
@@ -78,8 +78,7 @@ TEST_F(StringIRBuilderTest, StringGetAndSet) {
     Int64IRBuilder int64_builder;
     Function *load_fn = Function::Create(
         FunctionType::get(::llvm::Type::getVoidTy(m->getContext()),
-                          {string_ir_builder.GetType()->getPointerTo(),
-                           string_ir_builder.GetType()->getPointerTo()},
+                          {string_ir_builder.GetType()->getPointerTo(), string_ir_builder.GetType()->getPointerTo()},
                           false),
         Function::ExternalLinkage, "new_string", m.get());
 
@@ -107,8 +106,8 @@ TEST_F(StringIRBuilderTest, StringGetAndSet) {
 
     codec::StringRef src(hello_size, hello_data);
     codec::StringRef dist;
-    void (*decode)(codec::StringRef *, codec::StringRef *) = (void (*)(
-        codec::StringRef *, codec::StringRef *))load_fn_jit.getAddress();
+    void (*decode)(codec::StringRef *, codec::StringRef *) =
+        (void (*)(codec::StringRef *, codec::StringRef *))load_fn_jit.getAddress();
     decode(&src, &dist);
     ASSERT_EQ("hello", dist.ToString());
     free(hello_data);
@@ -121,8 +120,7 @@ TEST_F(StringIRBuilderTest, StringCopyFromTest) {
     Int64IRBuilder int64_builder;
     Function *load_fn = Function::Create(
         FunctionType::get(::llvm::Type::getVoidTy(m->getContext()),
-                          {string_ir_builder.GetType()->getPointerTo(),
-                           string_ir_builder.GetType()->getPointerTo()},
+                          {string_ir_builder.GetType()->getPointerTo(), string_ir_builder.GetType()->getPointerTo()},
                           false),
         Function::ExternalLinkage, "copy_from_string", m.get());
 
@@ -142,8 +140,8 @@ TEST_F(StringIRBuilderTest, StringCopyFromTest) {
     auto load_fn_jit = ExitOnErr(J->lookup("copy_from_string"));
     codec::StringRef src(strlen("hello"), strdup("hello"));
     codec::StringRef dist;
-    void (*decode)(codec::StringRef *, codec::StringRef *) = (void (*)(
-        codec::StringRef *, codec::StringRef *))load_fn_jit.getAddress();
+    void (*decode)(codec::StringRef *, codec::StringRef *) =
+        (void (*)(codec::StringRef *, codec::StringRef *))load_fn_jit.getAddress();
     decode(&src, &dist);
     ASSERT_EQ("hello", dist.ToString());
     free(const_cast<char *>(src.data_));

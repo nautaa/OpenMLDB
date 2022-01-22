@@ -15,7 +15,9 @@
  */
 
 #include "codegen/variable_ir_builder.h"
+
 #include <glog/logging.h>
+
 #include "codegen/ir_base_builder.h"
 #include "codegen/struct_ir_builder.h"
 
@@ -24,27 +26,22 @@ using ::hybridse::common::kCodegenError;
 namespace hybridse {
 namespace codegen {
 
-hybridse::codegen::VariableIRBuilder::VariableIRBuilder(
-    ::llvm::BasicBlock* block, ScopeVar* scope_var)
+hybridse::codegen::VariableIRBuilder::VariableIRBuilder(::llvm::BasicBlock* block, ScopeVar* scope_var)
     : block_(block), sv_(scope_var) {}
 hybridse::codegen::VariableIRBuilder::~VariableIRBuilder() {}
-bool VariableIRBuilder::StoreStruct(const std::string& name,
-                                    const NativeValue& value,
-                                    base::Status& status) {
+bool VariableIRBuilder::StoreStruct(const std::string& name, const NativeValue& value, base::Status& status) {
     // store value into memory address
     ::llvm::IRBuilder<> builder(block_);
     // get value addr
     NativeValue addr;
     if (!sv_->FindVar(name, &addr)) {
-        addr = NativeValue::Create(CreateAllocaAtHead(
-            &builder, value.GetType()->getPointerElementType(),
-            "struct_alloca_of_var_" + name));
+        addr = NativeValue::Create(
+            CreateAllocaAtHead(&builder, value.GetType()->getPointerElementType(), "struct_alloca_of_var_" + name));
         sv_->AddVar(name, addr);
     }
 
     if (addr.GetType() != value.GetType()) {
-        status.msg =
-            "fail to store value: src and dist value type aren't match";
+        status.msg = "fail to store value: src and dist value type aren't match";
         status.code = common::kCodegenError;
         return false;
     }
@@ -55,24 +52,21 @@ bool VariableIRBuilder::StoreStruct(const std::string& name,
         return false;
     }
 
-    if (!StructTypeIRBuilder::StructCopyFrom(block_, value.GetValue(&builder),
-                                             addr.GetValue(&builder))) {
+    if (!StructTypeIRBuilder::StructCopyFrom(block_, value.GetValue(&builder), addr.GetValue(&builder))) {
         status.msg = "fail to store struct: copy from struct fail";
         status.code = common::kCodegenError;
         return false;
     }
     return true;
 }
-bool hybridse::codegen::VariableIRBuilder::StoreValue(
-    const std::string& name, const NativeValue& value, bool is_register,
-    hybridse::base::Status& status) {
+bool hybridse::codegen::VariableIRBuilder::StoreValue(const std::string& name, const NativeValue& value,
+                                                      bool is_register, hybridse::base::Status& status) {
     if (is_register) {
         // store value into register
         NativeValue exist;
         if (sv_->FindVar(name, &exist)) {
             status.code = common::kCodegenError;
-            status.msg =
-                "fail to store register value: register value already exist";
+            status.msg = "fail to store register value: register value already exist";
             return false;
         } else {
             return sv_->AddVar(name, value);
@@ -86,14 +80,12 @@ bool hybridse::codegen::VariableIRBuilder::StoreValue(
         // get value addr
         NativeValue addr;
         if (!sv_->FindVar(name, &addr)) {
-            addr = NativeValue::CreateMem(CreateAllocaAtHead(
-                &builder, value.GetType(), "alloca_of_var_" + name));
+            addr = NativeValue::CreateMem(CreateAllocaAtHead(&builder, value.GetType(), "alloca_of_var_" + name));
             sv_->AddVar(name, addr);
         }
 
         if (addr.GetType() != value.GetType()) {
-            status.msg =
-                "fail to store value: src and dist value type aren't match";
+            status.msg = "fail to store value: src and dist value type aren't match";
             status.code = common::kCodegenError;
             return false;
         }
@@ -105,15 +97,13 @@ bool hybridse::codegen::VariableIRBuilder::StoreValue(
         }
 
         if (!addr.IsMem()) {
-            status.msg =
-                "fail to store mutable value: register value exists in scope";
+            status.msg = "fail to store mutable value: register value exists in scope";
             status.code = common::kCodegenError;
             LOG(WARNING) << status;
             return false;
         }
         // store value on address
-        if (nullptr == builder.CreateStore(value.GetValue(&builder),
-                                           addr.GetAddr(&builder))) {
+        if (nullptr == builder.CreateStore(value.GetValue(&builder), addr.GetAddr(&builder))) {
             status.msg = "fail to store value";
             status.code = common::kCodegenError;
             return false;
@@ -122,8 +112,8 @@ bool hybridse::codegen::VariableIRBuilder::StoreValue(
     }
 }
 
-bool hybridse::codegen::VariableIRBuilder::LoadValue(
-    std::string name, NativeValue* output, hybridse::base::Status& status) {
+bool hybridse::codegen::VariableIRBuilder::LoadValue(std::string name, NativeValue* output,
+                                                     hybridse::base::Status& status) {
     NativeValue value;
     if (!sv_->FindVar(name, &value)) {
         status.msg = "fail to get value " + name + ": value is null";
@@ -133,18 +123,15 @@ bool hybridse::codegen::VariableIRBuilder::LoadValue(
     *output = value;
     return true;
 }
-bool hybridse::codegen::VariableIRBuilder::StoreValue(
-    const std::string& name, const NativeValue& value,
-    hybridse::base::Status& status) {
+bool hybridse::codegen::VariableIRBuilder::StoreValue(const std::string& name, const NativeValue& value,
+                                                      hybridse::base::Status& status) {
     return StoreValue(name, value, true, status);
 }
 
-bool VariableIRBuilder::StoreRetStruct(const NativeValue& value,
-                                       base::Status& status) {
+bool VariableIRBuilder::StoreRetStruct(const NativeValue& value, base::Status& status) {
     return StoreValue("@ret_struct", value, status);
 }
-bool VariableIRBuilder::LoadRetStruct(NativeValue* output,
-                                      base::Status& status) {
+bool VariableIRBuilder::LoadRetStruct(NativeValue* output, base::Status& status) {
     return LoadValue("@ret_struct", output, status);
 }
 bool VariableIRBuilder::LoadRowKey(NativeValue* output, base::Status& status) {
@@ -159,53 +146,41 @@ base::Status VariableIRBuilder::LoadMemoryPool(NativeValue* output) {
     CHECK_STATUS(status, "fail to load memory pool")
     return status;
 }
-bool hybridse::codegen::VariableIRBuilder::LoadWindow(
-    const std::string& frame_str, NativeValue* output,
-    hybridse::base::Status& status) {
-    bool ok =
-        LoadValue("@window" + (frame_str.empty() ? "" : ("." + frame_str)),
-                  output, status);
+bool hybridse::codegen::VariableIRBuilder::LoadWindow(const std::string& frame_str, NativeValue* output,
+                                                      hybridse::base::Status& status) {
+    bool ok = LoadValue("@window" + (frame_str.empty() ? "" : ("." + frame_str)), output, status);
     return ok;
 }
-bool hybridse::codegen::VariableIRBuilder::LoadColumnRef(
-    const std::string& relation_name, const std::string& name,
-    const std::string& frame_str, ::llvm::Value** output,
-    hybridse::base::Status& status) {
+bool hybridse::codegen::VariableIRBuilder::LoadColumnRef(const std::string& relation_name, const std::string& name,
+                                                         const std::string& frame_str, ::llvm::Value** output,
+                                                         hybridse::base::Status& status) {
     NativeValue col_ref;
-    bool ok = LoadValue("@col." + relation_name + "." + name +
-                            (frame_str.empty() ? "" : ("." + frame_str)),
-                        &col_ref, status);
+    bool ok = LoadValue("@col." + relation_name + "." + name + (frame_str.empty() ? "" : ("." + frame_str)), &col_ref,
+                        status);
     *output = col_ref.GetRaw();
     return ok;
 }
-bool hybridse::codegen::VariableIRBuilder::LoadColumnItem(
-    const std::string& relation_name, const std::string& name,
-    NativeValue* output, hybridse::base::Status& status) {
+bool hybridse::codegen::VariableIRBuilder::LoadColumnItem(const std::string& relation_name, const std::string& name,
+                                                          NativeValue* output, hybridse::base::Status& status) {
     return LoadValue("@item." + relation_name + "." + name, output, status);
 }
-bool hybridse::codegen::VariableIRBuilder::StoreWindow(
-    const std::string& frame_str, ::llvm::Value* value,
-    hybridse::base::Status& status) {
-    return StoreValue("@window" + (frame_str.empty() ? "" : ("." + frame_str)),
+bool hybridse::codegen::VariableIRBuilder::StoreWindow(const std::string& frame_str, ::llvm::Value* value,
+                                                       hybridse::base::Status& status) {
+    return StoreValue("@window" + (frame_str.empty() ? "" : ("." + frame_str)), NativeValue::Create(value), status);
+}
+bool hybridse::codegen::VariableIRBuilder::StoreColumnRef(const std::string& relation_name, const std::string& name,
+                                                          const std::string& frame_str, ::llvm::Value* value,
+                                                          hybridse::base::Status& status) {
+    return StoreValue("@col." + relation_name + "." + name + (frame_str.empty() ? "" : ("." + frame_str)),
                       NativeValue::Create(value), status);
 }
-bool hybridse::codegen::VariableIRBuilder::StoreColumnRef(
-    const std::string& relation_name, const std::string& name,
-    const std::string& frame_str, ::llvm::Value* value,
-    hybridse::base::Status& status) {
-    return StoreValue("@col." + relation_name + "." + name +
-                          (frame_str.empty() ? "" : ("." + frame_str)),
-                      NativeValue::Create(value), status);
-}
-bool hybridse::codegen::VariableIRBuilder::StoreColumnItem(
-    const std::string& relation_name, const std::string& name,
-    const NativeValue& value, hybridse::base::Status& status) {
+bool hybridse::codegen::VariableIRBuilder::StoreColumnItem(const std::string& relation_name, const std::string& name,
+                                                           const NativeValue& value, hybridse::base::Status& status) {
     ::llvm::IRBuilder<> builder(block_);
     return StoreValue("@item." + relation_name + "." + name, value, status);
 }
-bool hybridse::codegen::VariableIRBuilder::LoadArrayIndex(
-    std::string array_ptr_name, int32_t index, ::llvm::Value** output,
-    base::Status& status) {
+bool hybridse::codegen::VariableIRBuilder::LoadArrayIndex(std::string array_ptr_name, int32_t index,
+                                                          ::llvm::Value** output, base::Status& status) {
     std::string array_index_name = array_ptr_name;
     array_index_name.append("[").append(std::to_string(index)).append("]");
     ::llvm::IRBuilder<> builder(block_);
@@ -224,13 +199,12 @@ bool hybridse::codegen::VariableIRBuilder::LoadArrayIndex(
         return false;
     }
     ::llvm::Value* array_ptr = array_ptr_wrapper.GetValue(&builder);
-    ::llvm::Value* ptr = builder.CreateInBoundsGEP(
-        array_ptr, ::llvm::ArrayRef<::llvm::Value*>(builder.getInt64(index)));
+    ::llvm::Value* ptr =
+        builder.CreateInBoundsGEP(array_ptr, ::llvm::ArrayRef<::llvm::Value*>(builder.getInt64(index)));
 
     ::llvm::Value* value = builder.CreateLoad(ptr);
     if (nullptr == value) {
-        status.msg =
-            "fail load " + array_ptr_name + "[" + std::to_string(index) + "]";
+        status.msg = "fail load " + array_ptr_name + "[" + std::to_string(index) + "]";
         status.code = common::kCodegenError;
         LOG(WARNING) << status;
         return false;

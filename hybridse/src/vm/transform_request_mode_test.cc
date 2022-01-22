@@ -19,6 +19,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "boost/algorithm/string.hpp"
 #include "case/sql_case.h"
 #include "gtest/gtest.h"
@@ -97,9 +98,9 @@ void PhysicalPlanCheck(const std::shared_ptr<Catalog>& catalog, std::string sql,
     ASSERT_EQ(oss.str(), exp);
 }
 INSTANTIATE_TEST_SUITE_P(SqlSimpleQueryParse, TransformRequestModeTest,
-                        testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
 INSTANTIATE_TEST_SUITE_P(SqlWindowQueryParse, TransformRequestModeTest,
-                        testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
 INSTANTIATE_TEST_SUITE_P(SqlJoinPlan, TransformRequestModeTest,
                          testing::ValuesIn(sqlcase::InitCases("cases/plan/join_query.yaml", FILTERS)));
 
@@ -175,8 +176,6 @@ void CheckTransformPhysicalPlan(const SqlCase& sql_case, bool is_cluster_optimiz
     table_def4.set_name("t4");
     table_def5.set_name("t5");
     table_def6.set_name("t6");
-
-
 
     hybridse::type::Database db;
     db.set_name("db");
@@ -361,9 +360,10 @@ INSTANTIATE_TEST_SUITE_P(
                                    "        DATA_PROVIDER(type=Partition, table=t1, index=index12)\n"
                                    "      DATA_PROVIDER(type=Partition, table=t2, index=index1_t2)")));
 
-INSTANTIATE_TEST_SUITE_P(RequestWindowUnionOptimized, TransformRequestModePassOptimizedTest,
-                        testing::Values(
-                            // 0
+INSTANTIATE_TEST_SUITE_P(
+    RequestWindowUnionOptimized, TransformRequestModePassOptimizedTest,
+    testing::Values(
+        // 0
         std::make_pair("SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
                        "      WINDOW w1 AS (UNION t3 PARTITION BY col1 ORDER BY col5 "
                        "ROWS_RANGE "
@@ -378,19 +378,19 @@ INSTANTIATE_TEST_SUITE_P(RequestWindowUnionOptimized, TransformRequestModePassOp
                        "      DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
         // 1
         std::make_pair("SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
-                                           "      WINDOW w1 AS (UNION t3 PARTITION BY col1,col2 ORDER BY col5 "
-                                           "ROWS_RANGE BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
-                                           "LIMIT(limit=10, optimized)\n"
-                                           "  PROJECT(type=Aggregation, limit=10)\n"
-                                           "    REQUEST_UNION(partition_keys=(), orders=(ASC), range=(col5, "
-                                           "-3, 0), index_keys=(col1,col2))\n"
-                                           "      +-UNION(partition_keys=(col1), orders=(ASC), range=(col5, "
-                                           "-3, 0), index_keys=(col2))\n"
-                                           "          RENAME(name=t1)\n"
-                                           "            DATA_PROVIDER(type=Partition, table=t3, "
-                                           "index=index2_t3)\n"
-                                           "      DATA_PROVIDER(request=t1)\n"
-                                           "      DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+                       "      WINDOW w1 AS (UNION t3 PARTITION BY col1,col2 ORDER BY col5 "
+                       "ROWS_RANGE BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
+                       "LIMIT(limit=10, optimized)\n"
+                       "  PROJECT(type=Aggregation, limit=10)\n"
+                       "    REQUEST_UNION(partition_keys=(), orders=(ASC), range=(col5, "
+                       "-3, 0), index_keys=(col1,col2))\n"
+                       "      +-UNION(partition_keys=(col1), orders=(ASC), range=(col5, "
+                       "-3, 0), index_keys=(col2))\n"
+                       "          RENAME(name=t1)\n"
+                       "            DATA_PROVIDER(type=Partition, table=t3, "
+                       "index=index2_t3)\n"
+                       "      DATA_PROVIDER(request=t1)\n"
+                       "      DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
         std::make_pair("SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
                        "      WINDOW w1 AS (UNION t3 PARTITION BY col1 ORDER BY col5 "
                        "ROWS_RANGE BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",

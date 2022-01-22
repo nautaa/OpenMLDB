@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "passes/physical/transform_up_physical_pass.h"
+
 #include <set>
 
 namespace hybridse {
@@ -54,8 +55,7 @@ bool TransformUpPysicalPass::Apply(PhysicalOpNode* in, PhysicalOpNode** out) {
     return visited_ids_[in->GetNodeId()];
 }
 
-bool ResetProducer(PhysicalPlanContext* plan_ctx, PhysicalOpNode* op,
-                   size_t idx, PhysicalOpNode* child) {
+bool ResetProducer(PhysicalPlanContext* plan_ctx, PhysicalOpNode* op, size_t idx, PhysicalOpNode* child) {
     auto origin = op->GetProducer(idx);
     if (origin == child) {
         return true;
@@ -64,8 +64,7 @@ bool ResetProducer(PhysicalPlanContext* plan_ctx, PhysicalOpNode* op,
     op->ClearSchema();
     Status status = op->InitSchema(plan_ctx);
     if (!status.isOK()) {
-        LOG(WARNING) << "Reset producer failed: " << status << "\nAt child:\n"
-                     << *child;
+        LOG(WARNING) << "Reset producer failed: " << status << "\nAt child:\n" << *child;
         op->SetProducer(idx, origin);
         op->ClearSchema();
         status = op->InitSchema(plan_ctx);
@@ -79,8 +78,7 @@ bool ResetProducer(PhysicalPlanContext* plan_ctx, PhysicalOpNode* op,
     return true;
 }
 
-Status CheckExprDependOnChildOnly(const node::ExprNode* expr,
-                                  const vm::SchemasContext* child_schemas_ctx) {
+Status CheckExprDependOnChildOnly(const node::ExprNode* expr, const vm::SchemasContext* child_schemas_ctx) {
     std::set<size_t> column_ids;
     return child_schemas_ctx->ResolveExprDependentColumns(expr, &column_ids);
 }

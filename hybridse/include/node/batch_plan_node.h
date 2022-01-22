@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+
 #include "node/node_enum.h"
 #include "node/sql_node.h"
 
@@ -29,20 +30,15 @@ const std::string NameOfPlanNodeType(BatchPlanNodeType type);
 
 class BatchPlanNode : public node::NodeBase<BatchPlanNode> {
  public:
-    explicit BatchPlanNode(const BatchPlanNodeType& type)
-        : type_(type), children_() {}
+    explicit BatchPlanNode(const BatchPlanNodeType& type) : type_(type), children_() {}
     virtual ~BatchPlanNode() {}
 
     const BatchPlanNodeType& GetType() const { return type_; }
     void AddChild(const BatchPlanNode* node) { children_.push_back(node); }
-    const std::vector<const BatchPlanNode*>& GetChildren() const {
-        return children_;
-    }
+    const std::vector<const BatchPlanNode*>& GetChildren() const { return children_; }
     const std::vector<const BatchPlanNode*>& GetChildren() { return children_; }
 
-    const std::string GetTypeName() const override {
-        return NameOfPlanNodeType(type_);
-    }
+    const std::string GetTypeName() const override { return NameOfPlanNodeType(type_); }
 
  private:
     BatchPlanNodeType type_;
@@ -51,8 +47,7 @@ class BatchPlanNode : public node::NodeBase<BatchPlanNode> {
 
 class DatasetNode : public BatchPlanNode {
  public:
-    explicit DatasetNode(const std::string& table)
-        : BatchPlanNode(kBatchDataset), table_(table) {}
+    explicit DatasetNode(const std::string& table) : BatchPlanNode(kBatchDataset), table_(table) {}
 
     const std::string& GetTable() const { return table_; }
 
@@ -65,8 +60,7 @@ class DatasetNode : public BatchPlanNode {
 // partition by multi column
 class ColumnPartitionNode : public BatchPlanNode {
  public:
-    explicit ColumnPartitionNode(const std::string& column)
-        : BatchPlanNode(kBatchPartition), columns_() {
+    explicit ColumnPartitionNode(const std::string& column) : BatchPlanNode(kBatchPartition), columns_() {
         columns_.push_back(column);
     }
     explicit ColumnPartitionNode(const std::vector<std::string>& columns)
@@ -83,8 +77,7 @@ class ColumnPartitionNode : public BatchPlanNode {
 
 class MapNode : public BatchPlanNode {
  public:
-    explicit MapNode(const NodePointVector& nodes)
-        : BatchPlanNode(kBatchMap), nodes_(nodes) {}
+    explicit MapNode(const NodePointVector& nodes) : BatchPlanNode(kBatchMap), nodes_(nodes) {}
     ~MapNode() {}
     const NodePointVector& GetNodes() const { return nodes_; }
 

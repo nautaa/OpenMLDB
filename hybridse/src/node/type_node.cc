@@ -15,15 +15,14 @@
  */
 
 #include "node/type_node.h"
+
 #include "node/node_manager.h"
 #include "vm/physical_op.h"
 
 namespace hybridse {
 namespace node {
 
-bool TypeNode::IsBaseType() const {
-    return IsNumber() || IsString() || IsTimestamp() || IsDate();
-}
+bool TypeNode::IsBaseType() const { return IsNumber() || IsString() || IsTimestamp() || IsDate(); }
 bool TypeNode::IsDate() const { return base_ == node::kDate; }
 bool TypeNode::IsTuple() const { return base_ == node::kTuple; }
 bool TypeNode::IsTupleNumbers() const {
@@ -44,18 +43,13 @@ bool TypeNode::IsNumber() const { return IsInteger() || IsFloating(); }
 bool TypeNode::IsNull() const { return base_ == node::kNull; }
 bool TypeNode::IsBool() const { return base_ == node::kBool; }
 
-bool TypeNode::IsIntegral() const {
-    return base_ == node::kInt16 || base_ == node::kInt32 || base_ == node::kInt64;
-}
+bool TypeNode::IsIntegral() const { return base_ == node::kInt16 || base_ == node::kInt32 || base_ == node::kInt64; }
 
 bool TypeNode::IsInteger() const {
-    return base_ == node::kBool || base_ == node::kInt16 ||
-           base_ == node::kInt32 || base_ == node::kInt64;
+    return base_ == node::kBool || base_ == node::kInt16 || base_ == node::kInt32 || base_ == node::kInt64;
 }
 
-bool TypeNode::IsFloating() const {
-    return base_ == node::kFloat || base_ == node::kDouble;
-}
+bool TypeNode::IsFloating() const { return base_ == node::kFloat || base_ == node::kDouble; }
 
 bool TypeNode::IsGeneric() const { return !generics_.empty(); }
 
@@ -77,14 +71,10 @@ TypeNode *TypeNode::DeepCopy(NodeManager *nm) const {
 }
 
 RowTypeNode::RowTypeNode(const vm::SchemasContext *schemas_ctx)
-    : TypeNode(node::kRow),
-      schemas_ctx_(schemas_ctx),
-      is_own_schema_ctx_(false) {}
+    : TypeNode(node::kRow), schemas_ctx_(schemas_ctx), is_own_schema_ctx_(false) {}
 
 RowTypeNode::RowTypeNode(const std::vector<const codec::Schema *> &schemas)
-    : TypeNode(node::kRow),
-      schemas_ctx_(new vm::SchemasContext()),
-      is_own_schema_ctx_(true) {
+    : TypeNode(node::kRow), schemas_ctx_(new vm::SchemasContext()), is_own_schema_ctx_(true) {
     auto schemas_ctx = const_cast<vm::SchemasContext *>(schemas_ctx_);
     schemas_ctx->BuildTrivial(schemas);
 }
@@ -95,13 +85,9 @@ RowTypeNode::~RowTypeNode() {
     }
 }
 
-RowTypeNode *RowTypeNode::ShadowCopy(NodeManager *nm) const {
-    return nm->MakeRowType(this->schemas_ctx());
-}
+RowTypeNode *RowTypeNode::ShadowCopy(NodeManager *nm) const { return nm->MakeRowType(this->schemas_ctx()); }
 
-OpaqueTypeNode *OpaqueTypeNode::ShadowCopy(NodeManager *nm) const {
-    return nm->MakeOpaqueType(bytes_);
-}
+OpaqueTypeNode *OpaqueTypeNode::ShadowCopy(NodeManager *nm) const { return nm->MakeOpaqueType(bytes_); }
 
 }  // namespace node
 }  // namespace hybridse

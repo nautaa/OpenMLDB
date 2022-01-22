@@ -15,7 +15,9 @@
  */
 
 #include "codegen/scope_var.h"
+
 #include <utility>
+
 #include "glog/logging.h"
 
 namespace hybridse {
@@ -44,8 +46,7 @@ bool ScopeVar::AddVar(const std::string& name, const NativeValue& value) {
 bool ScopeVar::ReplaceVar(const std::string& name, const NativeValue& value) {
     ScopeVar* cur = this;
     while (cur != nullptr) {
-        std::map<std::string, NativeValue>::iterator it =
-            cur->scope_map_.find(name);
+        std::map<std::string, NativeValue>::iterator it = cur->scope_map_.find(name);
         if (it != cur->scope_map_.end()) {
             it->second = value;
             return true;
@@ -63,8 +64,7 @@ bool ScopeVar::FindVar(const std::string& name, NativeValue* value) {
     }
     ScopeVar* cur = this;
     while (cur != nullptr) {
-        std::map<std::string, NativeValue>::iterator it =
-            cur->scope_map_.find(name);
+        std::map<std::string, NativeValue>::iterator it = cur->scope_map_.find(name);
         if (it != cur->scope_map_.end()) {
             *value = it->second;
             return true;
@@ -78,8 +78,7 @@ bool ScopeVar::FindVar(const std::string& name, NativeValue* value) {
 bool ScopeVar::HasVar(const std::string& name) {
     ScopeVar* cur = this;
     while (cur != nullptr) {
-        std::map<std::string, NativeValue>::iterator it =
-            cur->scope_map_.find(name);
+        std::map<std::string, NativeValue>::iterator it = cur->scope_map_.find(name);
         if (it != cur->scope_map_.end()) {
             return true;
         }
@@ -98,9 +97,7 @@ std::vector<const std::vector<::llvm::Value*>*> ScopeVar::GetIteratorValues() {
     return values;
 }
 
-const std::vector<::llvm::Value*>* ScopeVar::GetScopeIteratorValues() {
-    return &scope_iterators_;
-}
+const std::vector<::llvm::Value*>* ScopeVar::GetScopeIteratorValues() { return &scope_iterators_; }
 
 }  // namespace codegen
 }  // namespace hybridse

@@ -98,7 +98,8 @@ class MultipleResultSetSQL : public ::hybridse::sdk::ResultSet {
     ~MultipleResultSetSQL() {}
 
     static std::shared_ptr<::hybridse::sdk::ResultSet> MakeResultSet(
-        const std::vector<std::shared_ptr<ResultSetSQL>>& result_set_list, const int limit_cnt, ::hybridse::sdk::Status* status) {
+        const std::vector<std::shared_ptr<ResultSetSQL>>& result_set_list, const int limit_cnt,
+        ::hybridse::sdk::Status* status) {
         std::shared_ptr<::openmldb::sdk::MultipleResultSetSQL> rs =
             std::make_shared<openmldb::sdk::MultipleResultSetSQL>(result_set_list, limit_cnt);
         if (!rs->Init()) {
@@ -192,7 +193,7 @@ class MultipleResultSetSQL : public ::hybridse::sdk::ResultSet {
 
     int32_t Size() {
         int total_size = 0;
-        for (size_t i = 0 ; i < result_set_list_.size(); i++) {
+        for (size_t i = 0; i < result_set_list_.size(); i++) {
             total_size += result_set_list_[i]->Size();
             if (limit_cnt_ > 0 && total_size > limit_cnt_) {
                 return limit_cnt_;

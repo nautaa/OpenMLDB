@@ -14,8 +14,6 @@
  * limitations under the License.
  */
 
-#include "sdk/sql_sdk_test.h"
-
 #include <sched.h>
 #include <unistd.h>
 
@@ -28,10 +26,11 @@
 #include "codec/fe_row_codec.h"
 #include "common/timer.h"
 #include "gflags/gflags.h"
-#include "sdk/mini_cluster.h"
-#include "sdk/sql_router.h"
-#include "sdk/sql_cluster_router.h"
 #include "sdk/db_sdk.h"
+#include "sdk/mini_cluster.h"
+#include "sdk/sql_cluster_router.h"
+#include "sdk/sql_router.h"
+#include "sdk/sql_sdk_test.h"
 #include "test/base_test.h"
 #include "vm/catalog.h"
 
@@ -42,34 +41,28 @@ MiniCluster* mc_ = nullptr;
 std::shared_ptr<SQLRouter> router_ = std::shared_ptr<SQLRouter>();
 /// TODO(cj): replace rtidb-unsupport with performance-sensitive-unsupport
 static bool IsRequestSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
-        mode.find("request-unsupport") != std::string::npos
-        || mode.find("standalone-unsupport") != std::string::npos) {
+        mode.find("request-unsupport") != std::string::npos || mode.find("standalone-unsupport") != std::string::npos) {
         return false;
     }
     return true;
 }
 /// TODO(cj): replace rtidb-unsupport with performance-sensitive-unsupport
 static bool IsBatchRequestSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
         mode.find("batch-request-unsupport") != std::string::npos ||
-        mode.find("request-unsupport") != std::string::npos
-        || mode.find("standalone-unsupport") != std::string::npos) {
+        mode.find("request-unsupport") != std::string::npos || mode.find("standalone-unsupport") != std::string::npos) {
         return false;
     }
     return true;
 }
 /// TODO(cj): replace rtidb-unsupport with performance-sensitive-unsupport
 static bool IsBatchSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
-        mode.find("batch-unsupport") != std::string::npos
-        || mode.find("standalone-unsupport") != std::string::npos) {
+        mode.find("batch-unsupport") != std::string::npos || mode.find("standalone-unsupport") != std::string::npos) {
         return false;
     }
     return true;
@@ -481,7 +474,6 @@ TEST_F(SQLSDKQueryTest, RequestProcedureTest) {
     ASSERT_TRUE(router->ExecuteDDL(db, "drop table trans;", &status));
 }
 
-
 TEST_F(SQLSDKQueryTest, DropTableWithProcedureTest) {
     // create table trans
     std::string ddl =
@@ -815,7 +807,7 @@ int main(int argc, char** argv) {
     ::openmldb::sdk::StandaloneEnv env;
     env.SetUp();
     // connect to nameserver
-    ::openmldb::sdk::DBSDK *cs = new ::openmldb::sdk::StandAloneSDK("127.0.0.1", env.GetNsPort());
+    ::openmldb::sdk::DBSDK* cs = new ::openmldb::sdk::StandAloneSDK("127.0.0.1", env.GetNsPort());
     bool ok = cs->Init();
     if (!ok) {
         std::cout << "Fail to connect to db" << std::endl;

@@ -1329,7 +1329,7 @@ TEST_F(TabletImplTest, Traverse) {
         uint64_t cur_ts = 9539 - cnt;
         ASSERT_EQ(cur_ts, kv_it->GetKey());
         ASSERT_STREQ(std::string("test" + std::to_string(cur_ts)).c_str(),
-                ::openmldb::test::DecodeV(kv_it->GetValue().ToString()).c_str());
+                     ::openmldb::test::DecodeV(kv_it->GetValue().ToString()).c_str());
         kv_it->Next();
     }
     ASSERT_FALSE(kv_it->Valid());
@@ -1455,8 +1455,8 @@ TEST_F(TabletImplTest, TraverseTTLTS) {
         for (int idx = 0; idx < 2; idx++) {
             uint64_t ts_value = cur_time - 10 * 60 * 1000 - idx;
             uint64_t ts1_value = cur_time - idx;
-            std::vector<std::string> row = {"card" + std::to_string(key_base + i),
-                    "mcc" + std::to_string(key_base + i), "12", std::to_string(ts_value), std::to_string(ts1_value)};
+            std::vector<std::string> row = {"card" + std::to_string(key_base + i), "mcc" + std::to_string(key_base + i),
+                                            "12", std::to_string(ts_value), std::to_string(ts1_value)};
             ::openmldb::api::PutRequest prequest;
             ::openmldb::api::Dimension* dim = prequest.add_dimensions();
             dim->set_idx(0);
@@ -1481,8 +1481,8 @@ TEST_F(TabletImplTest, TraverseTTLTS) {
         for (int idx = 0; idx < 2; idx++) {
             uint64_t ts1_value = cur_time - 10 * 60 * 1000 - idx;
             uint64_t ts_value = cur_time - idx;
-            std::vector<std::string> row = {"card" + std::to_string(key_base + i),
-                    "mcc" + std::to_string(key_base + i), "12", std::to_string(ts_value), std::to_string(ts1_value)};
+            std::vector<std::string> row = {"card" + std::to_string(key_base + i), "mcc" + std::to_string(key_base + i),
+                                            "12", std::to_string(ts_value), std::to_string(ts1_value)};
             ::openmldb::api::PutRequest prequest;
             ::openmldb::api::Dimension* dim = prequest.add_dimensions();
             dim->set_idx(0);
@@ -3646,8 +3646,8 @@ TEST_F(TabletImplTest, AbsAndLat) {
         dim->set_key("test" + std::to_string(i % 10));
         uint64_t ts = now - (99 - i) * 60 * 1000;
         std::string ts_str = std::to_string(ts);
-        std::vector<std::string> row = {"test" + std::to_string(i % 10), ts_str, ts_str,
-            ts_str, ts_str, ts_str, ts_str};
+        std::vector<std::string> row = {
+            "test" + std::to_string(i % 10), ts_str, ts_str, ts_str, ts_str, ts_str, ts_str};
         auto value = prequest.mutable_value();
         sdk_codec.EncodeRow(row, value);
         prequest.set_tid(id);
@@ -4513,8 +4513,8 @@ TEST_F(TabletImplTest, AbsOrLat) {
         dim->set_idx(0);
         dim->set_key("test" + std::to_string(i % 10));
         std::string ts_str = std::to_string(now - (99 - i) * 60 * 1000);
-        std::vector<std::string> row = {"test" + std::to_string(i % 10), ts_str, ts_str,
-                ts_str, ts_str, ts_str, ts_str};
+        std::vector<std::string> row = {
+            "test" + std::to_string(i % 10), ts_str, ts_str, ts_str, ts_str, ts_str, ts_str};
         auto value = prequest.mutable_value();
         sdk_codec.EncodeRow(row, value);
         prequest.set_tid(id);
@@ -5664,8 +5664,8 @@ TEST_F(TabletImplTest, AddIndex) {
     ::openmldb::api::GeneralResponse add_index_response;
     add_index_request.set_tid(id);
     add_index_request.set_pid(1);
-    SchemaCodec::SetIndex(add_index_request.mutable_column_key(), "mcc", "mcc", "ts1",
-            ::openmldb::type::kAbsoluteTime, 20, 0);
+    SchemaCodec::SetIndex(add_index_request.mutable_column_key(), "mcc", "mcc", "ts1", ::openmldb::type::kAbsoluteTime,
+                          20, 0);
     tablet.AddIndex(NULL, &add_index_request, &add_index_response, &closure);
     ASSERT_EQ(0, response.code());
 
@@ -5675,8 +5675,8 @@ TEST_F(TabletImplTest, AddIndex) {
     for (int i = 0; i < 10; i++) {
         uint64_t ts_value = cur_time - 10 * 60 * 1000 - i;
         uint64_t ts1_value = cur_time - i;
-        std::vector<std::string> row = {"card" + std::to_string(key_base + i),
-                "mcc" + std::to_string(key_base + i), "12", std::to_string(ts_value), std::to_string(ts1_value)};
+        std::vector<std::string> row = {"card" + std::to_string(key_base + i), "mcc" + std::to_string(key_base + i),
+                                        "12", std::to_string(ts_value), std::to_string(ts1_value)};
         ::openmldb::api::PutRequest prequest;
         ::openmldb::api::Dimension* dim = prequest.add_dimensions();
         dim->set_idx(0);

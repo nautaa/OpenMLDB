@@ -16,13 +16,13 @@
 #include <fstream>
 #include <iostream>
 #include <string>
+
 #include "gflags/gflags.h"
 #include "glog/logging.h"
-#include "yaml-cpp/yaml.h"
-
 #include "passes/resolve_fn_and_attrs.h"
 #include "udf/default_udf_library.h"
 #include "udf/udf_registry.h"
+#include "yaml-cpp/yaml.h"
 
 DEFINE_string(output_dir, ".", "Output directory path");
 DEFINE_string(output_file, "udf_defs.yaml", "Output yaml filename");
@@ -33,8 +33,7 @@ namespace cmd {
 struct UdfTypeInfo {
     std::vector<const node::TypeNode*> arg_types;
     const node::TypeNode* return_type;
-    UdfTypeInfo(const std::vector<const node::TypeNode*>& arg_types,
-                const node::TypeNode* return_type)
+    UdfTypeInfo(const std::vector<const node::TypeNode*>& arg_types, const node::TypeNode* return_type)
         : arg_types(arg_types), return_type(return_type) {}
 };
 
@@ -52,8 +51,7 @@ class UdfTypeExtractor {
         enum_types_.push_back(node_manager_.MakeTypeNode(node::kDouble));
     }
 
-    void Expand(const std::string& name, size_t idx, bool is_expansion,
-                std::vector<const node::TypeNode*>* arg_types,
+    void Expand(const std::string& name, size_t idx, bool is_expansion, std::vector<const node::TypeNode*>* arg_types,
                 std::vector<UdfTypeInfo>* output) {
         if (idx == arg_types->size()) {
             // rec end
@@ -70,8 +68,7 @@ class UdfTypeExtractor {
             auto status = library->Transform(name, args, nm, &call);
             if (!status.isOK()) {
                 if (!is_expansion) {
-                    LOG(WARNING) << "Invalid registry of " << name << ": <"
-                                 << udf::GetArgSignature(args) << ">";
+                    LOG(WARNING) << "Invalid registry of " << name << ": <" << udf::GetArgSignature(args) << ">";
                 }
                 return;
             }
@@ -80,10 +77,8 @@ class UdfTypeExtractor {
             node::ExprAnalysisContext ctx(nm, library, &schemas_ctx, nullptr);
             passes::ResolveFnAndAttrs resolver(&ctx);
             status = resolver.VisitExpr(call, &resolved);
-            if (!status.isOK() || resolved == nullptr ||
-                resolved->GetOutputType() == nullptr) {
-                LOG(WARNING) << "Fail to resolve registry of " << name << ": <"
-                             << udf::GetArgSignature(args) << ">";
+            if (!status.isOK() || resolved == nullptr || resolved->GetOutputType() == nullptr) {
+                LOG(WARNING) << "Fail to resolve registry of " << name << ": <" << udf::GetArgSignature(args) << ">";
                 return;
             }
             UdfTypeInfo info(*arg_types, resolved->GetOutputType());
@@ -130,8 +125,7 @@ int ExportUdfInfo(const std::string& dir, const std::string& filename) {
             auto registry = regitem.value;
 
             std::vector<UdfTypeInfo> expand_type_infos;
-            udf_extractor.Expand(name, 0, false, &regitem.arg_types,
-                                 &expand_type_infos);
+            udf_extractor.Expand(name, 0, false, &regitem.arg_types, &expand_type_infos);
 
             yaml_out << YAML::BeginMap;
             yaml_out << YAML::Key << "signatures";

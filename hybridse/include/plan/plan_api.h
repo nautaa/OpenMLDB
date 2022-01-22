@@ -16,6 +16,7 @@
 #ifndef HYBRIDSE_INCLUDE_PLAN_PLAN_API_H_
 #define HYBRIDSE_INCLUDE_PLAN_PLAN_API_H_
 #include <string>
+
 #include "node/node_manager.h"
 namespace hybridse {
 namespace plan {

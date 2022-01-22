@@ -741,8 +741,8 @@ TEST_F(SnapshotTest, MakeSnapshot) {
     int count = 0;
     for (; count < 10; count++) {
         std::string key = "key" + std::to_string(count);
-        auto entry = ::openmldb::test::PackKVEntry(offset, key,
-                "value", ::baidu::common::timer::get_micros() / 1000, 5);
+        auto entry =
+            ::openmldb::test::PackKVEntry(offset, key, "value", ::baidu::common::timer::get_micros() / 1000, 5);
         std::string buffer;
         entry.SerializeToString(&buffer);
         ::openmldb::base::Slice slice(buffer);
@@ -811,7 +811,7 @@ TEST_F(SnapshotTest, MakeSnapshot) {
 
     for (; count < 50; count++) {
         auto entry = ::openmldb::test::PackKVEntry(offset, "key" + std::to_string(count), "value",
-                ::baidu::common::timer::get_micros() / 1000, 7);
+                                                   ::baidu::common::timer::get_micros() / 1000, 7);
         std::string buffer;
         entry.SerializeToString(&buffer);
         ::openmldb::base::Slice slice(buffer);
@@ -1227,8 +1227,8 @@ TEST_F(SnapshotTest, Recover_empty_binlog) {
     count = 0;
     for (; count < 10; count++) {
         offset++;
-        auto entry = ::openmldb::test::PackKVEntry(offset, "key_new",
-                "value_new" + std::to_string(count), count + 1, 1);
+        auto entry =
+            ::openmldb::test::PackKVEntry(offset, "key_new", "value_new" + std::to_string(count), count + 1, 1);
         std::string buffer;
         entry.SerializeToString(&buffer);
         ::openmldb::base::Slice slice(buffer);
@@ -1241,8 +1241,8 @@ TEST_F(SnapshotTest, Recover_empty_binlog) {
     count = 0;
     for (; count < 10; count++) {
         offset++;
-        auto entry = ::openmldb::test::PackKVEntry(offset, "key_xxx",
-                "value_xxx" + std::to_string(count), count + 1, 1);
+        auto entry =
+            ::openmldb::test::PackKVEntry(offset, "key_xxx", "value_xxx" + std::to_string(count), count + 1, 1);
         std::string buffer;
         entry.SerializeToString(&buffer);
         ::openmldb::base::Slice slice(buffer);
@@ -1437,8 +1437,8 @@ TEST_F(SnapshotTest, MakeSnapshotWithEndOffset) {
     int count = 0;
     for (; count < 10; count++) {
         std::string key = "key" + std::to_string(count);
-        auto entry = ::openmldb::test::PackKVEntry(offset, key, "value",
-                ::baidu::common::timer::get_micros() / 1000, 5);
+        auto entry =
+            ::openmldb::test::PackKVEntry(offset, key, "value", ::baidu::common::timer::get_micros() / 1000, 5);
         std::string buffer;
         entry.SerializeToString(&buffer);
         ::openmldb::base::Slice slice(buffer);
@@ -1529,8 +1529,8 @@ TEST_F(SnapshotTest, MakeSnapshotWithEndOffset) {
 
     for (; count < 50; count++) {
         std::string key = "key" + std::to_string(count);
-        auto entry = ::openmldb::test::PackKVEntry(offset, key, "value",
-                ::baidu::common::timer::get_micros() / 1000, 7);
+        auto entry =
+            ::openmldb::test::PackKVEntry(offset, key, "value", ::baidu::common::timer::get_micros() / 1000, 7);
         std::string buffer;
         entry.SerializeToString(&buffer);
         ::openmldb::base::Slice slice(buffer);

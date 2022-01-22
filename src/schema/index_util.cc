@@ -15,9 +15,11 @@
  */
 
 #include "schema/index_util.h"
+
 #include <map>
-#include <string>
 #include <set>
+#include <string>
+
 #include "common/timer.h"
 #include "gflags/gflags.h"
 #include "vm/catalog.h"
@@ -70,7 +72,7 @@ bool IndexUtil::ConvertIndex(const PBIndex& index, ::hybridse::vm::IndexList* ou
 }
 
 base::Status IndexUtil::CheckIndex(const std::map<std::string, ::openmldb::common::ColumnDesc>& column_map,
-        const PBIndex& index) {
+                                   const PBIndex& index) {
     if (index.size() == 0) {
         return {base::ReturnCode::kError, "no index"};
     }
@@ -85,11 +87,10 @@ base::Status IndexUtil::CheckIndex(const std::map<std::string, ::openmldb::commo
             col_set.insert(column_name);
             has_iter = true;
             auto iter = column_map.find(column_name);
-            if ((iter != column_map.end() &&
-                 ((iter->second.data_type() == ::openmldb::type::kFloat)
-                  || (iter->second.data_type() == ::openmldb::type::kDouble)))) {
+            if ((iter != column_map.end() && ((iter->second.data_type() == ::openmldb::type::kFloat) ||
+                                              (iter->second.data_type() == ::openmldb::type::kDouble)))) {
                 return {base::ReturnCode::kError,
-                    "float or double type column can not be index, column is: " + column_key.index_name()};
+                        "float or double type column can not be index, column is: " + column_key.index_name()};
             }
         }
         if (!has_iter) {
@@ -97,8 +98,8 @@ base::Status IndexUtil::CheckIndex(const std::map<std::string, ::openmldb::commo
             if (iter == column_map.end()) {
                 return {base::ReturnCode::kError, "index must member of columns when column key col name is empty"};
             }
-            if (iter->second.data_type() == ::openmldb::type::kFloat
-                    || iter->second.data_type() == ::openmldb::type::kDouble) {
+            if (iter->second.data_type() == ::openmldb::type::kFloat ||
+                iter->second.data_type() == ::openmldb::type::kDouble) {
                 return {base::ReturnCode::kError, "float or double column can not be index"};
             }
         }
@@ -172,8 +173,7 @@ base::Status IndexUtil::CheckUnique(const PBIndex& index) {
     return {};
 }
 
-bool IndexUtil::CheckExist(const ::openmldb::common::ColumnKey& column_key,
-        const PBIndex& index, int32_t* pos) {
+bool IndexUtil::CheckExist(const ::openmldb::common::ColumnKey& column_key, const PBIndex& index, int32_t* pos) {
     int32_t index_pos = 0;
     std::string id_str = GetIDStr(column_key);
     for (; index_pos < index.size(); index_pos++) {
@@ -203,7 +203,7 @@ std::string IndexUtil::GetIDStr(const ::openmldb::common::ColumnKey& column_key)
 }
 
 base::Status IndexUtil::CheckNewIndex(const ::openmldb::common::ColumnKey& column_key,
-        const openmldb::nameserver::TableInfo& table_info) {
+                                      const openmldb::nameserver::TableInfo& table_info) {
     if (table_info.column_key_size() == 0) {
         return {base::ReturnCode::kError, "has no index"};
     }

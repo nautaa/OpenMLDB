@@ -15,8 +15,10 @@
  */
 
 #include "vm/sql_compiler.h"
+
 #include <memory>
 #include <utility>
+
 #include "boost/algorithm/string.hpp"
 #include "case/sql_case.h"
 #include "gtest/gtest.h"
@@ -33,9 +35,9 @@
 #include "llvm/Transforms/InstCombine/InstCombine.h"
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
-#include "vm/simple_catalog.h"
-#include "testing/test_base.h"
 #include "testing/engine_test_base.h"
+#include "testing/test_base.h"
+#include "vm/simple_catalog.h"
 
 using namespace llvm;       // NOLINT
 using namespace llvm::orc;  // NOLINT
@@ -46,37 +48,29 @@ namespace hybridse {
 namespace vm {
 
 using hybridse::sqlcase::SqlCase;
-const std::vector<std::string> FILTERS({"physical-plan-unsupport",  "zetasql-unsupport",
-                                        "plan-unsupport", "parser-unsupport"});
+const std::vector<std::string> FILTERS({"physical-plan-unsupport", "zetasql-unsupport", "plan-unsupport",
+                                        "parser-unsupport"});
 
 class SqlCompilerTest : public ::testing::TestWithParam<SqlCase> {};
-INSTANTIATE_TEST_SUITE_P(
-    SqlSimpleQueryParse, SqlCompilerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlWindowQueryParse, SqlCompilerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlTableUdafQueryPlan, SqlCompilerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/table_aggregation_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlSimpleQueryParse, SqlCompilerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlWindowQueryParse, SqlCompilerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlTableUdafQueryPlan, SqlCompilerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/table_aggregation_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlWherePlan, SqlCompilerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/where_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlWherePlan, SqlCompilerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/where_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlGroupPlan, SqlCompilerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/group_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlHavingPlan, SqlCompilerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/having_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlJoinPlan, SqlCompilerTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/join_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlGroupPlan, SqlCompilerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/group_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlHavingPlan, SqlCompilerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/having_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlJoinPlan, SqlCompilerTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/join_query.yaml", FILTERS)));
 
-void CompilerCheck(std::shared_ptr<Catalog> catalog, const SqlCase& sql_case,
-                   const Schema& paramter_types, const EngineMode engine_mode,
-                   const bool enable_batch_window_paralled,
+void CompilerCheck(std::shared_ptr<Catalog> catalog, const SqlCase& sql_case, const Schema& paramter_types,
+                   const EngineMode engine_mode, const bool enable_batch_window_paralled,
                    const bool enable_window_column_pruning) {
     std::string sql = boost::to_lower_copy(sql_case.sql_str());
     SqlCompiler sql_compiler(catalog, false, true, false);
@@ -103,12 +97,12 @@ void CompilerCheck(std::shared_ptr<Catalog> catalog, const SqlCase& sql_case,
     PrintSchema(oss_schema, sql_context.schema);
     std::cout << "schema:\n" << oss_schema.str();
 }
-void CompilerCheck(std::shared_ptr<Catalog> catalog, const SqlCase& sql_case,
-                   const Schema& paramter_types, EngineMode engine_mode) {
+void CompilerCheck(std::shared_ptr<Catalog> catalog, const SqlCase& sql_case, const Schema& paramter_types,
+                   EngineMode engine_mode) {
     CompilerCheck(catalog, sql_case, paramter_types, engine_mode, false, false);
 }
-void RequestSchemaCheck(std::shared_ptr<Catalog> catalog, const SqlCase& sql_case,
-                        const vm::Schema& paramter_types, const type::TableDef& exp_table_def) {
+void RequestSchemaCheck(std::shared_ptr<Catalog> catalog, const SqlCase& sql_case, const vm::Schema& paramter_types,
+                        const type::TableDef& exp_table_def) {
     std::string sql = boost::to_lower_copy(sql_case.sql_str());
     SqlCompiler sql_compiler(catalog);
     SqlContext sql_context;
@@ -218,8 +212,6 @@ TEST_P(SqlCompilerTest, CompileRequestModeTest) {
     table_def5.set_name("t5");
     table_def6.set_name("t6");
 
-
-
     hybridse::type::Database db;
     db.set_name("db");
     AddTable(db, table_def);
@@ -283,7 +275,6 @@ TEST_P(SqlCompilerTest, CompileBatchModeTest) {
     auto& sql_case = GetParam();
     std::string sqlstr = sql_case.sql_str();
     DLOG(INFO) << sqlstr;
-
 
     hybridse::type::TableDef table_def;
     hybridse::type::TableDef table_def2;
@@ -407,25 +398,24 @@ TEST_P(SqlCompilerTest, CompileBatchModeTest) {
 TEST_F(SqlCompilerTest, TestEnableWindowParalled) {
     hybridse::type::TableDef t1;
     hybridse::type::TableDef t2;
-    SqlCase::ExtractTableDef(
-        {"col0 string", "col1 int", "col2 int"}, {}, t1);
+    SqlCase::ExtractTableDef({"col0 string", "col1 int", "col2 int"}, {}, t1);
     t1.set_name("t1");
-    SqlCase::ExtractTableDef(
-        {"str0 string", "str1 string", "col0 int", "col1 int"}, {}, t2);
+    SqlCase::ExtractTableDef({"str0 string", "str1 string", "col0 int", "col1 int"}, {}, t2);
     t2.set_name("t2");
     hybridse::type::Database db;
     db.set_name("db");
     AddTable(db, t1);
     AddTable(db, t2);
     auto simple_catalog = BuildSimpleCatalogIndexUnsupport(db);
-    std::string sqlstr = " SELECT sum(t1.col1) over w1 as sum_t1_col1, t2.str1 as t2_str1\n"
-                         " FROM t1\n"
-                         " last join t2 order by t2.col1\n"
-                         " on t1.col1 = t2.col1 and t1.col2 = t2.col0\n"
-                         " WINDOW w1 AS (\n"
-                         "  PARTITION BY t1.col2 ORDER BY t1.col1\n"
-                         "  ROWS_RANGE BETWEEN 3 PRECEDING AND CURRENT ROW\n"
-                         " ) limit 10;";
+    std::string sqlstr =
+        " SELECT sum(t1.col1) over w1 as sum_t1_col1, t2.str1 as t2_str1\n"
+        " FROM t1\n"
+        " last join t2 order by t2.col1\n"
+        " on t1.col1 = t2.col1 and t1.col2 = t2.col0\n"
+        " WINDOW w1 AS (\n"
+        "  PARTITION BY t1.col2 ORDER BY t1.col1\n"
+        "  ROWS_RANGE BETWEEN 3 PRECEDING AND CURRENT ROW\n"
+        " ) limit 10;";
     SqlCase sql_case;
     sql_case.sql_str_ = sqlstr;
     CompilerCheck(simple_catalog, sql_case, {}, kBatchMode, true, false);

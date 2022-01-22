@@ -555,7 +555,7 @@ int MemTableSnapshot::RemoveDeletedKey(const ::openmldb::api::LogEntry& entry, c
 }
 
 base::Status MemTableSnapshot::GetAllDecoder(std::shared_ptr<Table> table,
-        std::map<uint8_t, codec::RowView>* decoder_map) {
+                                             std::map<uint8_t, codec::RowView>* decoder_map) {
     if (decoder_map == nullptr) {
         return base::Status(base::ReturnCode::kError, "null ptr");
     }
@@ -578,7 +578,7 @@ base::Status MemTableSnapshot::GetAllDecoder(std::shared_ptr<Table> table,
  * 0 : not delete
  * 1 : delete all key
  * 2 : delete some key
-*/
+ */
 int MemTableSnapshot::CheckDeleteAndUpdate(std::shared_ptr<Table> table, openmldb::api::LogEntry* entry) {
     if (entry == nullptr) {
         return -1;
@@ -613,9 +613,9 @@ int MemTableSnapshot::CheckDeleteAndUpdate(std::shared_ptr<Table> table, openmld
     return 0;
 }
 
-base::Status MemTableSnapshot::GetIndexKey(std::shared_ptr<Table> table,
-        const std::shared_ptr<IndexDef>& index, const base::Slice& data,
-        std::map<uint8_t, codec::RowView>* decoder_map, std::string* index_key) {
+base::Status MemTableSnapshot::GetIndexKey(std::shared_ptr<Table> table, const std::shared_ptr<IndexDef>& index,
+                                           const base::Slice& data, std::map<uint8_t, codec::RowView>* decoder_map,
+                                           std::string* index_key) {
     if (table == nullptr || decoder_map == nullptr || index_key == nullptr) {
         return base::Status(base::ReturnCode::kError, "null ptr");
     }
@@ -648,9 +648,10 @@ base::Status MemTableSnapshot::GetIndexKey(std::shared_ptr<Table> table,
 }
 
 base::Status MemTableSnapshot::ExtractIndexFromSnapshot(std::shared_ptr<Table> table,
-        const ::openmldb::api::Manifest& manifest, WriteHandle* wh,
-        const std::vector<::openmldb::common::ColumnKey>& add_indexs, uint32_t partition_num,
-        uint64_t* count, uint64_t* expired_key_num, uint64_t* deleted_key_num) {
+                                                        const ::openmldb::api::Manifest& manifest, WriteHandle* wh,
+                                                        const std::vector<::openmldb::common::ColumnKey>& add_indexs,
+                                                        uint32_t partition_num, uint64_t* count,
+                                                        uint64_t* expired_key_num, uint64_t* deleted_key_num) {
     if (wh == nullptr || count == nullptr || expired_key_num == nullptr || deleted_key_num == nullptr) {
         return base::Status(base::ReturnCode::kError, "null ptr");
     }
@@ -691,14 +692,14 @@ base::Status MemTableSnapshot::ExtractIndexFromSnapshot(std::shared_ptr<Table> t
             break;
         }
         if (!status.ok()) {
-            PDLOG(WARNING, "fail to read record for tid %u, pid %u with error %s",
-                    tid_, pid_, status.ToString().c_str());
+            PDLOG(WARNING, "fail to read record for tid %u, pid %u with error %s", tid_, pid_,
+                  status.ToString().c_str());
             has_error = true;
             break;
         }
         if (!entry.ParseFromString(record.ToString())) {
-            PDLOG(WARNING, "fail parse record for tid %u, pid %u with value %s",
-                    tid_, pid_, ::openmldb::base::DebugString(record.ToString()).c_str());
+            PDLOG(WARNING, "fail parse record for tid %u, pid %u with value %s", tid_, pid_,
+                  ::openmldb::base::DebugString(record.ToString()).c_str());
             has_error = true;
             break;
         }
@@ -758,21 +759,21 @@ base::Status MemTableSnapshot::ExtractIndexFromSnapshot(std::shared_ptr<Table> t
         }
         status = wh->Write(record);
         if (!status.ok()) {
-            PDLOG(WARNING, "fail to extract index from snapshot. status[%s] tid[%u] pid[%u]",
-                  status.ToString().c_str(), tid, pid);
+            PDLOG(WARNING, "fail to extract index from snapshot. status[%s] tid[%u] pid[%u]", status.ToString().c_str(),
+                  tid, pid);
             has_error = true;
             break;
         }
         if ((*count + *expired_key_num + *deleted_key_num) % KEY_NUM_DISPLAY == 0) {
-            PDLOG(INFO, "tackled key num[%lu] total[%lu] tid[%u] pid[%u]",
-                    *count + *expired_key_num, manifest.count(), tid, pid);
+            PDLOG(INFO, "tackled key num[%lu] total[%lu] tid[%u] pid[%u]", *count + *expired_key_num, manifest.count(),
+                  tid, pid);
         }
         (*count)++;
     }
     delete seq_file;
     if (*expired_key_num + write_count + *deleted_key_num != manifest.count()) {
         PDLOG(WARNING, "key num not match! total key[%lu] load key[%lu] ttl key[%lu] delete key [%lu], tid %u pid %u",
-                manifest.count(), *count, *expired_key_num, *deleted_key_num, tid, pid);
+              manifest.count(), *count, *expired_key_num, *deleted_key_num, tid, pid);
         has_error = true;
     }
     if (has_error) {
@@ -955,10 +956,11 @@ std::string MemTableSnapshot::GenSnapshotName() {
     return snapshot_name;
 }
 
-base::Status MemTableSnapshot::ExtractIndexFromBinlog(std::shared_ptr<Table> table,
-        WriteHandle* wh, const std::vector<::openmldb::common::ColumnKey>& add_indexs,
-        uint64_t collected_offset, uint32_t partition_num, uint64_t* offset,
-        uint64_t* last_term, uint64_t* count, uint64_t* expired_key_num, uint64_t* deleted_key_num) {
+base::Status MemTableSnapshot::ExtractIndexFromBinlog(std::shared_ptr<Table> table, WriteHandle* wh,
+                                                      const std::vector<::openmldb::common::ColumnKey>& add_indexs,
+                                                      uint64_t collected_offset, uint32_t partition_num,
+                                                      uint64_t* offset, uint64_t* last_term, uint64_t* count,
+                                                      uint64_t* expired_key_num, uint64_t* deleted_key_num) {
     uint32_t tid = table->GetId();
     uint32_t pid = table->GetPid();
     std::map<uint8_t, codec::RowView> decoder_map;
@@ -995,8 +997,8 @@ base::Status MemTableSnapshot::ExtractIndexFromBinlog(std::shared_ptr<Table> tab
                 continue;
             }
             if (*offset + 1 != entry.log_index()) {
-                LOG(WARNING) << "log missing expect offset " << *offset + 1 << " but " << entry.log_index()
-                             << ". tid " << tid << " pid " << pid;
+                LOG(WARNING) << "log missing expect offset " << *offset + 1 << " but " << entry.log_index() << ". tid "
+                             << tid << " pid " << pid;
                 continue;
             }
             *offset = entry.log_index();
@@ -1061,8 +1063,8 @@ base::Status MemTableSnapshot::ExtractIndexFromBinlog(std::shared_ptr<Table> tab
             }
             ::openmldb::log::Status status = wh->Write(record);
             if (!status.ok()) {
-                PDLOG(WARNING, "fail to write snapshot. tid[%u] pid[%u] status[%s]",
-                        tid, pid, status.ToString().c_str());
+                PDLOG(WARNING, "fail to write snapshot. tid[%u] pid[%u] status[%s]", tid, pid,
+                      status.ToString().c_str());
                 return base::Status(base::ReturnCode::kError, "fail to write snapshot");
             }
             (*count)++;
@@ -1077,7 +1079,8 @@ base::Status MemTableSnapshot::ExtractIndexFromBinlog(std::shared_ptr<Table> tab
             // judge end_log_index greater than cur_log_index
             if (end_log_index >= 0 && end_log_index > cur_log_index) {
                 log_reader.RollRLogFile();
-                PDLOG(WARNING, "read new binlog file. tid[%u] pid[%u] cur_log_index[%d] "
+                PDLOG(WARNING,
+                      "read new binlog file. tid[%u] pid[%u] cur_log_index[%d] "
                       "end_log_index[%d] cur_offset[%lu]",
                       tid, pid, cur_log_index, end_log_index, *offset);
                 continue;
@@ -1093,8 +1096,8 @@ base::Status MemTableSnapshot::ExtractIndexFromBinlog(std::shared_ptr<Table> tab
 }
 
 int MemTableSnapshot::ExtractIndexData(std::shared_ptr<Table> table,
-        const std::vector<::openmldb::common::ColumnKey>& indexs,
-        uint32_t partition_num, uint64_t* out_offset) {
+                                       const std::vector<::openmldb::common::ColumnKey>& indexs, uint32_t partition_num,
+                                       uint64_t* out_offset) {
     if (out_offset == NULL) {
         return -1;
     }
@@ -1127,8 +1130,9 @@ int MemTableSnapshot::ExtractIndexData(std::shared_ptr<Table> table,
     int result = GetLocalManifest(snapshot_path_ + MANIFEST, manifest);
     if (result == 0) {
         DLOG(INFO) << "begin extract index data from snapshot";
-        if (!ExtractIndexFromSnapshot(table, manifest, wh, indexs, partition_num,
-                    &write_count, &expired_key_num, &deleted_key_num).OK()) {
+        if (!ExtractIndexFromSnapshot(table, manifest, wh, indexs, partition_num, &write_count, &expired_key_num,
+                                      &deleted_key_num)
+                 .OK()) {
             has_error = true;
         }
         last_term = manifest.term();
@@ -1139,8 +1143,8 @@ int MemTableSnapshot::ExtractIndexData(std::shared_ptr<Table> table,
     }
     uint64_t cur_offset = offset_;
     if (!has_error) {
-        auto ret = ExtractIndexFromBinlog(table, wh, indexs, collected_offset, partition_num,
-                &cur_offset, &last_term, &write_count, &expired_key_num, &deleted_key_num);
+        auto ret = ExtractIndexFromBinlog(table, wh, indexs, collected_offset, partition_num, &cur_offset, &last_term,
+                                          &write_count, &expired_key_num, &deleted_key_num);
         if (!ret.OK()) {
             LOG(WARNING) << ret.msg;
             has_error = true;

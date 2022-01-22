@@ -82,7 +82,6 @@ TEST_F(EngineCompileTest, EngineLRUCacheTest) {
     }
 }
 
-
 TEST_F(EngineCompileTest, EngineWithParameterizedLRUCacheTest) {
     // Build Simple Catalog
     auto catalog = BuildSimpleCatalog();
@@ -154,7 +153,6 @@ TEST_F(EngineCompileTest, EngineWithParameterizedLRUCacheTest) {
         ASSERT_NE(bsession1.GetCompileInfo().get(), bsession4.GetCompileInfo().get());
     }
 }
-
 
 TEST_F(EngineCompileTest, EngineEmptyDefaultDBLRUCacheTest) {
     // Build Simple Catalog
@@ -288,8 +286,7 @@ TEST_F(EngineCompileTest, EngineCompileOnlyTest) {
             LOG(INFO) << sqlstr;
             std::cout << sqlstr << std::endl;
             BatchRunSession session;
-            ASSERT_FALSE(
-                engine.Get(sqlstr, table_def.catalog(), session, get_status));
+            ASSERT_FALSE(engine.Get(sqlstr, table_def.catalog(), session, get_status));
         }
     }
 }
@@ -361,12 +358,11 @@ TEST_F(EngineCompileTest, EngineGetDependentTableTest) {
                            "t1.col5 = t2.col5\n"
                            "      WINDOW w1 AS (UNION t3 PARTITION BY t1.col2 ORDER BY t1.col5 "
                            "ROWS_RANGE BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
-                           std::set<std::pair<std::string, std::string>>(
-                               {std::make_pair("simple_db", "t1"),
-                                std::make_pair("simple_db", "t2"),
-                                std::make_pair("simple_db", "t3"),
-                               })));
-
+                           std::set<std::pair<std::string, std::string>>({
+                               std::make_pair("simple_db", "t1"),
+                               std::make_pair("simple_db", "t2"),
+                               std::make_pair("simple_db", "t3"),
+                           })));
 
         for (auto pair : pairs) {
             base::Status get_status;
@@ -450,8 +446,8 @@ TEST_F(EngineCompileTest, RouterTest) {
         ExplainOutput explain_output;
         codec::Schema empty_parameter_schema;
         base::Status status;
-        ASSERT_TRUE(engine.Explain(sql, "simple_db", kBatchRequestMode,
-                                   empty_parameter_schema, &explain_output, &status));
+        ASSERT_TRUE(
+            engine.Explain(sql, "simple_db", kBatchRequestMode, empty_parameter_schema, &explain_output, &status));
         ASSERT_EQ(explain_output.router.GetMainTable(), "t1");
         ASSERT_EQ(explain_output.router.GetRouterCol(), "col2");
     }
@@ -493,9 +489,7 @@ TEST_F(EngineCompileTest, ExplainBatchRequestTest) {
     Engine engine(catalog, options);
     ExplainOutput explain_output;
     base::Status status;
-    ASSERT_TRUE(engine.Explain(sql, "simple_db", kBatchRequestMode,
-                               common_column_indices, &explain_output,
-                               &status));
+    ASSERT_TRUE(engine.Explain(sql, "simple_db", kBatchRequestMode, common_column_indices, &explain_output, &status));
     ASSERT_TRUE(status.isOK()) << status;
     auto& output_schema = explain_output.output_schema;
     ASSERT_EQ(false, output_schema.Get(0).is_constant());
@@ -530,9 +524,7 @@ TEST_F(EngineCompileTest, MockRequestExplainTest) {
     Engine engine(catalog, options);
     ExplainOutput explain_output;
     base::Status status;
-    ASSERT_TRUE(engine.Explain(sql, "simple_db", kMockRequestMode,
-                               &explain_output,
-                               &status));
+    ASSERT_TRUE(engine.Explain(sql, "simple_db", kMockRequestMode, &explain_output, &status));
     ASSERT_TRUE(status.isOK()) << status;
 }
 

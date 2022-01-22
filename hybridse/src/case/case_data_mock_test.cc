@@ -15,6 +15,7 @@
  */
 
 #include "case/case_data_mock.h"
+
 #include "glog/logging.h"
 #include "gtest/gtest.h"
 namespace hybridse {

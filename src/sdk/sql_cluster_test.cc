@@ -78,13 +78,9 @@ class SQLClusterDDLTest : public SQLClusterTest {
         ASSERT_TRUE(router->ExecuteDDL(db, ddl, &status)) << "ddl: " << ddl;
         ASSERT_TRUE(router->ExecuteDDL(db, "drop table " + name + ";", &status));
     }
-    void RightDDL(const std::string& name, const std::string& ddl) {
-        RightDDL(db, name, ddl);
-    }
+    void RightDDL(const std::string& name, const std::string& ddl) { RightDDL(db, name, ddl); }
 
-    void WrongDDL(const std::string& name, const std::string& ddl) {
-        WrongDDL(db, name, ddl);
-    }
+    void WrongDDL(const std::string& name, const std::string& ddl) { WrongDDL(db, name, ddl); }
     void WrongDDL(const std::string& db, const std::string& name, const std::string& ddl) {
         ::hybridse::sdk::Status status;
         ASSERT_FALSE(router->ExecuteDDL(db, ddl, &status)) << "ddl: " << ddl;
@@ -415,32 +411,26 @@ static std::shared_ptr<SQLRouter> GetNewSQLRouter() {
     return NewClusterSQLRouter(sql_opt);
 }
 static bool IsRequestSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
-        mode.find("request-unsupport") != std::string::npos
-        || mode.find("cluster-unsupport") != std::string::npos) {
+        mode.find("request-unsupport") != std::string::npos || mode.find("cluster-unsupport") != std::string::npos) {
         return false;
     }
     return true;
 }
 static bool IsBatchRequestSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
         mode.find("batch-request-unsupport") != std::string::npos ||
-        mode.find("request-unsupport") != std::string::npos
-        || mode.find("cluster-unsupport") != std::string::npos) {
+        mode.find("request-unsupport") != std::string::npos || mode.find("cluster-unsupport") != std::string::npos) {
         return false;
     }
     return true;
 }
 static bool IsBatchSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
-        mode.find("batch-unsupport") != std::string::npos
-        || mode.find("cluster-unsupport") != std::string::npos) {
+        mode.find("batch-unsupport") != std::string::npos || mode.find("cluster-unsupport") != std::string::npos) {
         return false;
     }
     return true;

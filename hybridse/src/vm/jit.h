@@ -20,6 +20,7 @@
 #include <map>
 #include <memory>
 #include <string>
+
 #include "llvm/ExecutionEngine/GenericValue.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "vm/jit_wrapper.h"
@@ -45,8 +46,7 @@ class HybridSeJit : public ::llvm::orc::LLJIT {
     void Init();
 
     ::llvm::Error AddIRModule(::llvm::orc::JITDylib& jd,  // NOLINT
-                              ::llvm::orc::ThreadSafeModule tsm,
-                              ::llvm::orc::VModuleKey key);
+                              ::llvm::orc::ThreadSafeModule tsm, ::llvm::orc::VModuleKey key);
 
     bool OptModule(::llvm::Module* m);
 
@@ -72,9 +72,7 @@ class HybridSeJit : public ::llvm::orc::LLJIT {
 
 class HybridSeJitBuilder
     : public ::llvm::orc::LLJITBuilderState,
-      public ::llvm::orc::LLJITBuilderSetters<HybridSeJit, HybridSeJitBuilder,
-                                              ::llvm::orc::LLJITBuilderState> {
-};
+      public ::llvm::orc::LLJITBuilderSetters<HybridSeJit, HybridSeJitBuilder, ::llvm::orc::LLJITBuilderState> {};
 
 template <typename T>
 std::string LlvmToString(const T& value) {
@@ -94,13 +92,11 @@ class HybridSeLlvmJitWrapper : public HybridSeJitWrapper {
 
     bool OptModule(::llvm::Module* module) override;
 
-    bool AddModule(std::unique_ptr<llvm::Module> module,
-                   std::unique_ptr<llvm::LLVMContext> llvm_ctx) override;
+    bool AddModule(std::unique_ptr<llvm::Module> module, std::unique_ptr<llvm::LLVMContext> llvm_ctx) override;
 
     bool AddExternalFunction(const std::string& name, void* addr) override;
 
-    hybridse::vm::RawPtrHandle FindFunction(
-        const std::string& funcname) override;
+    hybridse::vm::RawPtrHandle FindFunction(const std::string& funcname) override;
 
  private:
     std::unique_ptr<HybridSeJit> jit_;
@@ -110,21 +106,18 @@ class HybridSeLlvmJitWrapper : public HybridSeJitWrapper {
 #ifdef LLVM_EXT_ENABLE
 class HybridSeMcJitWrapper : public HybridSeJitWrapper {
  public:
-    explicit HybridSeMcJitWrapper(const JitOptions& jit_options)
-        : jit_options_(jit_options) {}
+    explicit HybridSeMcJitWrapper(const JitOptions& jit_options) : jit_options_(jit_options) {}
     ~HybridSeMcJitWrapper() {}
 
     bool Init() override;
 
     bool OptModule(::llvm::Module* module) override;
 
-    bool AddModule(std::unique_ptr<llvm::Module> module,
-                   std::unique_ptr<llvm::LLVMContext> llvm_ctx) override;
+    bool AddModule(std::unique_ptr<llvm::Module> module, std::unique_ptr<llvm::LLVMContext> llvm_ctx) override;
 
     bool AddExternalFunction(const std::string& name, void* addr) override;
 
-    hybridse::vm::RawPtrHandle FindFunction(
-        const std::string& funcname) override;
+    hybridse::vm::RawPtrHandle FindFunction(const std::string& funcname) override;
 
  private:
     bool CheckInitialized() const;

@@ -15,10 +15,11 @@
  */
 
 #include "codegen/ir_base_builder.h"
+
 #include <memory>
 #include <utility>
-#include "gtest/gtest.h"
 
+#include "gtest/gtest.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"
 #include "llvm/IR/Function.h"
 #include "llvm/IR/IRBuilder.h"
@@ -52,10 +53,8 @@ TEST_F(IRBaseBuilderTest, test_load_float) {
     auto m = make_unique<Module>("test_load_float", *ctx);
     // Create the add1 function entry and insert this entry into module M.  The
     // function will have a return type of "int" and take an argument of "int".
-    Function *load_fn =
-        Function::Create(FunctionType::get(Type::getFloatTy(*ctx),
-                                           {Type::getInt8PtrTy(*ctx)}, false),
-                         Function::ExternalLinkage, "load_fn", m.get());
+    Function *load_fn = Function::Create(FunctionType::get(Type::getFloatTy(*ctx), {Type::getInt8PtrTy(*ctx)}, false),
+                                         Function::ExternalLinkage, "load_fn", m.get());
     BasicBlock *entry_block = BasicBlock::Create(*ctx, "EntryBlock", load_fn);
     IRBuilder<> builder(entry_block);
     Argument *arg0 = &*load_fn->arg_begin();
@@ -84,10 +83,8 @@ TEST_F(IRBaseBuilderTest, test_load_int64) {
     auto m = make_unique<Module>("test_load_int64", *ctx);
     // Create the add1 function entry and insert this entry into module M.  The
     // function will have a return type of "int" and take an argument of "int".
-    Function *load_fn =
-        Function::Create(FunctionType::get(Type::getInt64Ty(*ctx),
-                                           {Type::getInt8PtrTy(*ctx)}, false),
-                         Function::ExternalLinkage, "load_fn", m.get());
+    Function *load_fn = Function::Create(FunctionType::get(Type::getInt64Ty(*ctx), {Type::getInt8PtrTy(*ctx)}, false),
+                                         Function::ExternalLinkage, "load_fn", m.get());
     BasicBlock *entry_block = BasicBlock::Create(*ctx, "EntryBlock", load_fn);
     IRBuilder<> builder(entry_block);
     Argument *arg0 = &*load_fn->arg_begin();
@@ -101,8 +98,7 @@ TEST_F(IRBaseBuilderTest, test_load_int64) {
     auto J = ExitOnErr(LLJITBuilder().create());
     ExitOnErr(J->addIRModule(ThreadSafeModule(std::move(m), std::move(ctx))));
     auto load_fn_jit = ExitOnErr(J->lookup("load_fn"));
-    int64_t (*decode)(int8_t *) =
-        (int64_t(*)(int8_t *))load_fn_jit.getAddress();
+    int64_t (*decode)(int8_t *) = (int64_t(*)(int8_t *))load_fn_jit.getAddress();
     int64_t *test = new int64_t[2];
     test[0] = 1;
     test[1] = 2;

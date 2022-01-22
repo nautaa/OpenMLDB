@@ -205,8 +205,6 @@ int SDKCodec::EncodeDimension(const std::vector<std::string>& raw_data, uint32_t
     return 0;
 }
 
-
-
 int SDKCodec::EncodeRow(const std::vector<std::string>& raw_data, std::string* row) {
     auto ret = RowCodec::EncodeRow(raw_data, schema_, last_ver_, *row);
     return ret.code;

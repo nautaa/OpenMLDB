@@ -279,17 +279,19 @@ void APIServerImpl::RegisterPut() {
 }
 
 void APIServerImpl::RegisterExecDeployment() {
-    provider_.post("/dbs/:db_name/deployments/:sp_name", std::bind(&APIServerImpl::ExecuteProcedure, this,
-                false, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    provider_.post("/dbs/:db_name/deployments/:sp_name",
+                   std::bind(&APIServerImpl::ExecuteProcedure, this, false, std::placeholders::_1,
+                             std::placeholders::_2, std::placeholders::_3));
 }
 
 void APIServerImpl::RegisterExecSP() {
-    provider_.post("/dbs/:db_name/procedures/:sp_name", std::bind(&APIServerImpl::ExecuteProcedure, this,
-                true, std::placeholders::_1, std::placeholders::_2, std::placeholders::_3));
+    provider_.post("/dbs/:db_name/procedures/:sp_name",
+                   std::bind(&APIServerImpl::ExecuteProcedure, this, true, std::placeholders::_1, std::placeholders::_2,
+                             std::placeholders::_3));
 }
 
 void APIServerImpl::ExecuteProcedure(bool has_common_col, const InterfaceProvider::Params& param,
-        const butil::IOBuf& req_body, JsonWriter& writer) {
+                                     const butil::IOBuf& req_body, JsonWriter& writer) {
     auto err = GeneralError();
     auto db_it = param.find("db_name");
     auto sp_it = param.find("sp_name");
@@ -386,8 +388,7 @@ void APIServerImpl::ExecuteProcedure(bool has_common_col, const InterfaceProvide
     // output schema in sp_info is needed for encoding data, so we need a bool in ExecSPResp to know whether to
     // print schema
     resp.sp_info = sp_info;
-    if (document.HasMember("need_schema") && document["need_schema"].IsBool() &&
-        document["need_schema"].GetBool()) {
+    if (document.HasMember("need_schema") && document["need_schema"].IsBool() && document["need_schema"].GetBool()) {
         resp.need_schema = true;
     }
     resp.rs = rs;

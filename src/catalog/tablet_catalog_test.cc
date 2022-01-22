@@ -266,7 +266,7 @@ TEST_F(TabletCatalogTest, sql_last_join_smoke_test) {
     ::hybridse::codec::RowView rv(session.GetSchema());
     ASSERT_EQ(4, session.GetSchema().size());
     ASSERT_EQ(1u, output_rows.size());
-    auto& row = output_rows[0];
+    auto &row = output_rows[0];
     rv.Reset(row.buf(), row.size());
     ASSERT_EQ(args->pk, rv.GetStringUnsafe(0));
 }
@@ -305,7 +305,7 @@ TEST_F(TabletCatalogTest, sql_last_join_smoke_test2) {
     ::hybridse::codec::RowView rv(session.GetSchema());
     ASSERT_EQ(4, session.GetSchema().size());
     ASSERT_EQ(1u, outputs.size());
-    auto& row = outputs[0];
+    auto &row = outputs[0];
     rv.Reset(row.buf(), row.size());
     const char *data = NULL;
     uint32_t data_size = 0;

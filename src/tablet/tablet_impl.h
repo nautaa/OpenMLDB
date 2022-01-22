@@ -205,7 +205,7 @@ class TabletImpl : public ::openmldb::api::TabletServer {
                           ::openmldb::api::GeneralResponse* response, Closure* done);
 
     void ExtractMultiIndexData(RpcController* controller, const ::openmldb::api::ExtractMultiIndexDataRequest* request,
-                          ::openmldb::api::GeneralResponse* response, Closure* done);
+                               ::openmldb::api::GeneralResponse* response, Closure* done);
 
     void AddIndex(RpcController* controller, const ::openmldb::api::AddIndexRequest* request,
                   ::openmldb::api::GeneralResponse* response, Closure* done);
@@ -381,9 +381,7 @@ class TabletImpl : public ::openmldb::api::TabletServer {
                                   openmldb::api::SQLBatchRequestQueryResponse* response,
                                   butil::IOBuf& buf);  // NOLINT
 
-    inline bool IsClusterMode() const {
-        return startup_mode_ == ::openmldb::type::StartupMode::kCluster;
-    }
+    inline bool IsClusterMode() const { return startup_mode_ == ::openmldb::type::StartupMode::kCluster; }
 
     std::string GetDBPath(const std::string& root_path, uint32_t tid, uint32_t pid);
 

@@ -23,7 +23,6 @@
 
 #include "passes/expression/expr_pass.h"
 
-
 namespace hybridse {
 namespace passes {
 
@@ -36,8 +35,7 @@ class ExprInplaceTransformUp : public ExprPass {
     ExprInplaceTransformUp() {}
     virtual ~ExprInplaceTransformUp() {}
 
-    Status Apply(ExprAnalysisContext* ctx, ExprNode* expr,
-                 ExprNode** out) override;
+    Status Apply(ExprAnalysisContext* ctx, ExprNode* expr, ExprNode** out) override;
     void Reset(ExprAnalysisContext* ctx);
 
     // expression transformers
@@ -47,15 +45,9 @@ class ExprInplaceTransformUp : public ExprPass {
     virtual Status VisitDefault(ExprNode*, ExprNode**);
 
     // fn def transformers
-    virtual Status VisitFnDef(node::FnDefNode*,
-                              const std::vector<node::ExprAttrNode>&,
-                              node::FnDefNode**);
-    virtual Status VisitLambda(node::LambdaNode*,
-                               const std::vector<node::ExprAttrNode>&,
-                               node::FnDefNode**);
-    virtual Status VisitUdaf(node::UdafDefNode*,
-                             const std::vector<node::ExprAttrNode>&,
-                             node::FnDefNode**);
+    virtual Status VisitFnDef(node::FnDefNode*, const std::vector<node::ExprAttrNode>&, node::FnDefNode**);
+    virtual Status VisitLambda(node::LambdaNode*, const std::vector<node::ExprAttrNode>&, node::FnDefNode**);
+    virtual Status VisitUdaf(node::UdafDefNode*, const std::vector<node::ExprAttrNode>&, node::FnDefNode**);
 
  private:
     ExprAnalysisContext* ctx_;

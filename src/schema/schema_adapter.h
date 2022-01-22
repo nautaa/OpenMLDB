@@ -30,13 +30,11 @@ namespace schema {
 
 class SchemaAdapter {
  public:
-    static bool ConvertSchemaAndIndex(const ::hybridse::vm::Schema& sql_schema,
-            const ::hybridse::vm::IndexList& index,
-            PBSchema* schema_output, PBIndex* index_output);
+    static bool ConvertSchemaAndIndex(const ::hybridse::vm::Schema& sql_schema, const ::hybridse::vm::IndexList& index,
+                                      PBSchema* schema_output, PBIndex* index_output);
 
     static bool SubSchema(const ::hybridse::vm::Schema* schema,
-            const ::google::protobuf::RepeatedField<uint32_t>& projection,
-            hybridse::vm::Schema* output);
+                          const ::google::protobuf::RepeatedField<uint32_t>& projection, hybridse::vm::Schema* output);
 
     static bool ConvertSchema(const PBSchema& schema, ::hybridse::vm::Schema* output);
 
@@ -48,9 +46,9 @@ class SchemaAdapter {
 
     static bool ConvertType(openmldb::type::DataType oepnmldb_type, hybridse::type::Type* hybridse_type);
 
-    static bool ConvertType(hybridse::sdk::DataType type, hybridse::type::Type *cased_type);
+    static bool ConvertType(hybridse::sdk::DataType type, hybridse::type::Type* cased_type);
 
-    static bool ConvertType(hybridse::sdk::DataType type, openmldb::type::DataType *cased_type);
+    static bool ConvertType(hybridse::sdk::DataType type, openmldb::type::DataType* cased_type);
 
     static base::Status CheckTableMeta(const ::openmldb::nameserver::TableInfo& table_info);
 

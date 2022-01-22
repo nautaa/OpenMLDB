@@ -19,6 +19,7 @@
 
 #include <memory>
 #include <string>
+
 #include "base/status.h"
 #include "gflags/gflags.h"
 #include "proto/common.pb.h"
@@ -39,7 +40,7 @@ enum class SystemTableType {
 class SystemTable {
  public:
     static std::shared_ptr<::openmldb::nameserver::TableInfo> GetTableInfo(const std::string& table_name,
-            SystemTableType table_type) {
+                                                                           SystemTableType table_type) {
         auto table_info = std::make_shared<::openmldb::nameserver::TableInfo>();
         table_info->set_db(INTERNAL_DB);
         table_info->set_name(table_name);
@@ -72,7 +73,7 @@ class SystemTable {
 
  private:
     static void SetColumnDesc(const std::string& name, openmldb::type::DataType type,
-            openmldb::common::ColumnDesc* field) {
+                              openmldb::common::ColumnDesc* field) {
         if (field != nullptr) {
             field->set_name(name);
             field->set_data_type(type);

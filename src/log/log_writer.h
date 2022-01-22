@@ -26,8 +26,8 @@
 #include <string>
 
 #include "base/slice.h"
-#include "log/status.h"
 #include "log/log_format.h"
+#include "log/status.h"
 #include "log/writable_file.h"
 
 using ::openmldb::base::Slice;

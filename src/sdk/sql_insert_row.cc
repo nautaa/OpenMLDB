@@ -84,8 +84,6 @@ bool SQLInsertRow::Init(int str_length) {
 
 void SQLInsertRow::PackDimension(const std::string& val) { raw_dimensions_[rb_.GetAppendPos()] = val; }
 
-
-
 const std::map<uint32_t, std::vector<std::pair<std::string, uint32_t>>>& SQLInsertRow::GetDimensions() {
     if (!dimensions_.empty()) {
         return dimensions_;

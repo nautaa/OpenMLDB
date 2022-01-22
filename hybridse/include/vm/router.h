@@ -18,6 +18,7 @@
 #define HYBRIDSE_INCLUDE_VM_ROUTER_H_
 
 #include <string>
+
 #include "vm/physical_op.h"
 
 namespace hybridse {
@@ -27,13 +28,9 @@ class Router {
  public:
     Router() : main_db_(), main_table_(), router_col_() {}
     virtual ~Router() {}
-    void SetMainDb(const std::string& main_db) {
-        main_db_ = main_db;
-    }
+    void SetMainDb(const std::string& main_db) { main_db_ = main_db; }
     const std::string& GetMainDb() const { return main_db_; }
-    void SetMainTable(const std::string& main_table) {
-        main_table_ = main_table;
-    }
+    void SetMainTable(const std::string& main_table) { main_table_ = main_table; }
 
     const std::string& GetMainTable() const { return main_table_; }
 

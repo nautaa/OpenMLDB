@@ -15,9 +15,11 @@
  */
 
 #include "codegen/fn_ir_builder.h"
+
 #include <memory>
 #include <string>
 #include <utility>
+
 #include "codec/list_iterator_codec.h"
 #include "gtest/gtest.h"
 #include "llvm/ExecutionEngine/Orc/LLJIT.h"

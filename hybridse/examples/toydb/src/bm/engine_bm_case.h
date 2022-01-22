@@ -17,6 +17,7 @@
 #ifndef HYBRIDSE_EXAMPLES_TOYDB_SRC_BM_ENGINE_BM_CASE_H_
 #define HYBRIDSE_EXAMPLES_TOYDB_SRC_BM_ENGINE_BM_CASE_H_
 #include <string>
+
 #include "benchmark/benchmark.h"
 #include "case/sql_case.h"
 #include "testing/toydb_engine_test_base.h"
@@ -24,67 +25,45 @@
 namespace hybridse {
 namespace bm {
 enum MODE { BENCHMARK, TEST };
-void EngineRequestModeSimpleQueryBM(const std::string& db,
-                                    const std::string& request_table,
-                                    const std::string& sql, int32_t limit_cnt,
-                                    const std::string& resource_path,
-                                    benchmark::State* state, MODE mode);
-void EngineBatchModeSimpleQueryBM(const std::string& db, const std::string& sql,
-                                  const std::string& resource_path,
+void EngineRequestModeSimpleQueryBM(const std::string& db, const std::string& request_table, const std::string& sql,
+                                    int32_t limit_cnt, const std::string& resource_path, benchmark::State* state,
+                                    MODE mode);
+void EngineBatchModeSimpleQueryBM(const std::string& db, const std::string& sql, const std::string& resource_path,
                                   benchmark::State* state, MODE mode);
-void EngineWindowSumFeature1(benchmark::State* state, MODE mode,
-                             int64_t limit_cnt,
+void EngineWindowSumFeature1(benchmark::State* state, MODE mode, int64_t limit_cnt,
                              int64_t size);  // NOLINT
-void EngineWindowSumFeature1ExcludeCurrentTime(benchmark::State* state,
-                                               MODE mode, int64_t limit_cnt,
+void EngineWindowSumFeature1ExcludeCurrentTime(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                                int64_t size);  // NOLINT
-void EngineWindowRowsSumFeature1(benchmark::State* state, MODE mode,
-                                 int64_t limit_cnt,
+void EngineWindowRowsSumFeature1(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                  int64_t size);  // NOLINT
 
-void EngineRunBatchWindowSumFeature1ExcludeCurrentTime(benchmark::State* state,
-                                                       MODE mode,
-                                                       int64_t limit_cnt,
+void EngineRunBatchWindowSumFeature1ExcludeCurrentTime(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                                        int64_t size);  // NOLINT
-void EngineRunBatchWindowSumFeature1(benchmark::State* state, MODE mode,
-                                     int64_t limit_cnt,
+void EngineRunBatchWindowSumFeature1(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                      int64_t size);  // NOLINT
-void EngineRunBatchWindowSumFeature5Window5(benchmark::State* state, MODE mode,
-                                            int64_t limit_cnt,
+void EngineRunBatchWindowSumFeature5Window5(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                             int64_t size);  // NOLINT
-void EngineRunBatchWindowMultiAggWindow25Feature25(benchmark::State* state,
-                                                   MODE mode, int64_t limit_cnt,
+void EngineRunBatchWindowMultiAggWindow25Feature25(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                                    int64_t size);  // NOLINT
-void EngineRunBatchWindowSumFeature5(benchmark::State* state, MODE mode,
-                                     int64_t limit_cnt,
+void EngineRunBatchWindowSumFeature5(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                      int64_t size);  // NOLINT
-void EngineRunBatchWindowSumFeature5ExcludeCurrentTime(benchmark::State* state,
-                                                       MODE mode,
-                                                       int64_t limit_cnt,
+void EngineRunBatchWindowSumFeature5ExcludeCurrentTime(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                                        int64_t size);  // NOLINT
-void EngineWindowSumFeature5(benchmark::State* state, MODE mode,
-                             int64_t limit_cnt,
+void EngineWindowSumFeature5(benchmark::State* state, MODE mode, int64_t limit_cnt,
                              int64_t size);  // NOLINT
-void EngineWindowSumFeature5ExcludeCurrentTime(benchmark::State* state,
-                                               MODE mode, int64_t limit_cnt,
+void EngineWindowSumFeature5ExcludeCurrentTime(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                                int64_t size);  // NOLINT
-void EngineWindowSumFeature5Window5(benchmark::State* state, MODE mode,
-                                    int64_t limit_cnt,
+void EngineWindowSumFeature5Window5(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                     int64_t size);  // NOLINT
 
-void EngineWindowTop1RatioFeature(benchmark::State* state, MODE mode,
-                                  int64_t limit_cnt, int64_t size);
+void EngineWindowTop1RatioFeature(benchmark::State* state, MODE mode, int64_t limit_cnt, int64_t size);
 
-void EngineWindowDistinctCntFeature(benchmark::State* state, MODE mode,
-                                    int64_t limit_cnt, int64_t size);
+void EngineWindowDistinctCntFeature(benchmark::State* state, MODE mode, int64_t limit_cnt, int64_t size);
 
-void MapTop1(benchmark::State* state, MODE mode, int64_t limit_cnt,
-             int64_t size);
-void EngineWindowMultiAggFeature5(benchmark::State* state, MODE mode,
-                                  int64_t limit_cnt,
+void MapTop1(benchmark::State* state, MODE mode, int64_t limit_cnt, int64_t size);
+void EngineWindowMultiAggFeature5(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                   int64_t size);  // NOLINT
-void EngineWindowMultiAggWindow25Feature25(benchmark::State* state, MODE mode,
-                                           int64_t limit_cnt,
+void EngineWindowMultiAggWindow25Feature25(benchmark::State* state, MODE mode, int64_t limit_cnt,
                                            int64_t size);  // NOLINT
 
 void EngineSimpleSelectDouble(benchmark::State* state, MODE mode);
@@ -107,11 +86,9 @@ void EngineRequestSimpleUDF(benchmark::State* state, MODE mode);
 void EngineRequestSimpleSelectTimestamp(benchmark::State* state, MODE mode);
 void EngineRequestSimpleSelectDate(benchmark::State* state, MODE mode);
 
-hybridse::sqlcase::SqlCase LoadSqlCaseWithID(const std::string& yaml,
-                                             const std::string& case_id);
-void EngineBenchmarkOnCase(const std::string& yaml_path,
-                           const std::string& case_id,
-                           vm::EngineMode engine_mode, benchmark::State* state);
+hybridse::sqlcase::SqlCase LoadSqlCaseWithID(const std::string& yaml, const std::string& case_id);
+void EngineBenchmarkOnCase(const std::string& yaml_path, const std::string& case_id, vm::EngineMode engine_mode,
+                           benchmark::State* state);
 void EngineBenchmarkOnCase(hybridse::sqlcase::SqlCase& sql_case,  // NOLINT
                            vm::EngineMode engine_mode, benchmark::State* state);
 

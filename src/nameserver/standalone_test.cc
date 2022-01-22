@@ -83,7 +83,6 @@ TEST_F(StandaloneTest, smoketest) {
     ASSERT_TRUE(client.CreateTable(table_info, msg));
 }
 
-
 }  // namespace nameserver
 }  // namespace openmldb
 

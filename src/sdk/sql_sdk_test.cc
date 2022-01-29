@@ -39,7 +39,6 @@ namespace sdk {
 MiniCluster* mc_ = nullptr;
 std::shared_ptr<SQLRouter> router_ = std::shared_ptr<SQLRouter>();
 
-
 static std::shared_ptr<SQLRouter> GetNewSQLRouter() {
     SQLRouterOptions sql_opt;
     sql_opt.zk_cluster = mc_->GetZkCluster();
@@ -49,29 +48,24 @@ static std::shared_ptr<SQLRouter> GetNewSQLRouter() {
     return NewClusterSQLRouter(sql_opt);
 }
 static bool IsRequestSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
-            mode.find("request-unsupport") != std::string::npos
-        || mode.find("standalone-unsupport") != std::string::npos) {
+        mode.find("request-unsupport") != std::string::npos || mode.find("standalone-unsupport") != std::string::npos) {
         return false;
     }
     return true;
 }
 static bool IsBatchRequestSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
         mode.find("batch-request-unsupport") != std::string::npos ||
-        mode.find("request-unsupport") != std::string::npos
-        || mode.find("standalone-unsupport") != std::string::npos) {
+        mode.find("request-unsupport") != std::string::npos || mode.find("standalone-unsupport") != std::string::npos) {
         return false;
     }
     return true;
 }
 static bool IsBatchSupportMode(const std::string& mode) {
-    if (mode.find("hybridse-only") != std::string::npos ||
-        mode.find("rtidb-unsupport") != std::string::npos ||
+    if (mode.find("hybridse-only") != std::string::npos || mode.find("rtidb-unsupport") != std::string::npos ||
         mode.find("batch-unsupport") != std::string::npos ||
         mode.find("performance-sensitive-unsupport") != std::string::npos ||
         mode.find("standalone-unsupport") != std::string::npos) {
@@ -547,7 +541,6 @@ TEST_F(SQLSDKQueryTest, RequestProcedureTest) {
     // success drop table after drop all associated procedures
     ASSERT_TRUE(router->ExecuteDDL(db, "drop table trans;", &status));
 }
-
 
 TEST_F(SQLSDKQueryTest, DropTableWithProcedureTest) {
     // create table trans

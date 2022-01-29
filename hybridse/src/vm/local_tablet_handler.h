@@ -18,6 +18,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "vm/engine.h"
 #include "vm/mem_catalog.h"
 namespace hybridse {
@@ -25,8 +26,7 @@ namespace vm {
 
 class LocalTabletRowHandler : public RowHandler {
  public:
-    LocalTabletRowHandler(uint32_t task_id, const RequestRunSession& session,
-                          const Row& request)
+    LocalTabletRowHandler(uint32_t task_id, const RequestRunSession& session, const Row& request)
         : RowHandler(),
           status_(base::Status::Running()),
           table_name_(""),
@@ -45,11 +45,9 @@ class LocalTabletRowHandler : public RowHandler {
         return value_;
     }
     base::Status SyncValue() {
-        DLOG(INFO) << "Sync Value ... local tablet SubQuery request: task id "
-                   << task_id_;
+        DLOG(INFO) << "Sync Value ... local tablet SubQuery request: task id " << task_id_;
         if (0 != session_.Run(task_id_, request_, &value_)) {
-            return base::Status(common::kCallRpcMethodError,
-                                "sub query fail: session run fail");
+            return base::Status(common::kCallRpcMethodError, "sub query fail: session run fail");
         }
         return base::Status::OK();
     }
@@ -67,9 +65,7 @@ class LocalTabletRowHandler : public RowHandler {
 };
 class LocalTabletTableHandler : public MemTableHandler {
  public:
-    LocalTabletTableHandler(uint32_t task_id,
-                            const BatchRequestRunSession session,
-                            const std::vector<Row> requests,
+    LocalTabletTableHandler(uint32_t task_id, const BatchRequestRunSession session, const std::vector<Row> requests,
                             const bool request_is_common)
         : status_(base::Status::Running()),
           task_id_(task_id),
@@ -105,11 +101,9 @@ class LocalTabletTableHandler : public MemTableHandler {
 
  private:
     base::Status SyncValue() {
-        DLOG(INFO) << "Local tablet SubQuery batch request: task id "
-                   << task_id_;
+        DLOG(INFO) << "Local tablet SubQuery batch request: task id " << task_id_;
         if (0 != session_.Run(task_id_, requests_, table_)) {
-            return base::Status(common::kCallRpcMethodError,
-                                "sub query fail: session run fail");
+            return base::Status(common::kCallRpcMethodError, "sub query fail: session run fail");
         }
         return base::Status::OK();
     }

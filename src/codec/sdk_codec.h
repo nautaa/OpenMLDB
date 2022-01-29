@@ -46,8 +46,6 @@ class SDKCodec {
     int EncodeDimension(const std::vector<std::string>& raw_data, uint32_t pid_num,
                         std::map<uint32_t, Dimension>* dimensions);
 
-
-
     int EncodeRow(const std::vector<std::string>& raw_data, std::string* row);
 
     int DecodeRow(const std::string& row, std::vector<std::string>* value);

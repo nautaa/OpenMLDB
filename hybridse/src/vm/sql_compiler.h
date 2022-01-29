@@ -21,6 +21,7 @@
 #include <set>
 #include <string>
 #include <vector>
+
 #include "base/fe_status.h"
 #include "llvm/IR/Module.h"
 #include "proto/fe_common.pb.h"
@@ -92,52 +93,27 @@ class SqlCompileInfo : public CompileInfo {
 
     const hybridse::vm::Schema& GetSchema() const { return sql_ctx.schema; }
 
-    const hybridse::vm::ComileType GetCompileType() const {
-        return ComileType::kCompileSql;
-    }
-    const hybridse::vm::EngineMode GetEngineMode() const {
-        return sql_ctx.engine_mode;
-    }
-    const std::string& GetEncodedSchema() const {
-        return sql_ctx.encoded_schema;
-    }
+    const hybridse::vm::ComileType GetCompileType() const { return ComileType::kCompileSql; }
+    const hybridse::vm::EngineMode GetEngineMode() const { return sql_ctx.engine_mode; }
+    const std::string& GetEncodedSchema() const { return sql_ctx.encoded_schema; }
 
     const std::string& GetSql() const { return sql_ctx.sql; }
 
-    virtual const Schema& GetRequestSchema() const {
-        return sql_ctx.request_schema;
-    }
-    virtual const Schema& GetParameterSchema() const {
-        return sql_ctx.parameter_types;
-    }
-    virtual const std::string& GetRequestName() const {
-        return sql_ctx.request_name;
-    }
-    virtual const std::string& GetRequestDbName() const {
-        return sql_ctx.request_db_name;
-    }
-    virtual const hybridse::vm::BatchRequestInfo& GetBatchRequestInfo() const {
-        return sql_ctx.batch_request_info;
-    }
-    virtual const hybridse::vm::PhysicalOpNode* GetPhysicalPlan() const {
-        return sql_ctx.physical_plan;
-    }
-    virtual hybridse::vm::Runner* GetMainTask() {
-        return sql_ctx.cluster_job.GetMainTask().GetRoot();
-    }
-    virtual hybridse::vm::ClusterJob& GetClusterJob() {
-        return sql_ctx.cluster_job;
-    }
-    virtual void DumpPhysicalPlan(std::ostream& output,
-                                  const std::string& tab) {
+    virtual const Schema& GetRequestSchema() const { return sql_ctx.request_schema; }
+    virtual const Schema& GetParameterSchema() const { return sql_ctx.parameter_types; }
+    virtual const std::string& GetRequestName() const { return sql_ctx.request_name; }
+    virtual const std::string& GetRequestDbName() const { return sql_ctx.request_db_name; }
+    virtual const hybridse::vm::BatchRequestInfo& GetBatchRequestInfo() const { return sql_ctx.batch_request_info; }
+    virtual const hybridse::vm::PhysicalOpNode* GetPhysicalPlan() const { return sql_ctx.physical_plan; }
+    virtual hybridse::vm::Runner* GetMainTask() { return sql_ctx.cluster_job.GetMainTask().GetRoot(); }
+    virtual hybridse::vm::ClusterJob& GetClusterJob() { return sql_ctx.cluster_job; }
+    virtual void DumpPhysicalPlan(std::ostream& output, const std::string& tab) {
         sql_ctx.physical_plan->Print(output, tab);
     }
     virtual void DumpClusterJob(std::ostream& output, const std::string& tab) {
         sql_ctx.cluster_job.Print(output, tab);
     }
-    static SqlCompileInfo* CastFrom(CompileInfo* node) {
-        return dynamic_cast<SqlCompileInfo*>(node);
-    }
+    static SqlCompileInfo* CastFrom(CompileInfo* node) { return dynamic_cast<SqlCompileInfo*>(node); }
 
  private:
     hybridse::vm::SqlContext sql_ctx;
@@ -145,8 +121,8 @@ class SqlCompileInfo : public CompileInfo {
 
 class SqlCompiler {
  public:
-    explicit SqlCompiler(const std::shared_ptr<Catalog>& cl, bool keep_ir = false,
-                bool dump_plan = false, bool plan_only = false);
+    explicit SqlCompiler(const std::shared_ptr<Catalog>& cl, bool keep_ir = false, bool dump_plan = false,
+                         bool plan_only = false);
 
     ~SqlCompiler();
 
@@ -159,27 +135,20 @@ class SqlCompiler {
  private:
     void KeepIR(SqlContext& ctx, llvm::Module* m);  // NOLINT
 
-    bool ResolvePlanFnAddress(
-        PhysicalOpNode* node,
-        std::shared_ptr<HybridSeJitWrapper>& jit,  // NOLINT
-        Status& status);                           // NOLINT
+    bool ResolvePlanFnAddress(PhysicalOpNode* node,
+                              std::shared_ptr<HybridSeJitWrapper>& jit,  // NOLINT
+                              Status& status);                           // NOLINT
 
-    Status BuildPhysicalPlan(SqlContext* ctx,
-                             const ::hybridse::node::PlanNodeList& plan_list,
-                             ::llvm::Module* llvm_module,
-                             PhysicalOpNode** output);
-    Status BuildBatchModePhysicalPlan(
-        SqlContext* ctx, const ::hybridse::node::PlanNodeList& plan_list,
-        ::llvm::Module* llvm_module, udf::UdfLibrary* library,
-        PhysicalOpNode** output);
-    Status BuildRequestModePhysicalPlan(
-        SqlContext* ctx, const ::hybridse::node::PlanNodeList& plan_list,
-        const bool enable_request_performance_sensitive,
-        ::llvm::Module* llvm_module, udf::UdfLibrary* library, PhysicalOpNode** output);
-    Status BuildBatchRequestModePhysicalPlan(
-        SqlContext* ctx, const ::hybridse::node::PlanNodeList& plan_list,
-        ::llvm::Module* llvm_module, udf::UdfLibrary* library,
-        PhysicalOpNode** output);
+    Status BuildPhysicalPlan(SqlContext* ctx, const ::hybridse::node::PlanNodeList& plan_list,
+                             ::llvm::Module* llvm_module, PhysicalOpNode** output);
+    Status BuildBatchModePhysicalPlan(SqlContext* ctx, const ::hybridse::node::PlanNodeList& plan_list,
+                                      ::llvm::Module* llvm_module, udf::UdfLibrary* library, PhysicalOpNode** output);
+    Status BuildRequestModePhysicalPlan(SqlContext* ctx, const ::hybridse::node::PlanNodeList& plan_list,
+                                        const bool enable_request_performance_sensitive, ::llvm::Module* llvm_module,
+                                        udf::UdfLibrary* library, PhysicalOpNode** output);
+    Status BuildBatchRequestModePhysicalPlan(SqlContext* ctx, const ::hybridse::node::PlanNodeList& plan_list,
+                                             ::llvm::Module* llvm_module, udf::UdfLibrary* library,
+                                             PhysicalOpNode** output);
 
  private:
     const std::shared_ptr<Catalog> cl_;

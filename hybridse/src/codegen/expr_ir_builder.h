@@ -21,6 +21,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "base/fe_status.h"
 #include "codegen/arithmetic_expr_ir_builder.h"
 #include "codegen/buf_ir_builder.h"
@@ -48,53 +49,38 @@ class ExprIRBuilder {
 
     Status Build(const ::hybridse::node::ExprNode* node, NativeValue* output);
 
-    Status BuildAsUdf(const node::ExprNode* expr, const std::string& name,
-                      const std::vector<NativeValue>& args,
+    Status BuildAsUdf(const node::ExprNode* expr, const std::string& name, const std::vector<NativeValue>& args,
                       NativeValue* output);
 
     Status BuildWindow(NativeValue* output);
 
-    inline void set_frame(node::ExprNode* frame_arg,
-                          const node::FrameNode* frame) {
+    inline void set_frame(node::ExprNode* frame_arg, const node::FrameNode* frame) {
         this->frame_arg_ = frame_arg;
         this->frame_ = frame;
     }
 
  private:
-    Status BuildConstExpr(const ::hybridse::node::ConstNode* node,
-                          NativeValue* output);
-    Status BuildParameterExpr(const ::hybridse::node::ParameterExpr* node,
-                              NativeValue* output);
-    Status BuildColumnRef(const ::hybridse::node::ColumnRefNode* node,
-                          NativeValue* output);
+    Status BuildConstExpr(const ::hybridse::node::ConstNode* node, NativeValue* output);
+    Status BuildParameterExpr(const ::hybridse::node::ParameterExpr* node, NativeValue* output);
+    Status BuildColumnRef(const ::hybridse::node::ColumnRefNode* node, NativeValue* output);
 
+    Status BuildCallFn(const ::hybridse::node::CallExprNode* fn, NativeValue* output);
 
-    Status BuildCallFn(const ::hybridse::node::CallExprNode* fn,
-                       NativeValue* output);
+    Status BuildCallFnLegacy(const ::hybridse::node::CallExprNode* call_fn, NativeValue* output);
 
-    Status BuildCallFnLegacy(const ::hybridse::node::CallExprNode* call_fn,
-                           NativeValue* output);
+    Status BuildCastExpr(const ::hybridse::node::CastExprNode* node, NativeValue* output);
 
-    Status BuildCastExpr(const ::hybridse::node::CastExprNode* node,
-                         NativeValue* output);
+    Status BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node, NativeValue* output);
 
-    Status BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node,
-                           NativeValue* output);
+    Status BuildUnaryExpr(const ::hybridse::node::UnaryExpr* node, NativeValue* output);
 
-    Status BuildUnaryExpr(const ::hybridse::node::UnaryExpr* node,
-                          NativeValue* output);
+    Status BuildStructExpr(const ::hybridse::node::StructExpr* node, NativeValue* output);
 
-    Status BuildStructExpr(const ::hybridse::node::StructExpr* node,
-                           NativeValue* output);
+    Status BuildGetFieldExpr(const ::hybridse::node::GetFieldExpr* node, NativeValue* output);
 
-    Status BuildGetFieldExpr(const ::hybridse::node::GetFieldExpr* node,
-                             NativeValue* output);
+    Status BuildCaseExpr(const ::hybridse::node::CaseWhenExprNode* node, NativeValue* output);
 
-    Status BuildCaseExpr(const ::hybridse::node::CaseWhenExprNode* node,
-                         NativeValue* output);
-
-    Status BuildCondExpr(const ::hybridse::node::CondExpr* node,
-                         NativeValue* output);
+    Status BuildCondExpr(const ::hybridse::node::CondExpr* node, NativeValue* output);
 
     Status BuildBetweenExpr(const ::hybridse::node::BetweenExpr* node, NativeValue* output);
 
@@ -110,7 +96,7 @@ class ExprIRBuilder {
     Status ExtractSliceFromRow(const NativeValue& input_value, const int schema_idx, ::llvm::Value** slice_ptr,
                                ::llvm::Value** slice_size);
     Status GetFunction(const std::string& col, const std::vector<const node::TypeNode*>& generic_types,
-                      ::llvm::Function** output);
+                       ::llvm::Function** output);
 
  private:
     CodeGenContext* ctx_;

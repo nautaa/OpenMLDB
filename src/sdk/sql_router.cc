@@ -15,7 +15,9 @@
  */
 
 #include "sdk/sql_router.h"
+
 #include <map>
+
 #include "base/ddl_parser.h"
 #include "glog/logging.h"
 #include "schema/schema_adapter.h"

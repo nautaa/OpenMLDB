@@ -43,13 +43,9 @@ class Client {
 
     virtual int Init() = 0;
 
-    const std::string& GetEndpoint() const {
-        return endpoint_;
-    }
+    const std::string& GetEndpoint() const { return endpoint_; }
 
-    const std::string& GetRealEndpoint() const {
-        return real_endpoint_;
-    }
+    const std::string& GetRealEndpoint() const { return real_endpoint_; }
 
  private:
     std::string endpoint_;

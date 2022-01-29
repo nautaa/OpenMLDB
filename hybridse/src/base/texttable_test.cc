@@ -15,6 +15,7 @@
  */
 
 #include "base/texttable.h"
+
 #include "gtest/gtest.h"
 namespace hybridse {
 namespace base {

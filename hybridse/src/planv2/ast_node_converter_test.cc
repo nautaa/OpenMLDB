@@ -763,15 +763,13 @@ TEST_F(ASTNodeConverterTest, ConvertStmtFailTest) {
     expect_converted(R"sql(
         SET local_var = 'xxxx'
     )sql",
-                     common::kSqlAstError,
-                     "Un-support statement type: SingleAssignment");
+                     common::kSqlAstError, "Un-support statement type: SingleAssignment");
 
     // Non-support parameter variable currently
     expect_converted(R"sql(
         SET @user_var = 'xxxx'
     )sql",
-                     common::kSqlAstError,
-                     "Un-support statement type: ParameterAssignment");
+                     common::kSqlAstError, "Un-support statement type: ParameterAssignment");
 
     expect_converted(R"sql(
         SET @@level1.level2.var = 'xxxx'
@@ -787,8 +785,7 @@ TEST_F(ASTNodeConverterTest, ConvertStmtFailTest) {
     expect_converted(R"sql(
         SHOW GLOBAL VARIABLES LIKE 'execute%'
     )sql",
-                     common::kSqlAstError,
-                     "Non-support LIKE in show statement");
+                     common::kSqlAstError, "Non-support LIKE in show statement");
 }
 
 TEST_F(ASTNodeConverterTest, ConvertCreateTableNodeErrorTest) {
@@ -1003,14 +1000,14 @@ TEST_F(ASTNodeConverterTest, ASTIntervalLiteralToNumberTest) {
 TEST_F(ASTNodeConverterTest, ConvertTypeFailTest) {
     node::NodeManager node_manager;
     auto expect_converted = [&](const std::string& sql, const int code, const std::string& msg) {
-      std::unique_ptr<zetasql::ParserOutput> parser_output;
-      ZETASQL_ASSERT_OK(zetasql::ParseStatement(sql, zetasql::ParserOptions(), &parser_output));
-      const auto* statement = parser_output->statement();
+        std::unique_ptr<zetasql::ParserOutput> parser_output;
+        ZETASQL_ASSERT_OK(zetasql::ParseStatement(sql, zetasql::ParserOptions(), &parser_output));
+        const auto* statement = parser_output->statement();
 
-      node::SqlNode* stmt;
-      auto s = ConvertStatement(statement, &node_manager, &stmt);
-      EXPECT_EQ(code, s.code);
-      EXPECT_STREQ(msg.c_str(), s.msg.c_str()) << s;
+        node::SqlNode* stmt;
+        auto s = ConvertStatement(statement, &node_manager, &stmt);
+        EXPECT_EQ(code, s.code);
+        EXPECT_STREQ(msg.c_str(), s.msg.c_str()) << s;
     };
 
     expect_converted(R"sql(

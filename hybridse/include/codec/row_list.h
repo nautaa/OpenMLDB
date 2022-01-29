@@ -16,6 +16,7 @@
 #ifndef HYBRIDSE_INCLUDE_CODEC_ROW_LIST_H_
 #define HYBRIDSE_INCLUDE_CODEC_ROW_LIST_H_
 #include <memory>
+
 #include "codec/row_iterator.h"
 namespace hybridse {
 namespace codec {

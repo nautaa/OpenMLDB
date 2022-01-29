@@ -15,6 +15,7 @@
  */
 
 #include "dbms/dbms_server_impl.h"
+
 #include "brpc/server.h"
 #include "gflags/gflags.h"
 #include "gtest/gtest.h"
@@ -553,7 +554,6 @@ TEST_F(DBMSServerImplTest, GetTableTest) {
         ASSERT_EQ(table.DebugString(), response.table().DebugString());
     }
 }
-
 
 TEST_F(DBMSServerImplTest, DBMSServerErrorTest) {
     MockClosure closure;

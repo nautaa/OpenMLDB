@@ -60,8 +60,8 @@ TEST_F(MemTableIteratorTest, latest) {
     codec::SchemaCodec::SetColumnDesc(table_meta.add_column_desc(), "card", ::openmldb::type::kString);
     codec::SchemaCodec::SetColumnDesc(table_meta.add_column_desc(), "mcc", ::openmldb::type::kString);
     codec::SchemaCodec::SetColumnDesc(table_meta.add_column_desc(), "ts", ::openmldb::type::kBigInt);
-    codec::SchemaCodec::SetIndex(table_meta.add_column_key(), "card", "card", "ts",
-            ::openmldb::type::kLatestTime, 0, 3);
+    codec::SchemaCodec::SetIndex(table_meta.add_column_key(), "card", "card", "ts", ::openmldb::type::kLatestTime, 0,
+                                 3);
     MemTable table(table_meta);
     table.Init();
     codec::SDKCodec codec(table_meta);
@@ -69,7 +69,7 @@ TEST_F(MemTableIteratorTest, latest) {
     for (int i = 0; i < 5; i++) {
         std::string key = "card" + std::to_string(i);
         for (int j = 0; j < 10; j++) {
-            std::vector<std::string> row = {key , "mcc", std::to_string(now - j * (60 * 1000))};
+            std::vector<std::string> row = {key, "mcc", std::to_string(now - j * (60 * 1000))};
             ::openmldb::api::PutRequest request;
             ::openmldb::api::Dimension* dim = request.add_dimensions();
             dim->set_idx(0);

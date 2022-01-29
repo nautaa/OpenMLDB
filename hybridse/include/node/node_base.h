@@ -18,6 +18,7 @@
 #define HYBRIDSE_INCLUDE_NODE_NODE_BASE_H_
 
 #include <glog/logging.h>
+
 #include <sstream>
 #include <string>
 
@@ -42,8 +43,7 @@ class NodeBase : public base::FeBaseObject {
 
     virtual bool Equals(const T* other) const = 0;
 
-    friend std::ostream& operator<<(std::ostream& output,
-                                    const NodeBase<T>& thiz) {
+    friend std::ostream& operator<<(std::ostream& output, const NodeBase<T>& thiz) {
         thiz.Print(output, "");
         return output;
     }

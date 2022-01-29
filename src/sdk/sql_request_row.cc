@@ -17,6 +17,7 @@
 #include "sdk/sql_request_row.h"
 
 #include <stdint.h>
+
 #include <string>
 #include <unordered_map>
 

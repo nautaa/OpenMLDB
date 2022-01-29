@@ -31,7 +31,6 @@ namespace hybridse::udf {
 class UdfLibrary;
 }
 
-
 namespace hybridse {
 namespace node {
 

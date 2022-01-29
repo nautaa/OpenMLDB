@@ -15,9 +15,11 @@
  */
 
 #include "codegen/expr_ir_builder.h"
+
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "codegen/buf_ir_builder.h"
 #include "codegen/cond_select_ir_builder.h"
 #include "codegen/context.h"
@@ -46,7 +48,7 @@ ExprIRBuilder::~ExprIRBuilder() {}
 
 // TODO(chenjing): 修改GetFunction, 直接根据参数生成signature
 base::Status ExprIRBuilder::GetFunction(const std::string& name, const std::vector<const node::TypeNode*>& args_types,
-                                       ::llvm::Function** output) {
+                                        ::llvm::Function** output) {
     std::string fn_name = name;
     if (!args_types.empty()) {
         for (const node::TypeNode* type_node : args_types) {
@@ -66,8 +68,7 @@ base::Status ExprIRBuilder::GetFunction(const std::string& name, const std::vect
             case node::kTimestamp:
             case node::kVarchar:
             case node::kDate: {
-                fn_name.append(".").append(
-                    args_types[0]->generics_[0]->GetName());
+                fn_name.append(".").append(args_types[0]->generics_[0]->GetName());
                 fn = module->getFunction(::llvm::StringRef(fn_name));
                 break;
             }
@@ -80,10 +81,8 @@ base::Status ExprIRBuilder::GetFunction(const std::string& name, const std::vect
     return base::Status::OK();
 }
 
-Status ExprIRBuilder::Build(const ::hybridse::node::ExprNode* node,
-                            NativeValue* output) {
-    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError,
-               "Node or output is null");
+Status ExprIRBuilder::Build(const ::hybridse::node::ExprNode* node, NativeValue* output) {
+    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError, "Node or output is null");
     std::string cache_key = "@expr(#" + std::to_string(node->node_id()) + ")";
     if (frame_ != nullptr) {
         cache_key.append(" over " + frame_->GetExprString());
@@ -96,14 +95,12 @@ Status ExprIRBuilder::Build(const ::hybridse::node::ExprNode* node,
     }
     switch (node->GetExprType()) {
         case ::hybridse::node::kExprColumnRef: {
-            const ::hybridse::node::ColumnRefNode* n =
-                dynamic_cast<const ::hybridse::node::ColumnRefNode*>(node);
+            const ::hybridse::node::ColumnRefNode* n = dynamic_cast<const ::hybridse::node::ColumnRefNode*>(node);
             CHECK_STATUS(BuildColumnRef(n, output));
             break;
         }
         case ::hybridse::node::kExprCall: {
-            const ::hybridse::node::CallExprNode* fn =
-                dynamic_cast<const ::hybridse::node::CallExprNode*>(node);
+            const ::hybridse::node::CallExprNode* fn = dynamic_cast<const ::hybridse::node::CallExprNode*>(node);
             CHECK_STATUS(BuildCallFn(fn, output));
             break;
         }
@@ -113,76 +110,56 @@ Status ExprIRBuilder::Build(const ::hybridse::node::ExprNode* node,
             break;
         }
         case ::hybridse::node::kExprPrimary: {
-            auto const_node =
-                dynamic_cast<const ::hybridse::node::ConstNode*>(node);
+            auto const_node = dynamic_cast<const ::hybridse::node::ConstNode*>(node);
             CHECK_STATUS(BuildConstExpr(const_node, output));
             break;
         }
         case ::hybridse::node::kExprId: {
-            auto id_node =
-                dynamic_cast<const ::hybridse::node::ExprIdNode*>(node);
+            auto id_node = dynamic_cast<const ::hybridse::node::ExprIdNode*>(node);
             DLOG(INFO) << "id node spec " << id_node->GetExprString();
-            CHECK_TRUE(id_node->IsResolved(), kCodegenError,
-                       "Detect unresolved expr id: " + id_node->GetName());
+            CHECK_TRUE(id_node->IsResolved(), kCodegenError, "Detect unresolved expr id: " + id_node->GetName());
             NativeValue val;
-            VariableIRBuilder variable_ir_builder(
-                ctx_->GetCurrentBlock(), ctx_->GetCurrentScope()->sv());
+            VariableIRBuilder variable_ir_builder(ctx_->GetCurrentBlock(), ctx_->GetCurrentScope()->sv());
             Status status;
-            CHECK_TRUE(variable_ir_builder.LoadValue(id_node->GetExprString(),
-                                                     &val, status),
-                       kCodegenError, "Fail to find var ",
-                       id_node->GetExprString());
+            CHECK_TRUE(variable_ir_builder.LoadValue(id_node->GetExprString(), &val, status), kCodegenError,
+                       "Fail to find var ", id_node->GetExprString());
             *output = val;
             break;
         }
         case ::hybridse::node::kExprCast: {
-            CHECK_STATUS(
-                BuildCastExpr((::hybridse::node::CastExprNode*)node, output));
+            CHECK_STATUS(BuildCastExpr((::hybridse::node::CastExprNode*)node, output));
             break;
         }
         case ::hybridse::node::kExprBinary: {
-            CHECK_STATUS(
-                BuildBinaryExpr((::hybridse::node::BinaryExpr*)node, output));
+            CHECK_STATUS(BuildBinaryExpr((::hybridse::node::BinaryExpr*)node, output));
             break;
         }
         case ::hybridse::node::kExprUnary: {
-            CHECK_STATUS(BuildUnaryExpr(
-                dynamic_cast<const ::hybridse::node::UnaryExpr*>(node),
-                output));
+            CHECK_STATUS(BuildUnaryExpr(dynamic_cast<const ::hybridse::node::UnaryExpr*>(node), output));
             break;
         }
         case ::hybridse::node::kExprStruct: {
-            CHECK_STATUS(
-                BuildStructExpr((hybridse::node::StructExpr*)node, output));
+            CHECK_STATUS(BuildStructExpr((hybridse::node::StructExpr*)node, output));
             break;
         }
         case ::hybridse::node::kExprGetField: {
-            CHECK_STATUS(BuildGetFieldExpr(
-                dynamic_cast<const ::hybridse::node::GetFieldExpr*>(node),
-                output));
+            CHECK_STATUS(BuildGetFieldExpr(dynamic_cast<const ::hybridse::node::GetFieldExpr*>(node), output));
             break;
         }
         case ::hybridse::node::kExprCond: {
-            CHECK_STATUS(BuildCondExpr(
-                dynamic_cast<const ::hybridse::node::CondExpr*>(node), output));
+            CHECK_STATUS(BuildCondExpr(dynamic_cast<const ::hybridse::node::CondExpr*>(node), output));
             break;
         }
         case ::hybridse::node::kExprCase: {
-            CHECK_STATUS(BuildCaseExpr(
-                dynamic_cast<const ::hybridse::node::CaseWhenExprNode*>(node),
-                output));
+            CHECK_STATUS(BuildCaseExpr(dynamic_cast<const ::hybridse::node::CaseWhenExprNode*>(node), output));
             break;
         }
         case ::hybridse::node::kExprBetween: {
-            CHECK_STATUS(BuildBetweenExpr(
-                dynamic_cast<const ::hybridse::node::BetweenExpr*>(node),
-                output));
+            CHECK_STATUS(BuildBetweenExpr(dynamic_cast<const ::hybridse::node::BetweenExpr*>(node), output));
             break;
         }
         case ::hybridse::node::kExprIn: {
-            CHECK_STATUS(BuildInExpr(
-                dynamic_cast<const ::hybridse::node::InExpr*>(node),
-                output));
+            CHECK_STATUS(BuildInExpr(dynamic_cast<const ::hybridse::node::InExpr*>(node), output));
             break;
         }
         case ::hybridse::node::kExprList: {
@@ -195,58 +172,46 @@ Status ExprIRBuilder::Build(const ::hybridse::node::ExprNode* node,
         }
         default: {
             return Status(kCodegenError,
-                          "Expression Type " +
-                              node::ExprTypeName(node->GetExprType()) +
-                              " not supported");
+                          "Expression Type " + node::ExprTypeName(node->GetExprType()) + " not supported");
         }
     }
     ctx_->GetCurrentScope()->sv()->AddVar(cache_key, *output);
     return Status::OK();
 }
 
-Status ExprIRBuilder::BuildConstExpr(
-    const ::hybridse::node::ConstNode* const_node, NativeValue* output) {
+Status ExprIRBuilder::BuildConstExpr(const ::hybridse::node::ConstNode* const_node, NativeValue* output) {
     ::llvm::IRBuilder<> builder(ctx_->GetCurrentBlock());
     switch (const_node->GetDataType()) {
         case ::hybridse::node::kNull: {
-            *output = NativeValue::CreateNull(
-                llvm::Type::getTokenTy(builder.getContext()));
+            *output = NativeValue::CreateNull(llvm::Type::getTokenTy(builder.getContext()));
             break;
         }
         case ::hybridse::node::kBool: {
-            *output = NativeValue::Create(
-                builder.getInt1(const_node->GetBool() ? 1 : 0));
+            *output = NativeValue::Create(builder.getInt1(const_node->GetBool() ? 1 : 0));
             break;
         }
         case ::hybridse::node::kInt16: {
-            *output = NativeValue::Create(
-                builder.getInt16(const_node->GetSmallInt()));
+            *output = NativeValue::Create(builder.getInt16(const_node->GetSmallInt()));
             break;
         }
         case ::hybridse::node::kInt32: {
-            *output =
-                NativeValue::Create(builder.getInt32(const_node->GetInt()));
+            *output = NativeValue::Create(builder.getInt32(const_node->GetInt()));
             break;
         }
         case ::hybridse::node::kInt64: {
-            *output =
-                NativeValue::Create(builder.getInt64(const_node->GetLong()));
+            *output = NativeValue::Create(builder.getInt64(const_node->GetLong()));
             break;
         }
         case ::hybridse::node::kFloat: {
             llvm::Value* raw_float = nullptr;
-            CHECK_TRUE(GetConstFloat(ctx_->GetLLVMContext(),
-                                     const_node->GetFloat(), &raw_float),
-                       kCodegenError);
+            CHECK_TRUE(GetConstFloat(ctx_->GetLLVMContext(), const_node->GetFloat(), &raw_float), kCodegenError);
 
             *output = NativeValue::Create(raw_float);
             break;
         }
         case ::hybridse::node::kDouble: {
             llvm::Value* raw_double = nullptr;
-            CHECK_TRUE(GetConstDouble(ctx_->GetLLVMContext(),
-                                      const_node->GetDouble(), &raw_double),
-                       kCodegenError);
+            CHECK_TRUE(GetConstDouble(ctx_->GetLLVMContext(), const_node->GetDouble(), &raw_double), kCodegenError);
 
             *output = NativeValue::Create(raw_double);
             break;
@@ -254,8 +219,7 @@ Status ExprIRBuilder::BuildConstExpr(
         case ::hybridse::node::kVarchar: {
             std::string val(const_node->GetStr(), strlen(const_node->GetStr()));
             llvm::Value* raw_str = nullptr;
-            CHECK_TRUE(GetConstFeString(val, ctx_->GetCurrentBlock(), &raw_str),
-                       kCodegenError);
+            CHECK_TRUE(GetConstFeString(val, ctx_->GetCurrentBlock(), &raw_str), kCodegenError);
             *output = NativeValue::Create(raw_str);
             break;
         }
@@ -263,9 +227,7 @@ Status ExprIRBuilder::BuildConstExpr(
             auto date_int = builder.getInt32(const_node->GetLong());
             DateIRBuilder date_builder(ctx_->GetModule());
             ::llvm::Value* date = nullptr;
-            CHECK_TRUE(
-                date_builder.NewDate(ctx_->GetCurrentBlock(), date_int, &date),
-                kCodegenError);
+            CHECK_TRUE(date_builder.NewDate(ctx_->GetCurrentBlock(), date_int, &date), kCodegenError);
             *output = NativeValue::Create(date);
             break;
         }
@@ -273,23 +235,19 @@ Status ExprIRBuilder::BuildConstExpr(
             auto ts_int = builder.getInt64(const_node->GetLong());
             TimestampIRBuilder date_builder(ctx_->GetModule());
             ::llvm::Value* ts = nullptr;
-            CHECK_TRUE(
-                date_builder.NewTimestamp(ctx_->GetCurrentBlock(), ts_int, &ts),
-                kCodegenError);
+            CHECK_TRUE(date_builder.NewTimestamp(ctx_->GetCurrentBlock(), ts_int, &ts), kCodegenError);
             *output = NativeValue::Create(ts);
             break;
         }
         default: {
-            return Status(kCodegenError,
-                          "Fail to codegen primary expression for type: " +
-                              node::DataTypeName(const_node->GetDataType()));
+            return Status(kCodegenError, "Fail to codegen primary expression for type: " +
+                                             node::DataTypeName(const_node->GetDataType()));
         }
     }
     return Status::OK();
 }
 
-Status ExprIRBuilder::BuildCallFn(const ::hybridse::node::CallExprNode* call,
-                                  NativeValue* output) {
+Status ExprIRBuilder::BuildCallFn(const ::hybridse::node::CallExprNode* call, NativeValue* output) {
     const node::FnDefNode* fn_def = call->GetFnDef();
     if (fn_def->GetType() == node::kExternalFnDef) {
         auto extern_fn = dynamic_cast<const node::ExternalFnDefNode*>(fn_def);
@@ -305,8 +263,7 @@ Status ExprIRBuilder::BuildCallFn(const ::hybridse::node::CallExprNode* call,
     for (size_t i = 0; i < call->GetChildNum(); ++i) {
         node::ExprNode* arg_expr = call->GetChild(i);
         NativeValue arg_value;
-        CHECK_STATUS(sub_builder.Build(arg_expr, &arg_value), "Build argument ",
-                     arg_expr->GetExprString(), " failed");
+        CHECK_STATUS(sub_builder.Build(arg_expr, &arg_value), "Build argument ", arg_expr->GetExprString(), " failed");
         arg_values.push_back(arg_value);
         arg_types.push_back(arg_expr->GetOutputType());
     }
@@ -315,14 +272,11 @@ Status ExprIRBuilder::BuildCallFn(const ::hybridse::node::CallExprNode* call,
     return base::Status::OK();
 }
 
-Status ExprIRBuilder::BuildCallFnLegacy(
-    const ::hybridse::node::CallExprNode* call_fn, NativeValue* output) {
-
+Status ExprIRBuilder::BuildCallFnLegacy(const ::hybridse::node::CallExprNode* call_fn, NativeValue* output) {
     // TODO(chenjing): return status;
     CHECK_TRUE(call_fn != NULL, common::kCodegenError, "BuildCallFnLegacy#call_fn is null")
     CHECK_TRUE(output != NULL, common::kCodegenError, "BuildCallFnLegacy#output is null")
-    auto named_fn =
-        dynamic_cast<const node::ExternalFnDefNode*>(call_fn->GetFnDef());
+    auto named_fn = dynamic_cast<const node::ExternalFnDefNode*>(call_fn->GetFnDef());
     std::string function_name = named_fn->function_name();
 
     ::llvm::BasicBlock* block = ctx_->GetCurrentBlock();
@@ -330,14 +284,12 @@ Status ExprIRBuilder::BuildCallFnLegacy(
     ::llvm::StringRef name(function_name);
 
     std::vector<::llvm::Value*> llvm_args;
-    std::vector<::hybridse::node::ExprNode*>::const_iterator it =
-        call_fn->children_.cbegin();
+    std::vector<::hybridse::node::ExprNode*>::const_iterator it = call_fn->children_.cbegin();
     std::vector<const ::hybridse::node::TypeNode*> generics_types;
     std::vector<const ::hybridse::node::TypeNode*> args_types;
 
     for (; it != call_fn->children_.cend(); ++it) {
-        const ::hybridse::node::ExprNode* arg =
-            dynamic_cast<node::ExprNode*>(*it);
+        const ::hybridse::node::ExprNode* arg = dynamic_cast<node::ExprNode*>(*it);
         NativeValue llvm_arg_wrapper;
         // TODO(chenjing): remove out_name
         CHECK_STATUS(Build(arg, &llvm_arg_wrapper), "Fail to build arguments")
@@ -350,8 +302,7 @@ Status ExprIRBuilder::BuildCallFnLegacy(
         // handle list type
         // 泛型类型还需要优化，目前是hard
         // code识别list或者迭代器类型，然后取generic type
-        if (hybridse::node::kList == value_type->base() ||
-            hybridse::node::kIterator == value_type->base()) {
+        if (hybridse::node::kList == value_type->base() || hybridse::node::kIterator == value_type->base()) {
             generics_types.push_back(value_type);
         }
         ::llvm::Value* llvm_arg = llvm_arg_wrapper.GetValue(&builder);
@@ -362,8 +313,7 @@ Status ExprIRBuilder::BuildCallFnLegacy(
     CHECK_STATUS(GetFunction(function_name, args_types, &fn));
     if (call_fn->children_.size() == fn->arg_size()) {
         ::llvm::ArrayRef<::llvm::Value*> array_ref(llvm_args);
-        *output = NativeValue::Create(
-            builder.CreateCall(fn->getFunctionType(), fn, array_ref));
+        *output = NativeValue::Create(builder.CreateCall(fn->getFunctionType(), fn, array_ref));
         return base::Status::OK();
     } else if (call_fn->children_.size() == fn->arg_size() - 1) {
         auto it = fn->arg_end();
@@ -371,14 +321,10 @@ Status ExprIRBuilder::BuildCallFnLegacy(
         ::llvm::Argument* last_arg = &*it;
         CHECK_TRUE(TypeIRBuilder::IsStructPtr(last_arg->getType()), common::kCodegenCallFunctionError,
                    "Incorrect arguments passed")
-        ::llvm::Type* struct_type = reinterpret_cast<::llvm::PointerType*>(last_arg->getType())
-                ->getElementType();
-        ::llvm::Value* struct_value =
-            CreateAllocaAtHead(&builder, struct_type, "struct_alloca");
+        ::llvm::Type* struct_type = reinterpret_cast<::llvm::PointerType*>(last_arg->getType())->getElementType();
+        ::llvm::Value* struct_value = CreateAllocaAtHead(&builder, struct_type, "struct_alloca");
         llvm_args.push_back(struct_value);
-        ::llvm::Value* ret =
-            builder.CreateCall(fn->getFunctionType(), fn,
-                               ::llvm::ArrayRef<::llvm::Value*>(llvm_args));
+        ::llvm::Value* ret = builder.CreateCall(fn->getFunctionType(), fn, ::llvm::ArrayRef<::llvm::Value*>(llvm_args));
         CHECK_TRUE(nullptr != ret, common::kCodegenCallFunctionError, "Fail to codegen Call Function")
 
         *output = NativeValue::Create(struct_value);
@@ -395,24 +341,19 @@ Status ExprIRBuilder::BuildCallFnLegacy(
 // @param node
 // @param output
 // @return
-Status ExprIRBuilder::BuildStructExpr(const ::hybridse::node::StructExpr* node,
-                                      NativeValue* output) {
+Status ExprIRBuilder::BuildStructExpr(const ::hybridse::node::StructExpr* node, NativeValue* output) {
     std::vector<::llvm::Type*> members;
     if (nullptr != node->GetFileds() && !node->GetFileds()->children.empty()) {
         for (auto each : node->GetFileds()->children) {
             node::FnParaNode* field = dynamic_cast<node::FnParaNode*>(each);
             ::llvm::Type* type = nullptr;
-            CHECK_TRUE(ConvertHybridSeType2LlvmType(field->GetParaType(),
-                                                    ctx_->GetModule(), &type),
-                       kCodegenError,
-                       "Invalid struct with unacceptable field type: " +
-                           field->GetParaType()->GetName());
+            CHECK_TRUE(ConvertHybridSeType2LlvmType(field->GetParaType(), ctx_->GetModule(), &type), kCodegenError,
+                       "Invalid struct with unacceptable field type: " + field->GetParaType()->GetName());
             members.push_back(type);
         }
     }
     ::llvm::StringRef name(node->GetName());
-    ::llvm::StructType* llvm_struct =
-        ::llvm::StructType::create(ctx_->GetLLVMContext(), name);
+    ::llvm::StructType* llvm_struct = ::llvm::StructType::create(ctx_->GetLLVMContext(), name);
     ::llvm::ArrayRef<::llvm::Type*> array_ref(members);
     llvm_struct->setBody(array_ref);
     *output = NativeValue::Create(reinterpret_cast<::llvm::Value*>(llvm_struct));
@@ -499,39 +440,32 @@ Status ExprIRBuilder::BuildParameterExpr(const ::hybridse::node::ParameterExpr* 
     // Since parameter row has only one slice, the schema idx should be 0
     size_t schema_idx = 0;
     CHECK_STATUS(ExtractSliceFromRow(parameter_row, schema_idx, &slice_ptr, &slice_size))
-    BufNativeIRBuilder buf_builder(
-        schema_idx, &ctx_->parameter_row_format(),
-        ctx_->GetCurrentBlock(), ctx_->GetCurrentScope()->sv());
-    CHECK_TRUE(
-        buf_builder.BuildGetField(parameter->position()-1, slice_ptr, slice_size, output),
-        kCodegenError, "Fail to get ", parameter->position(), "th parameter value")
+    BufNativeIRBuilder buf_builder(schema_idx, &ctx_->parameter_row_format(), ctx_->GetCurrentBlock(),
+                                   ctx_->GetCurrentScope()->sv());
+    CHECK_TRUE(buf_builder.BuildGetField(parameter->position() - 1, slice_ptr, slice_size, output), kCodegenError,
+               "Fail to get ", parameter->position(), "th parameter value")
     return base::Status::OK();
 }
 // Get col with given col name, set list struct pointer into output
 // param col
 // param output
 // return
-Status ExprIRBuilder::BuildColumnRef(
-    const ::hybridse::node::ColumnRefNode* node, NativeValue* output) {
+Status ExprIRBuilder::BuildColumnRef(const ::hybridse::node::ColumnRefNode* node, NativeValue* output) {
     const std::string relation_name = node->GetRelationName();
     const std::string col = node->GetColumnName();
 
     size_t schema_idx;
     size_t col_idx;
-    CHECK_STATUS(ctx_->schemas_context()->ResolveColumnRefIndex(
-                     node, &schema_idx, &col_idx),
+    CHECK_STATUS(ctx_->schemas_context()->ResolveColumnRefIndex(node, &schema_idx, &col_idx),
                  "Fail to find context with " + node->GetExprString());
 
     ::llvm::Value* value = NULL;
-    const std::string frame_str =
-        nullptr == frame_ ? "" : frame_->GetExprString();
+    const std::string frame_str = nullptr == frame_ ? "" : frame_->GetExprString();
     DLOG(INFO) << "get table column " << col;
     // not found
-    VariableIRBuilder variable_ir_builder(ctx_->GetCurrentBlock(),
-                                          ctx_->GetCurrentScope()->sv());
+    VariableIRBuilder variable_ir_builder(ctx_->GetCurrentBlock(), ctx_->GetCurrentScope()->sv());
     Status status;
-    bool ok = variable_ir_builder.LoadColumnRef(relation_name, col, frame_str,
-                                                &value, status);
+    bool ok = variable_ir_builder.LoadColumnRef(relation_name, col, frame_str, &value, status);
     if (ok) {
         *output = NativeValue::Create(value);
         return Status::OK();
@@ -542,29 +476,21 @@ Status ExprIRBuilder::BuildColumnRef(
 
     DLOG(INFO) << "get table column " << col;
     // NOT reuse for iterator
-    MemoryWindowDecodeIRBuilder window_ir_builder(ctx_->schemas_context(),
-                                                  ctx_->GetCurrentBlock());
-    ok = window_ir_builder.BuildGetCol(schema_idx, col_idx, window.GetRaw(),
-                                       &value);
-    CHECK_TRUE(ok && value != nullptr, kCodegenError,
-               "fail to find column " + col);
+    MemoryWindowDecodeIRBuilder window_ir_builder(ctx_->schemas_context(), ctx_->GetCurrentBlock());
+    ok = window_ir_builder.BuildGetCol(schema_idx, col_idx, window.GetRaw(), &value);
+    CHECK_TRUE(ok && value != nullptr, kCodegenError, "fail to find column " + col);
 
-    ok = variable_ir_builder.StoreColumnRef(relation_name, col, frame_str,
-                                            value, status);
+    ok = variable_ir_builder.StoreColumnRef(relation_name, col, frame_str, value, status);
     CHECK_TRUE(ok, kCodegenError, "fail to store col for ", status.str());
     *output = NativeValue::Create(value);
     return Status::OK();
 }
 
-Status ExprIRBuilder::BuildUnaryExpr(const ::hybridse::node::UnaryExpr* node,
-                                     NativeValue* output) {
-    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError,
-               "Input node or output is null");
-    CHECK_TRUE(node->GetChildNum() == 1, kCodegenError,
-               "Invalid unary expr node");
+Status ExprIRBuilder::BuildUnaryExpr(const ::hybridse::node::UnaryExpr* node, NativeValue* output) {
+    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError, "Input node or output is null");
+    CHECK_TRUE(node->GetChildNum() == 1, kCodegenError, "Invalid unary expr node");
 
-    DLOG(INFO) << "build unary "
-               << ::hybridse::node::ExprOpTypeName(node->GetOp());
+    DLOG(INFO) << "build unary " << ::hybridse::node::ExprOpTypeName(node->GetOp());
     NativeValue left;
     CHECK_STATUS(Build(node->GetChild(0), &left), "Fail to build left node");
 
@@ -580,8 +506,8 @@ Status ExprIRBuilder::BuildUnaryExpr(const ::hybridse::node::UnaryExpr* node,
             if (node->GetOutputType()->base() == node::kBool) {
                 *output = left;
             } else {
-                CHECK_STATUS(arithmetic_ir_builder.BuildSubExpr(
-                    NativeValue::Create(builder.getInt16(0)), left, output));
+                CHECK_STATUS(
+                    arithmetic_ir_builder.BuildSubExpr(NativeValue::Create(builder.getInt16(0)), left, output));
             }
             break;
         }
@@ -603,8 +529,7 @@ Status ExprIRBuilder::BuildUnaryExpr(const ::hybridse::node::UnaryExpr* node,
             break;
         }
         default: {
-            return Status(kCodegenError,
-                          "Invalid op " + ExprOpTypeName(node->GetOp()));
+            return Status(kCodegenError, "Invalid op " + ExprOpTypeName(node->GetOp()));
         }
     }
 
@@ -615,18 +540,15 @@ Status ExprIRBuilder::BuildUnaryExpr(const ::hybridse::node::UnaryExpr* node,
         ::llvm::Type* expect_llvm_ty = nullptr;
         GetLlvmType(ctx_->GetModule(), node->GetOutputType(), &expect_llvm_ty);
         if (expect_llvm_ty != output->GetType()) {
-            LOG(WARNING) << "Inconsistent return llvm type: "
-                         << GetLlvmObjectString(output->GetType())
-                         << ", expect " << GetLlvmObjectString(expect_llvm_ty);
+            LOG(WARNING) << "Inconsistent return llvm type: " << GetLlvmObjectString(output->GetType()) << ", expect "
+                         << GetLlvmObjectString(expect_llvm_ty);
         }
     }
     return Status::OK();
 }
 
-Status ExprIRBuilder::BuildCastExpr(const ::hybridse::node::CastExprNode* node,
-                                    NativeValue* output) {
-    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError,
-               "Input node or output is null");
+Status ExprIRBuilder::BuildCastExpr(const ::hybridse::node::CastExprNode* node, NativeValue* output) {
+    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError, "Input node or output is null");
 
     DLOG(INFO) << "build cast expr: " << node::ExprString(node);
     NativeValue left;
@@ -634,8 +556,8 @@ Status ExprIRBuilder::BuildCastExpr(const ::hybridse::node::CastExprNode* node,
 
     CastExprIRBuilder cast_builder(ctx_->GetCurrentBlock());
     ::llvm::Type* cast_type = NULL;
-    CHECK_TRUE(GetLlvmType(ctx_->GetModule(), node->cast_type_, &cast_type),
-               kCodegenError, "Fail to cast expr: dist type invalid");
+    CHECK_TRUE(GetLlvmType(ctx_->GetModule(), node->cast_type_, &cast_type), kCodegenError,
+               "Fail to cast expr: dist type invalid");
 
     if (cast_builder.IsSafeCast(left.GetType(), cast_type)) {
         return cast_builder.SafeCast(left, cast_type, output);
@@ -644,15 +566,11 @@ Status ExprIRBuilder::BuildCastExpr(const ::hybridse::node::CastExprNode* node,
     }
 }
 
-Status ExprIRBuilder::BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node,
-                                      NativeValue* output) {
-    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError,
-               "Input node or output is null");
-    CHECK_TRUE(node->GetChildNum() == 2, kCodegenError,
-               "Invalid binary expr node");
+Status ExprIRBuilder::BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node, NativeValue* output) {
+    CHECK_TRUE(node != nullptr && output != nullptr, kCodegenError, "Input node or output is null");
+    CHECK_TRUE(node->GetChildNum() == 2, kCodegenError, "Invalid binary expr node");
 
-    DLOG(INFO) << "build binary "
-               << ::hybridse::node::ExprOpTypeName(node->GetOp());
+    DLOG(INFO) << "build binary " << ::hybridse::node::ExprOpTypeName(node->GetOp());
     NativeValue left;
     CHECK_STATUS(Build(node->children_[0], &left), "Fail to build left node");
 
@@ -664,53 +582,43 @@ Status ExprIRBuilder::BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node,
 
     switch (node->GetOp()) {
         case ::hybridse::node::kFnOpAdd: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildAddExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildAddExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpMulti: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildMultiExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildMultiExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpFDiv: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildFDivExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildFDivExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpDiv: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildSDivExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildSDivExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpMinus: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildSubExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildSubExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpMod: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildModExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildModExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpBitwiseAnd: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildBitwiseAndExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildBitwiseAndExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpBitwiseOr: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildBitwiseOrExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildBitwiseOrExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpBitwiseXor: {
-            CHECK_STATUS(
-                arithmetic_ir_builder.BuildBitwiseXorExpr(left, right, output));
+            CHECK_STATUS(arithmetic_ir_builder.BuildBitwiseXorExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpAnd: {
-            CHECK_STATUS(
-                predicate_ir_builder.BuildAndExpr(left, right, output));
+            CHECK_STATUS(predicate_ir_builder.BuildAndExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpOr: {
@@ -718,8 +626,7 @@ Status ExprIRBuilder::BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node,
             break;
         }
         case ::hybridse::node::kFnOpXor: {
-            CHECK_STATUS(
-                predicate_ir_builder.BuildXorExpr(left, right, output));
+            CHECK_STATUS(predicate_ir_builder.BuildXorExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpEq: {
@@ -727,8 +634,7 @@ Status ExprIRBuilder::BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node,
             break;
         }
         case ::hybridse::node::kFnOpNeq: {
-            CHECK_STATUS(
-                predicate_ir_builder.BuildNeqExpr(left, right, output));
+            CHECK_STATUS(predicate_ir_builder.BuildNeqExpr(left, right, output));
             break;
         }
         case ::hybridse::node::kFnOpGt: {
@@ -760,8 +666,7 @@ Status ExprIRBuilder::BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node,
             break;
         }
         default: {
-            return Status(kCodegenError,
-                          "Invalid op " + ExprOpTypeName(node->GetOp()));
+            return Status(kCodegenError, "Invalid op " + ExprOpTypeName(node->GetOp()));
         }
     }
 
@@ -772,37 +677,31 @@ Status ExprIRBuilder::BuildBinaryExpr(const ::hybridse::node::BinaryExpr* node,
         ::llvm::Type* expect_llvm_ty = nullptr;
         GetLlvmType(ctx_->GetModule(), node->GetOutputType(), &expect_llvm_ty);
         if (expect_llvm_ty != output->GetType()) {
-            LOG(WARNING) << "Inconsistent return llvm type: "
-                         << GetLlvmObjectString(output->GetType())
-                         << ", expect " << GetLlvmObjectString(expect_llvm_ty);
+            LOG(WARNING) << "Inconsistent return llvm type: " << GetLlvmObjectString(output->GetType()) << ", expect "
+                         << GetLlvmObjectString(expect_llvm_ty);
         }
     }
     return Status::OK();
 }
 
-Status ExprIRBuilder::BuildAsUdf(const node::ExprNode* expr,
-                                 const std::string& name,
-                                 const std::vector<NativeValue>& args,
-                                 NativeValue* output) {
+Status ExprIRBuilder::BuildAsUdf(const node::ExprNode* expr, const std::string& name,
+                                 const std::vector<NativeValue>& args, NativeValue* output) {
     CHECK_TRUE(args.size() == expr->GetChildNum(), kCodegenError);
     auto library = udf::DefaultUdfLibrary::get();
 
     std::vector<node::ExprNode*> proxy_args;
     for (size_t i = 0; i < expr->GetChildNum(); ++i) {
         auto child = expr->GetChild(i);
-        auto arg = ctx_->node_manager()->MakeExprIdNode("proxy_arg_" +
-                                                        std::to_string(i));
+        auto arg = ctx_->node_manager()->MakeExprIdNode("proxy_arg_" + std::to_string(i));
         arg->SetOutputType(child->GetOutputType());
         arg->SetNullable(child->nullable());
         proxy_args.push_back(arg);
     }
     node::ExprNode* transformed = nullptr;
-    CHECK_STATUS(library->Transform(name, proxy_args, ctx_->node_manager(),
-                                    &transformed));
+    CHECK_STATUS(library->Transform(name, proxy_args, ctx_->node_manager(), &transformed));
 
     node::ExprNode* target_expr = nullptr;
-    node::ExprAnalysisContext analysis_ctx(ctx_->node_manager(), library,
-                                           ctx_->schemas_context(), nullptr);
+    node::ExprAnalysisContext analysis_ctx(ctx_->node_manager(), library, ctx_->schemas_context(), nullptr);
     passes::ResolveFnAndAttrs resolver(&analysis_ctx);
     CHECK_STATUS(resolver.VisitExpr(transformed, &target_expr));
 
@@ -821,11 +720,8 @@ Status ExprIRBuilder::BuildAsUdf(const node::ExprNode* expr,
     return status;
 }
 
-Status ExprIRBuilder::BuildLikeExprAsUdf(const ::hybridse::node::BinaryExpr* expr,
-                                         const std::string& name,
-                                         const NativeValue& lhs,
-                                         const NativeValue& rhs,
-                                         NativeValue* output) {
+Status ExprIRBuilder::BuildLikeExprAsUdf(const ::hybridse::node::BinaryExpr* expr, const std::string& name,
+                                         const NativeValue& lhs, const NativeValue& rhs, NativeValue* output) {
     auto library = udf::DefaultUdfLibrary::get();
 
     std::vector<node::ExprNode*> proxy_args;
@@ -858,11 +754,9 @@ Status ExprIRBuilder::BuildLikeExprAsUdf(const ::hybridse::node::BinaryExpr* exp
     }
 
     node::ExprNode* transformed = nullptr;
-    CHECK_STATUS(library->Transform(name, proxy_args, ctx_->node_manager(),
-                                    &transformed));
+    CHECK_STATUS(library->Transform(name, proxy_args, ctx_->node_manager(), &transformed));
     node::ExprNode* target_expr = nullptr;
-    node::ExprAnalysisContext analysis_ctx(ctx_->node_manager(), library,
-                                           ctx_->schemas_context(), nullptr);
+    node::ExprAnalysisContext analysis_ctx(ctx_->node_manager(), library, ctx_->schemas_context(), nullptr);
     passes::ResolveFnAndAttrs resolver(&analysis_ctx);
     CHECK_STATUS(resolver.VisitExpr(transformed, &target_expr));
 
@@ -886,8 +780,7 @@ Status ExprIRBuilder::BuildLikeExprAsUdf(const ::hybridse::node::BinaryExpr* exp
     return Status::OK();
 }
 
-Status ExprIRBuilder::BuildGetFieldExpr(
-    const ::hybridse::node::GetFieldExpr* node, NativeValue* output) {
+Status ExprIRBuilder::BuildGetFieldExpr(const ::hybridse::node::GetFieldExpr* node, NativeValue* output) {
     // build input
     Status status;
     NativeValue input_value;
@@ -895,67 +788,50 @@ Status ExprIRBuilder::BuildGetFieldExpr(
 
     auto input_type = node->GetRow()->GetOutputType();
     if (input_type->base() == node::kTuple) {
-        CHECK_TRUE(input_value.IsTuple() && input_value.GetFieldNum() ==
-                                                input_type->GetGenericSize(),
-                   kCodegenError, "Illegal input for kTuple, expect ",
-                   input_type->GetName());
+        CHECK_TRUE(input_value.IsTuple() && input_value.GetFieldNum() == input_type->GetGenericSize(), kCodegenError,
+                   "Illegal input for kTuple, expect ", input_type->GetName());
         try {
             size_t idx = node->GetColumnID();
-            CHECK_TRUE(0 <= idx && idx < input_value.GetFieldNum(),
-                       kCodegenError, "Tuple idx out of range: ", idx);
+            CHECK_TRUE(0 <= idx && idx < input_value.GetFieldNum(), kCodegenError, "Tuple idx out of range: ", idx);
             *output = input_value.GetField(idx);
         } catch (std::invalid_argument& err) {
-            return Status(kCodegenError,
-                          "Invalid Tuple index: " + node->GetColumnName());
+            return Status(kCodegenError, "Invalid Tuple index: " + node->GetColumnName());
         }
 
     } else if (input_type->base() == node::kRow) {
-        auto row_type = dynamic_cast<const node::RowTypeNode*>(
-            node->GetRow()->GetOutputType());
+        auto row_type = dynamic_cast<const node::RowTypeNode*>(node->GetRow()->GetOutputType());
         const auto schemas_context = row_type->schemas_ctx();
 
         size_t schema_idx;
         size_t col_idx;
-        CHECK_STATUS(schemas_context->ResolveColumnIndexByID(
-                         node->GetColumnID(), &schema_idx, &col_idx),
-                     "Fail to resolve column ", node->GetExprString(), " from ",
-                     row_type->GetName());
+        CHECK_STATUS(schemas_context->ResolveColumnIndexByID(node->GetColumnID(), &schema_idx, &col_idx),
+                     "Fail to resolve column ", node->GetExprString(), " from ", row_type->GetName());
         ::llvm::Value* slice_ptr = nullptr;
         ::llvm::Value* slice_size = nullptr;
         CHECK_STATUS(ExtractSliceFromRow(input_value, schema_idx, &slice_ptr, &slice_size))
-        BufNativeIRBuilder buf_builder(
-            schema_idx, schemas_context->GetRowFormat(schema_idx),
-            ctx_->GetCurrentBlock(), ctx_->GetCurrentScope()->sv());
-        CHECK_TRUE(
-            buf_builder.BuildGetField(col_idx, slice_ptr, slice_size, output),
-            kCodegenError);
+        BufNativeIRBuilder buf_builder(schema_idx, schemas_context->GetRowFormat(schema_idx), ctx_->GetCurrentBlock(),
+                                       ctx_->GetCurrentScope()->sv());
+        CHECK_TRUE(buf_builder.BuildGetField(col_idx, slice_ptr, slice_size, output), kCodegenError);
     } else {
-        return Status(common::kCodegenError,
-                      "Get field's input is neither tuple nor row");
+        return Status(common::kCodegenError, "Get field's input is neither tuple nor row");
     }
     return Status::OK();
 }
 
-Status ExprIRBuilder::BuildCaseExpr(
-    const ::hybridse::node::CaseWhenExprNode* node, NativeValue* output) {
-    CHECK_TRUE(nullptr != node && nullptr != node->when_expr_list() &&
-                   node->when_expr_list()->GetChildNum() > 0,
+Status ExprIRBuilder::BuildCaseExpr(const ::hybridse::node::CaseWhenExprNode* node, NativeValue* output) {
+    CHECK_TRUE(nullptr != node && nullptr != node->when_expr_list() && node->when_expr_list()->GetChildNum() > 0,
                kCodegenError);
     node::NodeManager* nm = ctx_->node_manager();
-    node::ExprNode* expr =
-        nullptr == node->else_expr() ? nm->MakeConstNode() : node->else_expr();
-    for (auto iter = node->when_expr_list()->children_.rbegin();
-         iter != node->when_expr_list()->children_.rend(); iter++) {
+    node::ExprNode* expr = nullptr == node->else_expr() ? nm->MakeConstNode() : node->else_expr();
+    for (auto iter = node->when_expr_list()->children_.rbegin(); iter != node->when_expr_list()->children_.rend();
+         iter++) {
         auto when_expr = dynamic_cast<::hybridse::node::WhenExprNode*>(*iter);
-        expr = nm->MakeCondExpr(when_expr->when_expr(), when_expr->then_expr(),
-                                expr);
+        expr = nm->MakeCondExpr(when_expr->when_expr(), when_expr->then_expr(), expr);
     }
-    return BuildCondExpr(dynamic_cast<::hybridse::node::CondExpr*>(expr),
-                         output);
+    return BuildCondExpr(dynamic_cast<::hybridse::node::CondExpr*>(expr), output);
 }
 
-Status ExprIRBuilder::BuildCondExpr(const ::hybridse::node::CondExpr* node,
-                                    NativeValue* output) {
+Status ExprIRBuilder::BuildCondExpr(const ::hybridse::node::CondExpr* node, NativeValue* output) {
     // build condition
     NativeValue cond_value;
     CHECK_STATUS(this->Build(node->GetCondition(), &cond_value));
@@ -969,8 +845,7 @@ Status ExprIRBuilder::BuildCondExpr(const ::hybridse::node::CondExpr* node,
     CHECK_STATUS(this->Build(node->GetRight(), &right_value));
 
     CondSelectIRBuilder cond_select_builder;
-    return cond_select_builder.Select(ctx_->GetCurrentBlock(), cond_value,
-                                      left_value, right_value, output);
+    return cond_select_builder.Select(ctx_->GetCurrentBlock(), cond_value, left_value, right_value, output);
 }
 
 Status ExprIRBuilder::BuildBetweenExpr(const ::hybridse::node::BetweenExpr* node, NativeValue* output) {
@@ -1035,17 +910,13 @@ Status ExprIRBuilder::ExtractSliceFromRow(const NativeValue& input_value, const 
     ::llvm::Module* module = ctx_->GetModule();
     ::llvm::IRBuilder<> builder(ctx_->GetCurrentBlock());
     auto slice_idx_value = builder.getInt64(schema_idx);
-    auto get_slice_func = module->getOrInsertFunction(
-        "hybridse_storage_get_row_slice",
-        ::llvm::FunctionType::get(ptr_ty, {ptr_ty, int64_ty}, false));
+    auto get_slice_func = module->getOrInsertFunction("hybridse_storage_get_row_slice",
+                                                      ::llvm::FunctionType::get(ptr_ty, {ptr_ty, int64_ty}, false));
     auto get_slice_size_func = module->getOrInsertFunction(
-        "hybridse_storage_get_row_slice_size",
-        ::llvm::FunctionType::get(int64_ty, {ptr_ty, int64_ty}, false));
-    *slice_ptr =
-        builder.CreateCall(get_slice_func, {row_ptr, slice_idx_value});
-    *slice_size = builder.CreateIntCast(
-        builder.CreateCall(get_slice_size_func, {row_ptr, slice_idx_value}),
-        int32_ty, false);
+        "hybridse_storage_get_row_slice_size", ::llvm::FunctionType::get(int64_ty, {ptr_ty, int64_ty}, false));
+    *slice_ptr = builder.CreateCall(get_slice_func, {row_ptr, slice_idx_value});
+    *slice_size =
+        builder.CreateIntCast(builder.CreateCall(get_slice_size_func, {row_ptr, slice_idx_value}), int32_ty, false);
     return Status::OK();
 }
 }  // namespace codegen

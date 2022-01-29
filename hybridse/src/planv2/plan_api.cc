@@ -14,6 +14,7 @@
  * limitations under the License.
  */
 #include "plan/plan_api.h"
+
 #include "planv2/planner_v2.h"
 #include "zetasql/public/error_helpers.h"
 #include "zetasql/public/error_location.pb.h"
@@ -28,8 +29,8 @@ bool PlanAPI::CreatePlanTreeFromScript(const std::string &sql, PlanNodeList &pla
     zetasql::LanguageOptions language_opts;
     language_opts.EnableLanguageFeature(zetasql::FEATURE_V_1_3_COLUMN_DEFAULT_VALUE);
     parser_opts.set_language_options(&language_opts);
-    auto zetasql_status = zetasql::ParseScript(sql, parser_opts,
-                                               zetasql::ERROR_MESSAGE_MULTI_LINE_WITH_CARET, &parser_output);
+    auto zetasql_status =
+        zetasql::ParseScript(sql, parser_opts, zetasql::ERROR_MESSAGE_MULTI_LINE_WITH_CARET, &parser_output);
     zetasql::ErrorLocation location;
     if (!zetasql_status.ok()) {
         zetasql::ErrorLocation location;
@@ -46,7 +47,7 @@ bool PlanAPI::CreatePlanTreeFromScript(const std::string &sql, PlanNodeList &pla
     return status.isOK();
 }
 
-const int PlanAPI::GetPlanLimitCount(node::PlanNode* plan_tree) {
+const int PlanAPI::GetPlanLimitCount(node::PlanNode *plan_tree) {
     if (nullptr == plan_tree) {
         return 0;
     }

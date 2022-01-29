@@ -43,8 +43,7 @@ namespace replica {
 static const ::openmldb::base::DefaultComparator scmp;
 
 LogReplicator::LogReplicator(uint32_t tid, uint32_t pid, const std::string& path,
-                             const std::map<std::string, std::string>& real_ep_map,
-                             const ReplicatorRole& role)
+                             const std::map<std::string, std::string>& real_ep_map, const ReplicatorRole& role)
     : tid_(tid),
       pid_(pid),
       path_(path),
@@ -108,8 +107,8 @@ bool LogReplicator::Init() {
     if (role_ == kLeaderNode) {
         for (const auto& kv : real_ep_map_) {
             std::shared_ptr<ReplicateNode> replicate_node =
-                std::make_shared<ReplicateNode>(kv.first, logs_, log_path_, tid_, pid_, &term_,
-                                                &log_offset_, &mu_, &cv_, false, &follower_offset_, kv.second);
+                std::make_shared<ReplicateNode>(kv.first, logs_, log_path_, tid_, pid_, &term_, &log_offset_, &mu_,
+                                                &cv_, false, &follower_offset_, kv.second);
             if (replicate_node->Init() < 0) {
                 PDLOG(WARNING, "init replicate node %s error", kv.first.c_str());
                 return false;
@@ -296,8 +295,8 @@ bool LogReplicator::ApplyEntry(const LogEntry& entry) {
         }
     }
     if (entry.log_index() <= last_log_offset) {
-        PDLOG(WARNING, "entry log_index %lu cur log_offset %lu tid %u pid %u",
-                entry.log_index(), last_log_offset, tid_, pid_);
+        PDLOG(WARNING, "entry log_index %lu cur log_offset %lu tid %u pid %u", entry.log_index(), last_log_offset, tid_,
+              pid_);
         return true;
     }
     std::string buffer;
@@ -339,12 +338,12 @@ int LogReplicator::AddReplicateNode(const std::map<std::string, std::string>& re
         std::shared_ptr<ReplicateNode> replicate_node;
         if (tid == UINT32_MAX) {
             replicate_node =
-                std::make_shared<ReplicateNode>(endpoint, logs_, log_path_, tid_, pid_, &term_,
-                                                &log_offset_, &mu_, &cv_, false, &follower_offset_, kv.second);
+                std::make_shared<ReplicateNode>(endpoint, logs_, log_path_, tid_, pid_, &term_, &log_offset_, &mu_,
+                                                &cv_, false, &follower_offset_, kv.second);
         } else {
             replicate_node =
-                std::make_shared<ReplicateNode>(endpoint, logs_, log_path_, tid, pid_, &term_, &log_offset_,
-                                                &mu_, &cv_, true, &follower_offset_, kv.second);
+                std::make_shared<ReplicateNode>(endpoint, logs_, log_path_, tid, pid_, &term_, &log_offset_, &mu_, &cv_,
+                                                true, &follower_offset_, kv.second);
         }
         if (replicate_node->Init() < 0) {
             PDLOG(WARNING, "init replicate node %s error", endpoint.c_str());

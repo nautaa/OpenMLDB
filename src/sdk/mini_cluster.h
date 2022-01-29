@@ -243,9 +243,7 @@ class StandaloneEnv {
 
     ::openmldb::client::NsClient* GetNsClient() { return ns_client_; }
 
-    ::openmldb::client::TabletClient* GetTabletClient() {
-        return tb_client_;
-    }
+    ::openmldb::client::TabletClient* GetTabletClient() { return tb_client_; }
 
     uint64_t GetNsPort() const { return ns_port_; }
 

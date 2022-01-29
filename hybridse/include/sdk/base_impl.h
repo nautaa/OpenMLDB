@@ -19,14 +19,14 @@
 
 #include <memory>
 #include <string>
+
 #include "sdk/base.h"
 #include "vm/catalog.h"
 
 namespace hybridse {
 namespace sdk {
 
-typedef ::google::protobuf::RepeatedPtrField< ::hybridse::type::TableDef>
-    Tables;
+typedef ::google::protobuf::RepeatedPtrField< ::hybridse::type::TableDef> Tables;
 
 class SchemaImpl : public Schema {
  public:

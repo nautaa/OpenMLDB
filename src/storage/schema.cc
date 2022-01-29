@@ -206,7 +206,7 @@ int TableIndex::ParseFromMeta(const ::openmldb::api::TableMeta& table_meta) {
             } else {
                 // set default ts col
                 index->SetTsColumn(std::make_shared<ColumnDef>(DEFUALT_TS_COL_NAME, DEFUALT_TS_COL_ID,
-                            ::openmldb::type::kTimestamp, true));
+                                                               ::openmldb::type::kTimestamp, true));
             }
             if (column_key.has_ttl()) {
                 index->SetTTL(::openmldb::storage::TTLSt(column_key.ttl()));
@@ -221,8 +221,8 @@ int TableIndex::ParseFromMeta(const ::openmldb::api::TableMeta& table_meta) {
     // add default dimension
     if (indexs_->empty()) {
         auto index = std::make_shared<IndexDef>("idx0", 0);
-        index->SetTsColumn(std::make_shared<ColumnDef>(DEFUALT_TS_COL_NAME, DEFUALT_TS_COL_ID,
-                    ::openmldb::type::kTimestamp, true));
+        index->SetTsColumn(
+            std::make_shared<ColumnDef>(DEFUALT_TS_COL_NAME, DEFUALT_TS_COL_ID, ::openmldb::type::kTimestamp, true));
         if (AddIndex(index) < 0) {
             DLOG(WARNING) << "add index failed";
             return -1;

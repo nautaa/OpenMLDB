@@ -53,9 +53,7 @@ class Table {
 
     virtual bool Put(uint64_t time, const std::string& value, const Dimensions& dimensions) = 0;
 
-    bool Put(const ::openmldb::api::LogEntry& entry) {
-        return Put(entry.ts(), entry.value(), entry.dimensions());
-    }
+    bool Put(const ::openmldb::api::LogEntry& entry) { return Put(entry.ts(), entry.value(), entry.dimensions()); }
 
     virtual bool Delete(const std::string& pk, uint32_t idx) = 0;
 

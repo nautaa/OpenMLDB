@@ -15,13 +15,13 @@
  */
 
 #include "udf/default_udf_library.h"
+
 #include <gtest/gtest.h>
 
 namespace hybridse {
 namespace udf {
 
-class DefaultUdfLibraryTest : public ::testing::Test {
-};
+class DefaultUdfLibraryTest : public ::testing::Test {};
 
 TEST_F(DefaultUdfLibraryTest, TestCheckIsUDAFByNameAndArgsSize) {
     const udf::UdfLibrary* library = udf::DefaultUdfLibrary::get();
@@ -50,7 +50,6 @@ TEST_F(DefaultUdfLibraryTest, TestCheckIsUDAFByNameAndArgsSize) {
     // sin(arg1) isn't an udaf
     ASSERT_TRUE(!library->IsUdaf("sin", 1));
 }
-
 
 TEST_F(DefaultUdfLibraryTest, TestCheckIsUdafByName) {
     const udf::UdfLibrary* library = udf::DefaultUdfLibrary::get();

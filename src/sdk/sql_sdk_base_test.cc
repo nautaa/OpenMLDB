@@ -15,6 +15,7 @@
  */
 
 #include "sdk/sql_sdk_base_test.h"
+
 #include "sdk/base_impl.h"
 
 namespace openmldb {
@@ -357,8 +358,7 @@ void SQLSDKTest::BatchExecuteSQL(hybridse::sqlcase::SqlCase& sql_case,  // NOLIN
 }
 
 void SQLSDKTest::RunBatchModeSDK(hybridse::sqlcase::SqlCase& sql_case,  // NOLINT
-                                 std::shared_ptr<SQLRouter> router,
-                                 const std::vector<std::string>& tbEndpoints) {
+                                 std::shared_ptr<SQLRouter> router, const std::vector<std::string>& tbEndpoints) {
     hybridse::sdk::Status status;
     CreateDB(sql_case, router);
     CreateTables(sql_case, router);
@@ -378,8 +378,9 @@ void SQLSDKQueryTest::RequestExecuteSQL(hybridse::sqlcase::SqlCase& sql_case,  /
         std::string placeholder = "{" + std::to_string(i) + "}";
         boost::replace_all(sql, placeholder, sql_case.inputs()[i].name_);
     }
-    boost::replace_all(sql, "{auto}", hybridse::sqlcase::SqlCase::GenRand("auto_t") +
-            std::to_string(static_cast<int64_t>(time(NULL))));
+    boost::replace_all(
+        sql, "{auto}",
+        hybridse::sqlcase::SqlCase::GenRand("auto_t") + std::to_string(static_cast<int64_t>(time(NULL))));
     LOG(INFO) << sql;
     std::string lower_sql = sql;
     boost::to_lower(lower_sql);
@@ -528,8 +529,9 @@ void SQLSDKQueryTest::BatchRequestExecuteSQLWithCommonColumnIndices(hybridse::sq
         std::string placeholder = "{" + std::to_string(i) + "}";
         boost::replace_all(sql, placeholder, sql_case.inputs()[i].name_);
     }
-    boost::replace_all(sql, "{auto}", hybridse::sqlcase::SqlCase::GenRand("auto_t") +
-            std::to_string(static_cast<int64_t>(time(NULL))));
+    boost::replace_all(
+        sql, "{auto}",
+        hybridse::sqlcase::SqlCase::GenRand("auto_t") + std::to_string(static_cast<int64_t>(time(NULL))));
     LOG(INFO) << sql;
     std::string lower_sql = sql;
     boost::to_lower(lower_sql);
@@ -733,7 +735,8 @@ void SQLSDKBatchRequestQueryTest::DistributeRunBatchRequestProcedureModeSDK(
 }
 void SQLSDKClusterOnlineBatchQueryTest::DistributeRunBatchModeSDK(hybridse::sqlcase::SqlCase& sql_case,  // NOLINT
                                                                   std::shared_ptr<SQLRouter> router,
-                                                                  const std::vector<std::string>& tbEndpoints, const int partition_num) {
+                                                                  const std::vector<std::string>& tbEndpoints,
+                                                                  const int partition_num) {
     hybridse::sdk::Status status;
     CreateDB(sql_case, router);
     CreateTables(sql_case, router, partition_num);

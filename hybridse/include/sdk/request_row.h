@@ -19,6 +19,7 @@
 
 #include <string>
 #include <vector>
+
 #include "sdk/base.h"
 
 namespace hybridse {

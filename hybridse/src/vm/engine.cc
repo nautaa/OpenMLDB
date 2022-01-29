@@ -15,9 +15,11 @@
  */
 
 #include "vm/engine.h"
+
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "base/fe_strings.h"
 #include "boost/none.hpp"
 #include "boost/optional.hpp"
@@ -123,8 +125,8 @@ bool Engine::GetDependentTables(const node::PlanNode* node, const std::string& d
         switch (node->GetType()) {
             case node::kPlanTypeTable: {
                 const node::TablePlanNode* table_node = dynamic_cast<const node::TablePlanNode*>(node);
-                db_tables->insert(std::make_pair(table_node->db_.empty() ? default_db : table_node->db_,
-                                                 table_node->table_));
+                db_tables->insert(
+                    std::make_pair(table_node->db_.empty() ? default_db : table_node->db_, table_node->table_));
                 return true;
             }
             case node::kPlanTypeProject: {
@@ -185,9 +187,10 @@ bool Engine::IsCompatibleCache(RunSession& session,  // NOLINT
         }
         for (int i = 0; i < batch_sess->GetParameterSchema().size(); i++) {
             if (cache_ctx.parameter_types.Get(i).type() != batch_sess->GetParameterSchema().Get(i).type()) {
-                status = Status(common::kEngineCacheError, "Inconsistent cache parameter type, expect " +
-                                                       batch_sess->GetParameterSchema().Get(i).DebugString() +
-                                                       " but get " + cache_ctx.parameter_types.Get(i).DebugString());
+                status =
+                    Status(common::kEngineCacheError, "Inconsistent cache parameter type, expect " +
+                                                          batch_sess->GetParameterSchema().Get(i).DebugString() +
+                                                          " but get " + cache_ctx.parameter_types.Get(i).DebugString());
                 return false;
             }
         }
@@ -268,10 +271,8 @@ bool Engine::Get(const std::string& sql, const std::string& db, RunSession& sess
 }
 
 bool Engine::Explain(const std::string& sql, const std::string& db, EngineMode engine_mode,
-                     const codec::Schema& parameter_schema,
-                     const std::set<size_t>& common_column_indices,
-                     ExplainOutput* explain_output,
-                     base::Status* status) {
+                     const codec::Schema& parameter_schema, const std::set<size_t>& common_column_indices,
+                     ExplainOutput* explain_output, base::Status* status) {
     if (explain_output == NULL || status == NULL) {
         LOG(WARNING) << "input args is invalid";
         return false;
@@ -329,7 +330,7 @@ bool Engine::Explain(const std::string& sql, const std::string& db, EngineMode e
         size_t schema_size = static_cast<size_t>(explain_output->output_schema.size());
         for (size_t idx : output_common_indices) {
             if (idx >= schema_size) {
-                status->msg =  "Output common column index out of bound: " + std::to_string(idx);
+                status->msg = "Output common column index out of bound: " + std::to_string(idx);
                 status->code = common::kCommonIndexError;
                 return false;
             }
@@ -350,8 +351,8 @@ bool Engine::Explain(const std::string& sql, const std::string& db, EngineMode e
     return Explain(sql, db, engine_mode, parameter_schema, {}, explain_output, status);
 }
 bool Engine::Explain(const std::string& sql, const std::string& db, EngineMode engine_mode,
-             const std::set<size_t>& common_column_indices,
-             ExplainOutput* explain_output, base::Status* status) {
+                     const std::set<size_t>& common_column_indices, ExplainOutput* explain_output,
+                     base::Status* status) {
     const codec::Schema empty_schema;
     return Explain(sql, db, engine_mode, empty_schema, common_column_indices, explain_output, status);
 }
@@ -364,9 +365,7 @@ void Engine::ClearCacheLocked(const std::string& db) {
     }
 }
 
-EngineOptions Engine::GetEngineOptions() {
-    return options_;
-}
+EngineOptions Engine::GetEngineOptions() { return options_; }
 
 std::shared_ptr<CompileInfo> Engine::GetCacheLocked(const std::string& db, const std::string& sql,
                                                     EngineMode engine_mode) {
@@ -478,9 +477,7 @@ int32_t BatchRequestRunSession::Run(const uint32_t id, const std::vector<Row>& r
     ctx.ClearCache();
     return 0;
 }
-int32_t BatchRunSession::Run(std::vector<Row>& rows, uint64_t limit) {
-    return Run(Row(), rows, limit);
-}
+int32_t BatchRunSession::Run(std::vector<Row>& rows, uint64_t limit) { return Run(Row(), rows, limit); }
 int32_t BatchRunSession::Run(const Row& parameter_row, std::vector<Row>& rows, uint64_t limit) {
     auto& sql_ctx = std::dynamic_pointer_cast<SqlCompileInfo>(compile_info_)->get_sql_context();
     RunnerContext ctx(&sql_ctx.cluster_job, parameter_row, is_debug_);

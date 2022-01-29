@@ -627,10 +627,8 @@ bool SQLClusterRouter::ShowDB(std::vector<std::string>* dbs, hybridse::sdk::Stat
 }
 
 // get all table names in all DB
-std::vector<std::string> SQLClusterRouter::GetAllTables() {
-    return cluster_sdk_->GetAllTables();
-}
- 
+std::vector<std::string> SQLClusterRouter::GetAllTables() { return cluster_sdk_->GetAllTables(); }
+
 bool SQLClusterRouter::CreateDB(const std::string& db, hybridse::sdk::Status* status) {
     if (status == NULL) {
         return false;
@@ -1705,9 +1703,7 @@ bool SQLClusterRouter::UpdateOfflineTableInfo(const ::openmldb::nameserver::Tabl
     return taskmanager_client_ptr->ExportOfflineData(sql, config, default_db, job_info);
 }
 
-bool SQLClusterRouter::NotifyTableChange() {
-    return cluster_sdk_->TriggerNotify();
-}
+bool SQLClusterRouter::NotifyTableChange() { return cluster_sdk_->TriggerNotify(); }
 
 }  // namespace sdk
 }  // namespace openmldb

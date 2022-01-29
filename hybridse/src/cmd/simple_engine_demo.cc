@@ -16,11 +16,13 @@
 
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <algorithm>
 #include <map>
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "base/texttable.h"
 #include "boost/algorithm/string.hpp"
 #include "codec/fe_row_codec.h"
@@ -41,8 +43,8 @@
 #include "llvm/Transforms/Scalar.h"
 #include "llvm/Transforms/Scalar/GVN.h"
 #include "sys/time.h"
-#include "vm/engine.h"
 #include "testing/test_base.h"
+#include "vm/engine.h"
 
 using namespace llvm;       // NOLINT (build/namespaces)
 using namespace llvm::orc;  // NOLINT (build/namespaces)
@@ -158,8 +160,7 @@ int run() {
         base::Status get_status;
         BatchRunSession session;
         // compile sql
-        if (!engine.Get(sql, "simple_db", session, get_status) ||
-            get_status.code != common::kOk) {
+        if (!engine.Get(sql, "simple_db", session, get_status) || get_status.code != common::kOk) {
             return SIMPLE_ENGINE_COMPILE_ERROR;
         }
         std::vector<Row> outputs;

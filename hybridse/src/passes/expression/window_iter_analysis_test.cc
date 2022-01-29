@@ -15,7 +15,9 @@
  */
 
 #include "passes/expression/window_iter_analysis.h"
+
 #include <tuple>
+
 #include "passes/expression/expr_pass_test.h"
 #include "udf/literal_traits.h"
 
@@ -58,8 +60,7 @@ TEST_F(WindowIterAnalysisTest, Test) {
 
     auto row_arg = function_let->GetArg(0);
     auto window_arg = function_let->GetArg(1);
-    Status status = window_dep_analyzer.VisitFunctionLet(row_arg, window_arg,
-                                                         function_let->body());
+    Status status = window_dep_analyzer.VisitFunctionLet(row_arg, window_arg, function_let->body());
     ASSERT_TRUE(status.isOK()) << status.str();
 
     auto expr_list = function_let->body();

@@ -18,6 +18,7 @@
 #define HYBRIDSE_INCLUDE_NODE_NODE_ENUM_H_
 
 #include <string>
+
 #include "proto/fe_common.pb.h"
 #include "proto/fe_type.pb.h"
 namespace hybridse {
@@ -189,7 +190,7 @@ enum FnOperator {
     kFnOpDot,         // "."
     kFnOpAt,          // "[]"
     kFnOpLike,        // "LIKE"
-    kFnOpILike,        // "ILIKE"
+    kFnOpILike,       // "ILIKE"
     kFnOpIn,          // "IN"
     kFnOpBracket,     // "()"
     kFnOpIsNull,      // "is_null"
@@ -201,12 +202,7 @@ enum FnOperator {
     kFnOpBitwiseNot,  // "~"
 };
 
-enum FrameType {
-    kFrameRange,
-    kFrameRows,
-    kFrameRowsRange,
-    kFrameRowsMergeRowsRange
-};
+enum FrameType { kFrameRange, kFrameRows, kFrameRowsRange, kFrameRowsMergeRowsRange };
 enum BoundType {
     kPrecedingUnbound = 0,
     kPreceding,

@@ -15,6 +15,7 @@
  */
 
 #include "base/fe_slice.h"
+
 #include "gtest/gtest.h"
 
 namespace hybridse {

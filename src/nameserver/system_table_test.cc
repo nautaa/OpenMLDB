@@ -14,18 +14,20 @@
  * limitations under the License.
  */
 
+#include "nameserver/system_table.h"
+
 #include <gflags/gflags.h>
 #include <sched.h>
 #include <unistd.h>
-#include <vector>
+
 #include <string>
+#include <vector>
 
 #include "base/glog_wapper.h"
 #include "brpc/server.h"
 #include "client/ns_client.h"
 #include "common/timer.h"
 #include "gtest/gtest.h"
-#include "nameserver/system_table.h"
 #include "rpc/rpc_client.h"
 #include "test/util.h"
 

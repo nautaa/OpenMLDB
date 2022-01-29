@@ -20,6 +20,7 @@
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "sdk/base.h"
 #include "sdk/result_set.h"
 
@@ -42,18 +43,12 @@ class TabletSdk {
     TabletSdk() = default;
     virtual ~TabletSdk() {}
 
-    virtual void Insert(const std::string& db, const std::string& sql,
-                        sdk::Status* status) = 0;
+    virtual void Insert(const std::string& db, const std::string& sql, sdk::Status* status) = 0;
 
-    virtual std::shared_ptr<ResultSet> Query(const std::string& db,
-                                             const std::string& sql,
+    virtual std::shared_ptr<ResultSet> Query(const std::string& db, const std::string& sql, sdk::Status* status) = 0;
+    virtual std::shared_ptr<ResultSet> Query(const std::string& db, const std::string& sql, const std::string& row,
                                              sdk::Status* status) = 0;
-    virtual std::shared_ptr<ResultSet> Query(const std::string& db,
-                                             const std::string& sql,
-                                             const std::string& row,
-                                             sdk::Status* status) = 0;
-    virtual std::shared_ptr<ExplainInfo> Explain(const std::string& db,
-                                                 const std::string& sql,
+    virtual std::shared_ptr<ExplainInfo> Explain(const std::string& db, const std::string& sql,
                                                  sdk::Status* status) = 0;
 };
 

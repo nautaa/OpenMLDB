@@ -51,8 +51,7 @@ enum ReplicatorRole { kLeaderNode = 1, kFollowerNode };
 class LogReplicator {
  public:
     LogReplicator(uint32_t tid, uint32_t pid, const std::string& path,
-                  const std::map<std::string, std::string>& real_ep_map,
-                  const ReplicatorRole& role);
+                  const std::map<std::string, std::string>& real_ep_map, const ReplicatorRole& role);
 
     ~LogReplicator();
 

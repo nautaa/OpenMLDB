@@ -128,7 +128,7 @@ TEST_F(ZkClientTest, ZkNodeChange) {
     ok = client2.WatchItem(node, [&detect] { detect.store(true); });
     ASSERT_TRUE(ok);
     ASSERT_TRUE(client.SetNodeValue(node, "2"));
-    for (int i = 0 ; i < 30; i++) {
+    for (int i = 0; i < 30; i++) {
         if (detect.load()) {
             break;
         }
@@ -137,7 +137,7 @@ TEST_F(ZkClientTest, ZkNodeChange) {
     ASSERT_TRUE(detect.load());
     detect.store(false);
     ASSERT_TRUE(client.SetNodeValue(node, "3"));
-    for (int i = 0 ; i < 30; i++) {
+    for (int i = 0; i < 30; i++) {
         if (detect.load()) {
             break;
         }

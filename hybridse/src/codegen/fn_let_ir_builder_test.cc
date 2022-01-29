@@ -14,9 +14,11 @@
  * limitations under the License.
  */
 #include "codegen/fn_let_ir_builder_test.h"
+
 #include <memory>
 #include <string>
 #include <vector>
+
 #include "case/sql_case.h"
 #include "codec/fe_row_codec.h"
 #include "codec/list_iterator_codec.h"
@@ -471,24 +473,23 @@ TEST_F(FnLetIRBuilderTest, test_simple_project_with_placeholder) {
     ASSERT_TRUE(BuildT1Buf(table1, &ptr, &size));
     Row row(base::RefCountedSlice::Create(ptr, size));
 
-    int8_t * ptr2 = NULL;
+    int8_t* ptr2 = NULL;
     uint32_t size2 = 0;
     type::TableDef parameter_schema;
     ASSERT_TRUE(BuildParameter1Buf(parameter_schema, &ptr2, &size2));
     Row parameter_row(base::RefCountedSlice::Create(ptr2, size2));
 
-
     int8_t* row_ptr = reinterpret_cast<int8_t*>(&row);
     int8_t* output = NULL;
     int8_t* window_ptr = nullptr;
-    int8_t *parameter_row_ptr = reinterpret_cast<int8_t*>(&parameter_row);
+    int8_t* parameter_row_ptr = reinterpret_cast<int8_t*>(&parameter_row);
     vm::Schema schema;
     CheckFnLetBuilderWithParameterRow(&manager, table1, parameter_schema, "", sql, row_ptr, window_ptr,
                                       parameter_row_ptr, &schema, &output);
     ASSERT_EQ(2, schema.size());
     ASSERT_EQ(15u, *reinterpret_cast<uint32_t*>(output + 2));
     ASSERT_EQ(32u, *reinterpret_cast<uint32_t*>(output + 7));
-    ASSERT_EQ(100u, *reinterpret_cast<uint32_t*>(output + 7+4));
+    ASSERT_EQ(100u, *reinterpret_cast<uint32_t*>(output + 7 + 4));
     free(ptr);
 }
 }  // namespace codegen

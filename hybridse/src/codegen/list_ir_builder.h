@@ -18,6 +18,7 @@
 #define HYBRIDSE_SRC_CODEGEN_LIST_IR_BUILDER_H_
 
 #include <string>
+
 #include "base/fe_status.h"
 #include "codegen/native_value.h"
 #include "codegen/scope_var.h"
@@ -34,22 +35,14 @@ class ListIRBuilder {
     ListIRBuilder(::llvm::BasicBlock* block, ScopeVar* scope_var);
     ~ListIRBuilder();
 
-    Status BuildIterator(::llvm::Value* list, const node::TypeNode* elem_type,
-                         ::llvm::Value** output);
-    Status BuildIteratorHasNext(::llvm::Value* iterator,
-                                const node::TypeNode* elem_type,
-                                ::llvm::Value** output);
-    Status BuildIteratorNext(::llvm::Value* iterator,
-                             const node::TypeNode* elem_type,
-                             bool elem_nullable, NativeValue* output);
-    Status BuildIteratorDelete(::llvm::Value* iterator,
-                               const node::TypeNode* elem_type,
-                               ::llvm::Value** output);
+    Status BuildIterator(::llvm::Value* list, const node::TypeNode* elem_type, ::llvm::Value** output);
+    Status BuildIteratorHasNext(::llvm::Value* iterator, const node::TypeNode* elem_type, ::llvm::Value** output);
+    Status BuildIteratorNext(::llvm::Value* iterator, const node::TypeNode* elem_type, bool elem_nullable,
+                             NativeValue* output);
+    Status BuildIteratorDelete(::llvm::Value* iterator, const node::TypeNode* elem_type, ::llvm::Value** output);
 
  private:
-    Status BuildStructTypeIteratorNext(::llvm::Value* iterator,
-                                       const node::TypeNode* elem_type,
-                                       NativeValue* output);
+    Status BuildStructTypeIteratorNext(::llvm::Value* iterator, const node::TypeNode* elem_type, NativeValue* output);
     ::llvm::BasicBlock* block_;
     ScopeVar* sv_;
 };

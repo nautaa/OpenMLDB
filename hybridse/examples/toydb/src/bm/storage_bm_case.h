@@ -17,6 +17,7 @@
 #ifndef HYBRIDSE_EXAMPLES_TOYDB_SRC_BM_STORAGE_BM_CASE_H_
 #define HYBRIDSE_EXAMPLES_TOYDB_SRC_BM_STORAGE_BM_CASE_H_
 #include <string>
+
 #include "benchmark/benchmark.h"
 #include "testing/toydb_engine_test_base.h"
 #include "vm/mem_catalog.h"
@@ -24,8 +25,7 @@ namespace hybridse {
 namespace bm {
 enum MODE { BENCHMARK, TEST };
 void MemTableIterate(benchmark::State* state, MODE mode, int64_t data_size);
-void RequestUnionTableIterate(benchmark::State* state, MODE mode,
-                              int64_t data_size);
+void RequestUnionTableIterate(benchmark::State* state, MODE mode, int64_t data_size);
 void MemSegmentIterate(benchmark::State* state, MODE mode, int64_t data_size);
 void TabletFullIterate(benchmark::State* state, MODE mode, int64_t data_size);
 void TabletWindowIterate(benchmark::State* state, MODE mode, int64_t data_size);

@@ -15,6 +15,7 @@
  */
 
 #include "node/sql_node.h"
+
 #include "gtest/gtest.h"
 #include "node/node_manager.h"
 
@@ -923,8 +924,8 @@ TEST_F(SqlNodeTest, QueryTypeNameTest) {
 TEST_F(SqlNodeTest, OrderByNodeTest) {
     // expr list
     ExprListNode *expr_list1 = node_manager_->MakeExprList();
-    OrderExpression* order_expression = node_manager_->MakeOrderExpression(node_manager_->MakeColumnRefNode("col1", ""),
-                                                                           true);
+    OrderExpression *order_expression =
+        node_manager_->MakeOrderExpression(node_manager_->MakeColumnRefNode("col1", ""), true);
     expr_list1->AddChild(order_expression);
     expr_list1->AddChild(node_manager_->MakeOrderExpression(node_manager_->MakeColumnRefNode("col2", ""), true));
 
@@ -971,14 +972,16 @@ TEST_F(SqlNodeTest, OrderByNodeTest) {
         std::ostringstream oss;
         order_expression->Print(oss, "");
         ASSERT_EQ("col1 ASC", order_expression->GetExprString());
-        ASSERT_EQ("+-node[kExpr]\n"
-            "  +-order_expression: col1 ASC", oss.str());
+        ASSERT_EQ(
+            "+-node[kExpr]\n"
+            "  +-order_expression: col1 ASC",
+            oss.str());
     }
 }
 TEST_F(SqlNodeTest, ParameterExprTest) {
-    ParameterExpr* parameter_expr1 = node_manager_->MakeParameterExpr(1);
-    ParameterExpr* parameter_expr2 = node_manager_->MakeParameterExpr(1);
-    ParameterExpr* parameter_expr3 = node_manager_->MakeParameterExpr(2);
+    ParameterExpr *parameter_expr1 = node_manager_->MakeParameterExpr(1);
+    ParameterExpr *parameter_expr2 = node_manager_->MakeParameterExpr(1);
+    ParameterExpr *parameter_expr3 = node_manager_->MakeParameterExpr(2);
     ASSERT_TRUE(node::ExprEquals(parameter_expr1, parameter_expr1));
     ASSERT_TRUE(node::ExprEquals(parameter_expr1, parameter_expr2));
     ASSERT_FALSE(node::ExprEquals(parameter_expr1, parameter_expr3));

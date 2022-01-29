@@ -15,7 +15,9 @@
  */
 
 #include "base/mem_pool.h"
+
 #include <string>
+
 #include "gtest/gtest.h"
 
 namespace hybridse {

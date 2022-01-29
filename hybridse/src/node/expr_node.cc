@@ -15,7 +15,9 @@
  */
 
 #include "node/expr_node.h"
+
 #include <absl/strings/str_cat.h>
+
 #include "codec/fe_row_codec.h"
 #include "codegen/arithmetic_expr_ir_builder.h"
 #include "codegen/type_ir_builder.h"
@@ -36,14 +38,11 @@ Status ColumnRefNode::InferAttr(ExprAnalysisContext* ctx) {
     auto schemas_ctx = ctx->schemas_context();
     size_t schema_idx;
     size_t col_idx;
-    CHECK_STATUS(
-        schemas_ctx->ResolveColumnRefIndex(this, &schema_idx, &col_idx),
-        "Fail to resolve column ", GetExprString());
-    type::Type col_type =
-        schemas_ctx->GetSchema(schema_idx)->Get(col_idx).type();
+    CHECK_STATUS(schemas_ctx->ResolveColumnRefIndex(this, &schema_idx, &col_idx), "Fail to resolve column ",
+                 GetExprString());
+    type::Type col_type = schemas_ctx->GetSchema(schema_idx)->Get(col_idx).type();
     node::DataType dtype;
-    CHECK_TRUE(vm::SchemaType2DataType(col_type, &dtype), kTypeError,
-               "Fail to convert type: ", col_type);
+    CHECK_TRUE(vm::SchemaType2DataType(col_type, &dtype), kTypeError, "Fail to convert type: ", col_type);
     auto nm = ctx->node_manager();
     SetOutputType(nm->MakeTypeNode(node::kList, dtype));
     return Status::OK();
@@ -53,27 +52,23 @@ Status ColumnIdNode::InferAttr(ExprAnalysisContext* ctx) {
     auto schemas_ctx = ctx->schemas_context();
     size_t schema_idx;
     size_t col_idx;
-    CHECK_STATUS(schemas_ctx->ResolveColumnIndexByID(this->GetColumnID(),
-                                                     &schema_idx, &col_idx),
+    CHECK_STATUS(schemas_ctx->ResolveColumnIndexByID(this->GetColumnID(), &schema_idx, &col_idx),
                  "Fail to resolve column ", GetExprString());
-    type::Type col_type =
-        schemas_ctx->GetSchema(schema_idx)->Get(col_idx).type();
+    type::Type col_type = schemas_ctx->GetSchema(schema_idx)->Get(col_idx).type();
     node::DataType dtype;
-    CHECK_TRUE(vm::SchemaType2DataType(col_type, &dtype), kTypeError,
-               "Fail to convert type: ", col_type);
+    CHECK_TRUE(vm::SchemaType2DataType(col_type, &dtype), kTypeError, "Fail to convert type: ", col_type);
     auto nm = ctx->node_manager();
     SetOutputType(nm->MakeTypeNode(node::kList, dtype));
     return Status::OK();
 }
-Status ParameterExpr::InferAttr(ExprAnalysisContext *ctx) {
+Status ParameterExpr::InferAttr(ExprAnalysisContext* ctx) {
     CHECK_TRUE(nullptr != ctx->parameter_types(), common::kTypeError,
                "Fail to get parameter type with NULL parameter types")
-    CHECK_TRUE(position() > 0 &&  position() <= ctx->parameter_types()->size(), common::kTypeError,
+    CHECK_TRUE(position() > 0 && position() <= ctx->parameter_types()->size(), common::kTypeError,
                "Fail to get parameter type with position ", position())
-    type::Type parameter_type = ctx->parameter_types()->Get(position()-1).type();
+    type::Type parameter_type = ctx->parameter_types()->Get(position() - 1).type();
     node::DataType dtype;
-    CHECK_TRUE(vm::SchemaType2DataType(parameter_type, &dtype), kTypeError,
-               "Fail to convert type: ", parameter_type);
+    CHECK_TRUE(vm::SchemaType2DataType(parameter_type, &dtype), kTypeError, "Fail to convert type: ", parameter_type);
     SetOutputType(ctx->node_manager()->MakeTypeNode(dtype));
     return Status::OK();
 }
@@ -96,13 +91,11 @@ bool CallExprNode::RequireListAt(ExprAnalysisContext* ctx, size_t index) const {
     return GetFnDef()->RequireListAt(ctx, index);
 }
 
-bool CallExprNode::IsListReturn(ExprAnalysisContext* ctx) const {
-    return GetFnDef()->IsListReturn(ctx);
-}
+bool CallExprNode::IsListReturn(ExprAnalysisContext* ctx) const { return GetFnDef()->IsListReturn(ctx); }
 Status ExprIdNode::InferAttr(ExprAnalysisContext* ctx) {
     // var node should be bind outside
-    CHECK_TRUE(this->GetOutputType() != nullptr, kTypeError,
-               this->GetExprString(), "  should get type binding before infer");
+    CHECK_TRUE(this->GetOutputType() != nullptr, kTypeError, this->GetExprString(),
+               "  should get type binding before infer");
     return Status::OK();
 }
 
@@ -116,13 +109,11 @@ Status GetFieldExpr::InferAttr(ExprAnalysisContext* ctx) {
     if (input_type->base() == node::kTuple) {
         try {
             size_t idx = GetColumnID();
-            CHECK_TRUE(0 <= idx && idx < input_type->GetGenericSize(),
-                       kTypeError, "Tuple idx out of range: ", idx);
+            CHECK_TRUE(0 <= idx && idx < input_type->GetGenericSize(), kTypeError, "Tuple idx out of range: ", idx);
             SetOutputType(input_type->GetGenericType(idx));
             SetNullable(input_type->IsGenericNullable(idx));
         } catch (std::invalid_argument& err) {
-            return Status(common::kTypeError,
-                          "Invalid Tuple index: " + this->GetColumnName());
+            return Status(common::kTypeError, "Invalid Tuple index: " + this->GetColumnName());
         }
 
     } else if (input_type->base() == node::kRow) {
@@ -131,21 +122,17 @@ Status GetFieldExpr::InferAttr(ExprAnalysisContext* ctx) {
 
         size_t schema_idx;
         size_t col_idx;
-        CHECK_STATUS(schemas_context->ResolveColumnIndexByID(
-                         GetColumnID(), &schema_idx, &col_idx),
+        CHECK_STATUS(schemas_context->ResolveColumnIndexByID(GetColumnID(), &schema_idx, &col_idx),
                      "Fail to resolve column ", GetExprString());
 
-        type::Type col_type =
-            schemas_context->GetSchema(schema_idx)->Get(col_idx).type();
+        type::Type col_type = schemas_context->GetSchema(schema_idx)->Get(col_idx).type();
         node::DataType dtype;
-        CHECK_TRUE(vm::SchemaType2DataType(col_type, &dtype), kTypeError,
-                   "Fail to convert type: ", col_type);
+        CHECK_TRUE(vm::SchemaType2DataType(col_type, &dtype), kTypeError, "Fail to convert type: ", col_type);
 
         auto nm = ctx->node_manager();
         SetOutputType(nm->MakeTypeNode(dtype));
     } else {
-        return Status(common::kTypeError,
-                      "Get field's input is neither tuple nor row");
+        return Status(common::kTypeError, "Get field's input is neither tuple nor row");
     }
     return Status::OK();
 }
@@ -167,31 +154,25 @@ Status CaseWhenExprNode::InferAttr(ExprAnalysisContext* ctx) {
         auto expr_type = expr->GetOutputType();
         if (nullptr == type) {
             type = expr_type;
-        } else if (expr_type->base() != node::kNull &&
-                   type->base() != node::kNull) {
-            CHECK_TRUE(
-                type->Equals(expr_type), kTypeError,
-                "fail infer case when expr attr: then return types and else "
-                "return type aren't compatible");
+        } else if (expr_type->base() != node::kNull && type->base() != node::kNull) {
+            CHECK_TRUE(type->Equals(expr_type), kTypeError,
+                       "fail infer case when expr attr: then return types and else "
+                       "return type aren't compatible");
         }
     }
-    CHECK_TRUE(nullptr != else_expr(), kTypeError,
-               "fail infer case when expr attr: else expr is nullptr");
-    CHECK_TRUE(node::IsNullPrimary(else_expr()) ||
-                   type->Equals(else_expr()->GetOutputType()),
-               kTypeError,
+    CHECK_TRUE(nullptr != else_expr(), kTypeError, "fail infer case when expr attr: else expr is nullptr");
+    CHECK_TRUE(node::IsNullPrimary(else_expr()) || type->Equals(else_expr()->GetOutputType()), kTypeError,
                "fail infer case when expr attr: then return types and else "
                "return type aren't compatible");
 
-    CHECK_TRUE(nullptr != type, kTypeError,
-               "fail infer case when expr: output type is null");
+    CHECK_TRUE(nullptr != type, kTypeError, "fail infer case when expr: output type is null");
     SetOutputType(type);
     SetNullable(true);
     return Status::OK();
 }
 
-Status ExprNode::IsCastAccept(node::NodeManager* nm, const TypeNode* src,
-                              const TypeNode* dist, const TypeNode** output) {
+Status ExprNode::IsCastAccept(node::NodeManager* nm, const TypeNode* src, const TypeNode* dist,
+                              const TypeNode** output) {
     CHECK_TRUE(src != nullptr && dist != nullptr, kTypeError);
     if (TypeEquals(src, dist) || IsSafeCast(src, dist)) {
         *output = dist;
@@ -199,30 +180,25 @@ Status ExprNode::IsCastAccept(node::NodeManager* nm, const TypeNode* src,
     }
 
     if (src->IsDate() && dist->IsNumber() && !dist->IsBool()) {
-        return Status(
-            common::kCodegenError,
-            "incastable from " + src->GetName() + " to " + dist->GetName());
+        return Status(common::kCodegenError, "incastable from " + src->GetName() + " to " + dist->GetName());
     }
 
     if (src->IsNumber() && dist->IsDate()) {
-        return Status(
-            common::kCodegenError,
-            "incastable from " + src->GetName() + " to " + dist->GetName());
+        return Status(common::kCodegenError, "incastable from " + src->GetName() + " to " + dist->GetName());
     }
     *output = dist;
     return Status::OK();
 }
 
 /**
-* support rules:
-*  case target_type
-*   bool         -> from_type is bool
-*   int*         -> from_type is bool or from_type is equal/smaller integral type
-*   float|double -> from_type is bool or equal/smaller float type
-*   timestamp    -> from_type is timestamp or integral type
-*/
-bool ExprNode::IsSafeCast(const TypeNode* from_type,
-                          const TypeNode* target_type) {
+ * support rules:
+ *  case target_type
+ *   bool         -> from_type is bool
+ *   int*         -> from_type is bool or from_type is equal/smaller integral type
+ *   float|double -> from_type is bool or equal/smaller float type
+ *   timestamp    -> from_type is timestamp or integral type
+ */
+bool ExprNode::IsSafeCast(const TypeNode* from_type, const TypeNode* target_type) {
     if (from_type == nullptr || target_type == nullptr) {
         return false;
     }
@@ -237,8 +213,7 @@ bool ExprNode::IsSafeCast(const TypeNode* from_type,
         case kInt16:
             return from_base == kBool || from_base == kInt16;
         case kInt32:
-            return from_base == kBool || from_base == kInt16 ||
-                   from_base == kInt32;
+            return from_base == kBool || from_base == kInt16 || from_base == kInt32;
         case kInt64:
             return from_base == kBool || from_type->IsInteger();
         case kFloat:
@@ -252,17 +227,13 @@ bool ExprNode::IsSafeCast(const TypeNode* from_type,
     }
 }
 
-bool ExprNode::IsIntFloat2PointerCast(const TypeNode* lhs,
-                                      const TypeNode* rhs) {
+bool ExprNode::IsIntFloat2PointerCast(const TypeNode* lhs, const TypeNode* rhs) {
     return lhs->IsNumber() && rhs->IsFloating();
 }
-Status ExprNode::InferNumberCastTypes(node::NodeManager* nm,
-                                      const TypeNode* left_type,
-                                      const TypeNode* right_type,
+Status ExprNode::InferNumberCastTypes(node::NodeManager* nm, const TypeNode* left_type, const TypeNode* right_type,
                                       const TypeNode** output_type) {
     CHECK_TRUE(left_type->IsNumber() && right_type->IsNumber(), kTypeError,
-               "Fail to infer number types: invalid types ",
-               left_type->GetName(), ", ", right_type->GetName())
+               "Fail to infer number types: invalid types ", left_type->GetName(), ", ", right_type->GetName())
 
     if (IsSafeCast(left_type, right_type)) {
         *output_type = right_type;
@@ -273,28 +244,22 @@ Status ExprNode::InferNumberCastTypes(node::NodeManager* nm,
     } else if (IsIntFloat2PointerCast(right_type, left_type)) {
         *output_type = left_type;
     } else {
-        return base::Status(kTypeError,
-                            "Fail cast numbers, types aren't compatible:" +
-                                left_type->GetName() + ", " +
-                                right_type->GetName());
+        return base::Status(kTypeError, "Fail cast numbers, types aren't compatible:" + left_type->GetName() + ", " +
+                                            right_type->GetName());
     }
     return Status::OK();
 }
-Status ExprNode::AndTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                               const TypeNode* rhs,
+Status ExprNode::AndTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                const TypeNode** output_type) {
-    CHECK_TRUE(lhs->IsInteger() && rhs->IsInteger(), kTypeError,
-               "Invalid Bit-And type: lhs ", lhs->GetName(), " rhs ",
+    CHECK_TRUE(lhs->IsInteger() && rhs->IsInteger(), kTypeError, "Invalid Bit-And type: lhs ", lhs->GetName(), " rhs ",
                rhs->GetName())
 
     CHECK_STATUS(InferNumberCastTypes(nm, lhs, rhs, output_type))
     return Status::OK();
 }
-Status ExprNode::LShiftTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                                  const TypeNode* rhs,
+Status ExprNode::LShiftTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                   const TypeNode** output_type) {
-    CHECK_TRUE(lhs->IsInteger() && rhs->IsInteger(), kTypeError,
-               "Invalid lshift type: lhs ", lhs->GetName(), " rhs ",
+    CHECK_TRUE(lhs->IsInteger() && rhs->IsInteger(), kTypeError, "Invalid lshift type: lhs ", lhs->GetName(), " rhs ",
                rhs->GetName())
 
     CHECK_STATUS(InferNumberCastTypes(nm, lhs, rhs, output_type))
@@ -307,20 +272,16 @@ Status ExprNode::LShiftTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
 // 3. timestamp + integer
 // 4. number + number
 // 5. same tuple<number, number, ..> types can be added together
-Status ExprNode::AddTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                               const TypeNode* rhs,
+Status ExprNode::AddTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr && rhs != nullptr, kTypeError);
     CHECK_TRUE(!lhs->IsTuple() && !rhs->IsTuple(), kTypeError);
-    CHECK_TRUE(
-        (lhs->IsNull() || lhs->IsNumber() || lhs->IsTimestamp()) &&
-            (rhs->IsNull() || rhs->IsNumber() || rhs->IsTimestamp()),
-        kTypeError,
-        "Invalid Sub Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber() || lhs->IsTimestamp()) &&
+                   (rhs->IsNull() || rhs->IsNumber() || rhs->IsTimestamp()),
+               kTypeError, "Invalid Sub Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName())
     if (lhs->IsTupleNumbers() || rhs->IsTupleNumbers()) {
         CHECK_TRUE(TypeEquals(lhs, rhs), kTypeError,
-                   "Invalid Add Op type: lhs " + lhs->GetName() + " rhs " +
-                       rhs->GetName())
+                   "Invalid Add Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName())
         *output_type = lhs;
     } else if (lhs->IsNull()) {
         *output_type = rhs;
@@ -335,23 +296,19 @@ Status ExprNode::AddTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
     } else if (lhs->IsNumber() && rhs->IsNumber()) {
         CHECK_STATUS(InferNumberCastTypes(nm, lhs, rhs, output_type))
     } else {
-        return Status(kTypeError, "Invalid Add Op type: lhs " + lhs->GetName() +
-                                      " rhs " + rhs->GetName());
+        return Status(kTypeError, "Invalid Add Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName());
     }
     return Status::OK();
 }
 // Accept rules:
 // 1. timestamp - interger
 // 2. number - number
-Status ExprNode::SubTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                               const TypeNode* rhs,
+Status ExprNode::SubTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr && rhs != nullptr, kTypeError);
-    CHECK_TRUE(
-        (lhs->IsNull() || lhs->IsNumber() || lhs->IsTimestamp()) &&
-            (rhs->IsNull() || rhs->IsNumber() || rhs->IsTimestamp()),
-        kTypeError,
-        "Invalid Sub Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber() || lhs->IsTimestamp()) &&
+                   (rhs->IsNull() || rhs->IsNumber() || rhs->IsTimestamp()),
+               kTypeError, "Invalid Sub Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName())
     if (lhs->IsNull()) {
         *output_type = rhs;
     } else if (rhs->IsNull()) {
@@ -363,20 +320,15 @@ Status ExprNode::SubTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
     } else if (lhs->IsNumber() && rhs->IsNumber()) {
         CHECK_STATUS(InferNumberCastTypes(nm, lhs, rhs, output_type))
     } else {
-        return Status(kTypeError, "Invalid Sub Op type: lhs " + lhs->GetName() +
-                                      " rhs " + rhs->GetName());
+        return Status(kTypeError, "Invalid Sub Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName());
     }
     return Status::OK();
 }
-Status ExprNode::MultiTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                                 const TypeNode* rhs,
+Status ExprNode::MultiTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                  const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr && rhs != nullptr, kTypeError);
-    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber()) &&
-                   (rhs->IsNull() || rhs->IsNumber()),
-               kTypeError,
-               "Invalid Multi Op type: lhs " + lhs->GetName() + " rhs " +
-                   rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber()) && (rhs->IsNull() || rhs->IsNumber()), kTypeError,
+               "Invalid Multi Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName())
     if (lhs->IsNull()) {
         *output_type = rhs;
     } else if (rhs->IsNull()) {
@@ -386,26 +338,19 @@ Status ExprNode::MultiTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
     }
     return Status::OK();
 }
-Status ExprNode::FDivTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                                const TypeNode* rhs,
+Status ExprNode::FDivTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                 const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr && rhs != nullptr, kTypeError);
-    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber() || lhs->IsTimestamp()) &&
-                   (rhs->IsNull() || rhs->IsNumber()),
-               kTypeError,
-               "Invalid FDiv Op type: lhs " + lhs->GetName() + " rhs " +
-                   rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber() || lhs->IsTimestamp()) && (rhs->IsNull() || rhs->IsNumber()),
+               kTypeError, "Invalid FDiv Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName())
     *output_type = nm->MakeTypeNode(kDouble);
     return Status::OK();
 }
-Status ExprNode::SDivTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                                const TypeNode* rhs,
+Status ExprNode::SDivTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                 const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr && rhs != nullptr, kTypeError);
-    CHECK_TRUE((lhs->IsNull() || lhs->IsInteger()) &&
-                   (rhs->IsNull() || rhs->IsInteger()),
-               kTypeError, "Invalid SDiv type: lhs ", lhs->GetName(), " rhs ",
-               rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsInteger()) && (rhs->IsNull() || rhs->IsInteger()), kTypeError,
+               "Invalid SDiv type: lhs ", lhs->GetName(), " rhs ", rhs->GetName())
     if (lhs->IsNull()) {
         *output_type = rhs;
     } else if (rhs->IsNull()) {
@@ -415,14 +360,11 @@ Status ExprNode::SDivTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
     }
     return Status::OK();
 }
-Status ExprNode::ModTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                               const TypeNode* rhs,
+Status ExprNode::ModTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr && rhs != nullptr, kTypeError);
-    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber()) &&
-                   (rhs->IsNull() || rhs->IsNumber()),
-               kTypeError, "Invalid Mod type: lhs ", lhs->GetName(), " rhs ",
-               rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsNumber()) && (rhs->IsNull() || rhs->IsNumber()), kTypeError,
+               "Invalid Mod type: lhs ", lhs->GetName(), " rhs ", rhs->GetName())
     if (lhs->IsNull()) {
         *output_type = rhs;
     } else if (rhs->IsNull()) {
@@ -433,25 +375,20 @@ Status ExprNode::ModTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
     return Status::OK();
 }
 
-Status ExprNode::NotTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                               const TypeNode** output_type) {
+Status ExprNode::NotTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr, kTypeError);
-    CHECK_TRUE(lhs->IsNull() || lhs->IsBaseType(), kTypeError,
-               "Invalid Mod type: lhs ", lhs->GetName())
+    CHECK_TRUE(lhs->IsNull() || lhs->IsBaseType(), kTypeError, "Invalid Mod type: lhs ", lhs->GetName())
 
     *output_type = nm->MakeTypeNode(kBool);
     return Status::OK();
 }
 
-Status ExprNode::CompareTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                                   const TypeNode* rhs,
+Status ExprNode::CompareTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                    const TypeNode** output_type) {
     CHECK_TRUE(lhs != nullptr && rhs != nullptr, kTypeError);
     CHECK_TRUE(!lhs->IsTuple() && !rhs->IsTuple(), kTypeError);
-    CHECK_TRUE((lhs->IsNull() || lhs->IsBaseType()) &&
-                   (rhs->IsNull() || rhs->IsBaseType()),
-               kTypeError, "Invalid Compare Op type: lhs ", lhs->GetName(),
-               " rhs ", rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsBaseType()) && (rhs->IsNull() || rhs->IsBaseType()), kTypeError,
+               "Invalid Compare Op type: lhs ", lhs->GetName(), " rhs ", rhs->GetName())
 
     if (lhs->IsNull() || rhs->IsNull()) {
         *output_type = nm->MakeTypeNode(kBool);
@@ -462,19 +399,14 @@ Status ExprNode::CompareTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
     } else if (TypeEquals(lhs, rhs)) {
         *output_type = nm->MakeTypeNode(kBool);
     } else {
-        return Status(kTypeError, "Invalid Compare Op type: lhs " +
-                                      lhs->GetName() + " rhs " +
-                                      rhs->GetName());
+        return Status(kTypeError, "Invalid Compare Op type: lhs " + lhs->GetName() + " rhs " + rhs->GetName());
     }
     return Status::OK();
 }
-Status ExprNode::LogicalOpTypeAccept(node::NodeManager* nm, const TypeNode* lhs,
-                                     const TypeNode* rhs,
+Status ExprNode::LogicalOpTypeAccept(node::NodeManager* nm, const TypeNode* lhs, const TypeNode* rhs,
                                      const TypeNode** output_type) {
-    CHECK_TRUE((lhs->IsNull() || lhs->IsBaseType()) &&
-                   (rhs->IsNull() || rhs->IsBaseType()),
-               kTypeError, "Invalid Logical Op type: lhs ", lhs->GetName(),
-               " rhs ", rhs->GetName())
+    CHECK_TRUE((lhs->IsNull() || lhs->IsBaseType()) && (rhs->IsNull() || rhs->IsBaseType()), kTypeError,
+               "Invalid Logical Op type: lhs ", lhs->GetName(), " rhs ", rhs->GetName())
     *output_type = nm->MakeTypeNode(kBool);
     return Status::OK();
 }
@@ -505,8 +437,8 @@ Status ExprNode::BitwiseLogicalTypeAccept(node::NodeManager* nm, const TypeNode*
 
 Status ExprNode::BitwiseNotTypeAccept(node::NodeManager* nm, const TypeNode* rhs, const TypeNode** output_type) {
     CHECK_TRUE(rhs != nullptr, kTypeError, "value for bitwise NOT must not null");
-    CHECK_TRUE(rhs->IsNull() || rhs->IsIntegral(), kTypeError,
-               "value for bitwise NOT must be integral type, but get ", rhs->GetName());
+    CHECK_TRUE(rhs->IsNull() || rhs->IsIntegral(), kTypeError, "value for bitwise NOT must be integral type, but get ",
+               rhs->GetName());
     *output_type = rhs;
     return Status::OK();
 }
@@ -551,48 +483,42 @@ Status BinaryExpr::InferAttr(ExprAnalysisContext* ctx) {
     switch (GetOp()) {
         case kFnOpAdd: {
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(AddTypeAccept(ctx->node_manager(), left_type,
-                                       right_type, &top_type))
+            CHECK_STATUS(AddTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
         }
         case kFnOpMinus: {
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(SubTypeAccept(ctx->node_manager(), left_type,
-                                       right_type, &top_type))
+            CHECK_STATUS(SubTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
         }
         case kFnOpMulti: {
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(MultiTypeAccept(ctx->node_manager(), left_type,
-                                         right_type, &top_type))
+            CHECK_STATUS(MultiTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
         }
         case kFnOpMod: {
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(ModTypeAccept(ctx->node_manager(), left_type,
-                                       right_type, &top_type))
+            CHECK_STATUS(ModTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
         }
         case kFnOpDiv: {
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(SDivTypeAccept(ctx->node_manager(), left_type,
-                                        right_type, &top_type))
+            CHECK_STATUS(SDivTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
         }
         case kFnOpFDiv: {
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(FDivTypeAccept(ctx->node_manager(), left_type,
-                                        right_type, &top_type))
+            CHECK_STATUS(FDivTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
@@ -604,8 +530,7 @@ Status BinaryExpr::InferAttr(ExprAnalysisContext* ctx) {
         case kFnOpGt:
         case kFnOpGe: {
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(CompareTypeAccept(ctx->node_manager(), left_type,
-                                           right_type, &top_type))
+            CHECK_STATUS(CompareTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
@@ -615,8 +540,7 @@ Status BinaryExpr::InferAttr(ExprAnalysisContext* ctx) {
         case kFnOpAnd: {
             // all type accept
             const TypeNode* top_type = ctx->node_manager()->MakeTypeNode(kBool);
-            CHECK_STATUS(LogicalOpTypeAccept(ctx->node_manager(), left_type,
-                                             right_type, &top_type))
+            CHECK_STATUS(LogicalOpTypeAccept(ctx->node_manager(), left_type, right_type, &top_type))
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
@@ -641,10 +565,9 @@ Status BinaryExpr::InferAttr(ExprAnalysisContext* ctx) {
             SetOutputType(top_type);
             SetNullable(nullable);
             break;
-            }
+        }
         default:
-            return Status(common::kTypeError,
-                          "Unknown binary op type: " + ExprOpTypeName(GetOp()));
+            return Status(common::kTypeError, "Unknown binary op type: " + ExprOpTypeName(GetOp()));
     }
     return Status::OK();
 }
@@ -664,8 +587,7 @@ Status UnaryExpr::InferAttr(ExprAnalysisContext* ctx) {
             break;
         }
         case kFnOpMinus: {
-            CHECK_TRUE(dtype->IsNumber(), kTypeError,
-                       "Invalid unary type for minus: ", dtype->GetName());
+            CHECK_TRUE(dtype->IsNumber(), kTypeError, "Invalid unary type for minus: ", dtype->GetName());
             SetOutputType(dtype);
             SetNullable(nullable);
             break;
@@ -691,62 +613,52 @@ Status UnaryExpr::InferAttr(ExprAnalysisContext* ctx) {
             break;
         }
         default:
-            return Status(common::kTypeError,
-                          "Unknown unary op type: " + ExprOpTypeName(GetOp()));
+            return Status(common::kTypeError, "Unknown unary op type: " + ExprOpTypeName(GetOp()));
     }
     return Status::OK();
 }
 
 Status CondExpr::InferAttr(ExprAnalysisContext* ctx) {
-    CHECK_TRUE(GetCondition() != nullptr &&
-                   GetCondition()->GetOutputType() != nullptr &&
+    CHECK_TRUE(GetCondition() != nullptr && GetCondition()->GetOutputType() != nullptr &&
                    GetCondition()->GetOutputType()->base() == node::kBool,
                kTypeError, "Condition must be boolean type");
     CHECK_TRUE(GetLeft() != nullptr && GetRight() != nullptr, kTypeError);
     auto left_type = GetLeft()->GetOutputType();
     auto right_type = GetRight()->GetOutputType();
-    CHECK_TRUE(left_type != nullptr, kTypeError, kTypeError,
-               "Unknown cond left type");
-    CHECK_TRUE(right_type != nullptr, kTypeError, kTypeError,
-               "Unknown cond right type");
+    CHECK_TRUE(left_type != nullptr, kTypeError, kTypeError, "Unknown cond left type");
+    CHECK_TRUE(right_type != nullptr, kTypeError, kTypeError, "Unknown cond right type");
     CHECK_TRUE(TypeEquals(left_type, right_type), kTypeError,
-               "Condition's left and right type do not match: ",
-               left_type->GetName(), " : ", right_type->GetName());
+               "Condition's left and right type do not match: ", left_type->GetName(), " : ", right_type->GetName());
     this->SetOutputType(left_type);
     this->SetNullable(GetLeft()->nullable() || GetRight()->nullable());
     return Status::OK();
 }
 
-Status ExprAnalysisContext::InferAsUdf(node::ExprNode* expr,
-                                       const std::string& name) {
+Status ExprAnalysisContext::InferAsUdf(node::ExprNode* expr, const std::string& name) {
     auto nm = this->node_manager();
     std::vector<node::ExprNode*> proxy_args;
     for (size_t i = 0; i < expr->GetChildNum(); ++i) {
         auto child = expr->GetChild(i);
-        auto arg =
-            node_manager()->MakeExprIdNode("proxy_arg_" + std::to_string(i));
+        auto arg = node_manager()->MakeExprIdNode("proxy_arg_" + std::to_string(i));
         arg->SetOutputType(child->GetOutputType());
         arg->SetNullable(child->nullable());
         proxy_args.push_back(arg);
     }
     node::ExprNode* transformed = nullptr;
-    CHECK_STATUS(library()->Transform(name, proxy_args, nm, &transformed),
-                 "Resolve ", expr->GetExprString(), " as \"", name,
-                 "\" failed");
+    CHECK_STATUS(library()->Transform(name, proxy_args, nm, &transformed), "Resolve ", expr->GetExprString(), " as \"",
+                 name, "\" failed");
 
     node::ExprNode* target_expr = nullptr;
     passes::ResolveFnAndAttrs resolver(this);
-    CHECK_STATUS(resolver.VisitExpr(transformed, &target_expr), "Infer ",
-                 expr->GetExprString(), " as \"", name, "\" failed");
+    CHECK_STATUS(resolver.VisitExpr(transformed, &target_expr), "Infer ", expr->GetExprString(), " as \"", name,
+                 "\" failed");
 
     expr->SetOutputType(target_expr->GetOutputType());
     expr->SetNullable(target_expr->nullable());
     return Status::OK();
 }
 
-UnaryExpr* UnaryExpr::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeUnaryExprNode(GetChild(0), GetOp());
-}
+UnaryExpr* UnaryExpr::ShadowCopy(NodeManager* nm) const { return nm->MakeUnaryExprNode(GetChild(0), GetOp()); }
 
 BinaryExpr* BinaryExpr::ShadowCopy(NodeManager* nm) const {
     return nm->MakeBinaryExprNode(GetChild(0), GetChild(1), GetOp());
@@ -768,34 +680,24 @@ Status ExprListNode::InferAttr(ExprAnalysisContext* ctx) {
     return Status::OK();
 }
 
-OrderByNode* OrderByNode::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeOrderByNode(order_expressions_);
-}
-OrderExpression *OrderExpression::ShadowCopy(NodeManager *nm) const {
-    return nm->MakeOrderExpression(expr_, is_asc_);
-}
+OrderByNode* OrderByNode::ShadowCopy(NodeManager* nm) const { return nm->MakeOrderByNode(order_expressions_); }
+OrderExpression* OrderExpression::ShadowCopy(NodeManager* nm) const { return nm->MakeOrderExpression(expr_, is_asc_); }
 ExprIdNode* ExprIdNode::ShadowCopy(NodeManager* nm) const {
     auto expr_id = nm->MakeUnresolvedExprId(GetName());
     expr_id->SetId(GetId());
     return expr_id;
 }
 
-CastExprNode* CastExprNode::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeCastNode(cast_type_, GetChild(0));
-}
+CastExprNode* CastExprNode::ShadowCopy(NodeManager* nm) const { return nm->MakeCastNode(cast_type_, GetChild(0)); }
 
-WhenExprNode* WhenExprNode::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeWhenNode(when_expr(), then_expr());
-}
+WhenExprNode* WhenExprNode::ShadowCopy(NodeManager* nm) const { return nm->MakeWhenNode(when_expr(), then_expr()); }
 
 CaseWhenExprNode* CaseWhenExprNode::ShadowCopy(NodeManager* nm) const {
     auto node = new CaseWhenExprNode(when_expr_list(), else_expr());
     return nm->RegisterNode(node);
 }
 
-AllNode* AllNode::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeAllNode(GetRelationName(), GetDBName());
-}
+AllNode* AllNode::ShadowCopy(NodeManager* nm) const { return nm->MakeAllNode(GetRelationName(), GetDBName()); }
 
 BetweenExpr* BetweenExpr::ShadowCopy(NodeManager* nm) const {
     return nm->MakeBetweenExpr(GetLhs(), GetLow(), GetHigh(), is_not_between());
@@ -812,9 +714,7 @@ Status BetweenExpr::InferAttr(ExprAnalysisContext* ctx) {
     return Status::OK();
 }
 
-InExpr* InExpr::ShadowCopy(NodeManager *nm) const {
-    return nm->MakeInExpr(GetLhs(), GetInList(), IsNot());
-}
+InExpr* InExpr::ShadowCopy(NodeManager* nm) const { return nm->MakeInExpr(GetLhs(), GetInList(), IsNot()); }
 
 Status InExpr::InferAttr(ExprAnalysisContext* ctx) {
     CHECK_TRUE(kExprList == GetInList()->GetExprType(), kTypeError,
@@ -833,9 +733,7 @@ Status InExpr::InferAttr(ExprAnalysisContext* ctx) {
     return Status::OK();
 }
 
-EscapedExpr* EscapedExpr::ShadowCopy(NodeManager * nm) const {
-    return nm->MakeEscapeExpr(GetPattern(), GetEscape());
-}
+EscapedExpr* EscapedExpr::ShadowCopy(NodeManager* nm) const { return nm->MakeEscapeExpr(GetPattern(), GetEscape()); }
 
 // EscapedExpr output is only meaningful when using together with BinaryExpr[LIKE]
 // - output: tuple of (pattern, escape)
@@ -856,9 +754,7 @@ Status EscapedExpr::InferAttr(ExprAnalysisContext* ctx) {
     return Status::OK();
 }
 
-QueryExpr* QueryExpr::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeQueryExprNode(query_);
-}
+QueryExpr* QueryExpr::ShadowCopy(NodeManager* nm) const { return nm->MakeQueryExprNode(query_); }
 
 CondExpr* CondExpr::ShadowCopy(NodeManager* nm) const {
     return nm->MakeCondExpr(GetCondition(), GetLeft(), GetRight());
@@ -877,9 +773,7 @@ CallExprNode* CallExprNode::DeepCopy(NodeManager* nm) const {
     return nm->MakeFuncNode(new_fn, new_args, GetOver());
 }
 
-ParameterExpr *ParameterExpr::ShadowCopy(NodeManager *nm) const {
-    return nm->MakeParameterExpr(position());
-}
+ParameterExpr* ParameterExpr::ShadowCopy(NodeManager* nm) const { return nm->MakeParameterExpr(position()); }
 ConstNode* ConstNode::ShadowCopy(NodeManager* nm) const {
     switch (this->GetDataType()) {
         case node::kBool:
@@ -903,22 +797,18 @@ ConstNode* ConstNode::ShadowCopy(NodeManager* nm) const {
         case node::kNull:
             return nm->MakeConstNode();
         default: {
-            LOG(WARNING) << "Fail to copy primary expr of type " +
-                                node::DataTypeName(GetDataType());
+            LOG(WARNING) << "Fail to copy primary expr of type " + node::DataTypeName(GetDataType());
             return nm->MakeConstNode();
         }
     }
 }
 
 ColumnRefNode* ColumnRefNode::ShadowCopy(NodeManager* nm) const {
-    auto col =
-        nm->MakeColumnRefNode(GetColumnName(), GetRelationName(), GetDBName());
+    auto col = nm->MakeColumnRefNode(GetColumnName(), GetRelationName(), GetDBName());
     return col;
 }
 
-ColumnIdNode* ColumnIdNode::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeColumnIdNode(this->GetColumnID());
-}
+ColumnIdNode* ColumnIdNode::ShadowCopy(NodeManager* nm) const { return nm->MakeColumnIdNode(this->GetColumnID()); }
 
 GetFieldExpr* GetFieldExpr::ShadowCopy(NodeManager* nm) const {
     return nm->MakeGetFieldExpr(GetChild(0), GetColumnName(), GetColumnID());
@@ -931,9 +821,7 @@ StructExpr* StructExpr::ShadowCopy(NodeManager* nm) const {
     return nm->RegisterNode(node);
 }
 
-LambdaNode* LambdaNode::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeLambdaNode(args_, body_);
-}
+LambdaNode* LambdaNode::ShadowCopy(NodeManager* nm) const { return nm->MakeLambdaNode(args_, body_); }
 
 LambdaNode* LambdaNode::DeepCopy(NodeManager* nm) const {
     std::vector<ExprIdNode*> new_args;
@@ -956,43 +844,31 @@ LambdaNode* LambdaNode::DeepCopy(NodeManager* nm) const {
     }
 }
 
-ExternalFnDefNode* ExternalFnDefNode::ShadowCopy(NodeManager* nm) const {
-    return DeepCopy(nm);
-}
+ExternalFnDefNode* ExternalFnDefNode::ShadowCopy(NodeManager* nm) const { return DeepCopy(nm); }
 
 ExternalFnDefNode* ExternalFnDefNode::DeepCopy(NodeManager* nm) const {
     if (IsResolved()) {
-        return nm->MakeExternalFnDefNode(function_name(), function_ptr(),
-                                         GetReturnType(), IsReturnNullable(),
-                                         arg_types_, arg_nullable_,
-                                         variadic_pos(), return_by_arg());
+        return nm->MakeExternalFnDefNode(function_name(), function_ptr(), GetReturnType(), IsReturnNullable(),
+                                         arg_types_, arg_nullable_, variadic_pos(), return_by_arg());
     } else {
         return nm->MakeUnresolvedFnDefNode(function_name());
     }
 }
 
-UdfDefNode* UdfDefNode::ShadowCopy(NodeManager* nm) const {
-    return DeepCopy(nm);
-}
+UdfDefNode* UdfDefNode::ShadowCopy(NodeManager* nm) const { return DeepCopy(nm); }
 
-UdfDefNode* UdfDefNode::DeepCopy(NodeManager* nm) const {
-    return nm->MakeUdfDefNode(def_);
-}
+UdfDefNode* UdfDefNode::DeepCopy(NodeManager* nm) const { return nm->MakeUdfDefNode(def_); }
 
-UdfByCodeGenDefNode* UdfByCodeGenDefNode::ShadowCopy(NodeManager* nm) const {
-    return DeepCopy(nm);
-}
+UdfByCodeGenDefNode* UdfByCodeGenDefNode::ShadowCopy(NodeManager* nm) const { return DeepCopy(nm); }
 
 UdfByCodeGenDefNode* UdfByCodeGenDefNode::DeepCopy(NodeManager* nm) const {
-    auto def_node = nm->MakeUdfByCodeGenDefNode(
-        name_, arg_types_, arg_nullable_, ret_type_, ret_nullable_);
+    auto def_node = nm->MakeUdfByCodeGenDefNode(name_, arg_types_, arg_nullable_, ret_type_, ret_nullable_);
     def_node->SetGenImpl(this->GetGenImpl());
     return def_node;
 }
 
 UdafDefNode* UdafDefNode::ShadowCopy(NodeManager* nm) const {
-    return nm->MakeUdafDefNode(name_, arg_types_, init_expr_, update_, merge_,
-                               output_);
+    return nm->MakeUdafDefNode(name_, arg_types_, init_expr_, update_, merge_, output_);
 }
 
 UdafDefNode* UdafDefNode::DeepCopy(NodeManager* nm) const {
@@ -1000,8 +876,7 @@ UdafDefNode* UdafDefNode::DeepCopy(NodeManager* nm) const {
     FnDefNode* new_update = update_ ? update_->DeepCopy(nm) : nullptr;
     FnDefNode* new_merge = merge_ ? merge_->DeepCopy(nm) : nullptr;
     FnDefNode* new_output = output_ ? output_->DeepCopy(nm) : nullptr;
-    return nm->MakeUdafDefNode(name_, arg_types_, new_init, new_update,
-                               new_merge, new_output);
+    return nm->MakeUdafDefNode(name_, arg_types_, new_init, new_update, new_merge, new_output);
 }
 
 // Default expr deep copy: shadow copy self and deep copy children

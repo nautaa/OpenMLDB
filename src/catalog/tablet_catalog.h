@@ -174,7 +174,7 @@ class TabletTableHandler : public ::hybridse::vm::TableHandler,
     bool Init(const ClientManager &client_manager);
 
     // TODO(denglong): guarantee threadsafe
-    bool UpdateIndex(const ::google::protobuf::RepeatedPtrField<::openmldb::common::ColumnKey>& indexs);
+    bool UpdateIndex(const ::google::protobuf::RepeatedPtrField<::openmldb::common::ColumnKey> &indexs);
 
     const ::hybridse::vm::Schema *GetSchema() override { return &schema_; }
 
@@ -253,7 +253,7 @@ class TabletCatalog : public ::hybridse::vm::Catalog {
 
     bool UpdateTableMeta(const ::openmldb::api::TableMeta &meta);
 
-    bool UpdateTableInfo(const ::openmldb::nameserver::TableInfo& table_info);
+    bool UpdateTableInfo(const ::openmldb::nameserver::TableInfo &table_info);
 
     std::shared_ptr<::hybridse::type::Database> GetDatabase(const std::string &db) override;
 

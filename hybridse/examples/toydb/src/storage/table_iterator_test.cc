@@ -15,9 +15,12 @@
  */
 
 #include "storage/table_iterator.h"
+
 #include <sys/time.h>
+
 #include <iostream>
 #include <string>
+
 #include "codec/row.h"
 #include "gtest/gtest.h"
 #include "storage/table_impl.h"

@@ -15,14 +15,18 @@
  */
 
 #include "catalog/base.h"
+
 #include "schema/schema_adapter.h"
 namespace openmldb {
 namespace catalog {
 
-ProcedureInfoImpl::ProcedureInfoImpl(const ::openmldb::api::ProcedureInfo& procedure) :
-    db_name_(procedure.db_name()), sp_name_(procedure.sp_name()), sql_(procedure.sql()),
-    main_table_(procedure.main_table()), main_db_(procedure.main_db()),
-    type_(::hybridse::sdk::ProcedureType::kReqProcedure) {
+ProcedureInfoImpl::ProcedureInfoImpl(const ::openmldb::api::ProcedureInfo& procedure)
+    : db_name_(procedure.db_name()),
+      sp_name_(procedure.sp_name()),
+      sql_(procedure.sql()),
+      main_table_(procedure.main_table()),
+      main_db_(procedure.main_db()),
+      type_(::hybridse::sdk::ProcedureType::kReqProcedure) {
     if (procedure.input_schema_size() > 0) {
         ::hybridse::vm::Schema hybridse_in_schema;
         openmldb::schema::SchemaAdapter::ConvertSchema(procedure.input_schema(), &hybridse_in_schema);

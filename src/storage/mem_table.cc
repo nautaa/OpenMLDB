@@ -596,7 +596,7 @@ bool MemTable::AddIndex(const ::openmldb::common::ColumnKey& column_key) {
                   FLAGS_absolute_default_skiplist_height, ts_vec.size(), id_, pid_);
         }
         index_def = std::make_shared<IndexDef>(column_key.index_name(), table_index_.GetMaxIndexId() + 1,
-                IndexStatus::kReady, ::openmldb::type::IndexType::kTimeSerise, col_vec);
+                                               IndexStatus::kReady, ::openmldb::type::IndexType::kTimeSerise, col_vec);
         if (table_index_.AddIndex(index_def) < 0) {
             PDLOG(WARNING, "add index failed. tid %u pid %u", id_, pid_);
             return false;
@@ -607,7 +607,7 @@ bool MemTable::AddIndex(const ::openmldb::common::ColumnKey& column_key) {
             index_def->SetTsColumn(std::make_shared<ColumnDef>(ts_iter->second));
         } else {
             index_def->SetTsColumn(std::make_shared<ColumnDef>(DEFUALT_TS_COL_NAME, DEFUALT_TS_COL_ID,
-                        ::openmldb::type::kTimestamp, true));
+                                                               ::openmldb::type::kTimestamp, true));
         }
         if (column_key.has_ttl()) {
             index_def->SetTTL(::openmldb::storage::TTLSt(column_key.ttl()));

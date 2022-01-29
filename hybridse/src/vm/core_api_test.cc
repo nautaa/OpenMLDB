@@ -15,6 +15,7 @@
  */
 
 #include "vm/core_api.h"
+
 #include "gtest/gtest.h"
 
 namespace hybridse {

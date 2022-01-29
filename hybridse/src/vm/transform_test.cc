@@ -58,11 +58,8 @@ namespace vm {
 using hybridse::passes::ConditionOptimized;
 using hybridse::passes::ExprPair;
 using hybridse::sqlcase::SqlCase;
-const std::vector<std::string> FILTERS({"physical-plan-unsupport",
-                                        "zetasql-unsupport",
-                                        "logical-plan-unsupport",
-                                        "batch-unsupport",
-                                        "parser-unsupport"});
+const std::vector<std::string> FILTERS({"physical-plan-unsupport", "zetasql-unsupport", "logical-plan-unsupport",
+                                        "batch-unsupport", "parser-unsupport"});
 
 class TransformTest : public ::testing::TestWithParam<SqlCase> {
  public:
@@ -71,38 +68,29 @@ class TransformTest : public ::testing::TestWithParam<SqlCase> {
     node::NodeManager manager;
 };
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(TransformTest);
-INSTANTIATE_TEST_SUITE_P(
-    SqlSimpleQueryParse, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlUdafQueryParse, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/table_aggregation_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlReanmeQueryParse, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/rename_query.yaml", FILTERS)));
-INSTANTIATE_TEST_SUITE_P(
-    SqlWindowQueryParse, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlSimpleQueryParse, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/simple_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlUdafQueryParse, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/table_aggregation_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlReanmeQueryParse, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/rename_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlWindowQueryParse, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/window_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlWherePlan, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/where_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlWherePlan, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/where_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlGroupPlan, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/group_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlGroupPlan, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/group_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlJoinPlan, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/join_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlJoinPlan, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/join_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlDistinctPlan, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/distinct_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlDistinctPlan, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/distinct_query.yaml", FILTERS)));
 
-INSTANTIATE_TEST_SUITE_P(
-    SqlSubQueryPlan, TransformTest,
-    testing::ValuesIn(sqlcase::InitCases("cases/plan/sub_query.yaml", FILTERS)));
+INSTANTIATE_TEST_SUITE_P(SqlSubQueryPlan, TransformTest,
+                         testing::ValuesIn(sqlcase::InitCases("cases/plan/sub_query.yaml", FILTERS)));
 
 TEST_P(TransformTest, TransformPhysicalPlan) {
     auto sql_case = GetParam();
@@ -299,8 +287,7 @@ TEST_P(TransformTest, TransformPhysicalPlanEnableWindowParalled) {
     EXPECT_EQ(sql_case.expect().success_, status.isOK()) << status;
 }
 
-void PhysicalPlanCheck(const std::shared_ptr<Catalog>& catalog, std::string sql,
-                       std::string exp) {
+void PhysicalPlanCheck(const std::shared_ptr<Catalog>& catalog, std::string sql, std::string exp) {
     const hybridse::base::Status exp_status(::hybridse::common::kOk, "ok");
 
     boost::to_lower(sql);
@@ -342,11 +329,8 @@ void PhysicalPlanCheck(const std::shared_ptr<Catalog>& catalog, std::string sql,
     ASSERT_EQ(oos.str(), exp);
 }
 
-void PhysicalPlanFailCheck(const std::shared_ptr<Catalog>& catalog,
-                           const std::string& sql,
-                           const vm::EngineMode runner_mode,
-                           int err_code,
-                           const std::string& err_msg) {
+void PhysicalPlanFailCheck(const std::shared_ptr<Catalog>& catalog, const std::string& sql,
+                           const vm::EngineMode runner_mode, int err_code, const std::string& err_msg) {
     const hybridse::base::Status exp_status(::hybridse::common::kOk, "ok");
 
     ::hybridse::node::NodeManager manager;
@@ -369,8 +353,8 @@ void PhysicalPlanFailCheck(const std::shared_ptr<Catalog>& catalog,
             break;
         }
         case kRequestMode: {
-            transform.reset(new RequestModeTransformer(&manager, "db",
-                                                       catalog, nullptr, m.get(), lib, {}, false, false, false));
+            transform.reset(
+                new RequestModeTransformer(&manager, "db", catalog, nullptr, m.get(), lib, {}, false, false, false));
             break;
         }
         default: {
@@ -429,7 +413,6 @@ TEST_F(TransformTest, PhysicalPlanFailOnGroupType) {
         "unsupported partition key: 'col3', type is float, should be bool, intxx, string, date or timestamp");
 }
 
-
 // physical plan transform will fail if the right key of a join op is not in the supported type list
 //  which is [bool, intxx, data, timestamp, string]
 TEST_F(TransformTest, PhysicalPlanFailOnRightKeyTypeOfJoin) {
@@ -481,9 +464,11 @@ TEST_F(TransformTest, PhysicalPlanFailOnLastJoinWindow) {
       last join t2 order by t2.col5 on t1.col3=t2.col3 and t1.col5 = t2.col5
       WINDOW w1 AS (PARTITION BY t1.col2 ORDER BY t1.col5 ROWS_RANGE BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;
     )sql";
-    PhysicalPlanFailCheck(catalog, last_join_window, kBatchMode, common::kPhysicalPlanError,
+    PhysicalPlanFailCheck(
+        catalog, last_join_window, kBatchMode, common::kPhysicalPlanError,
         "unsupported partition key: 't2.col3', type is float, should be bool, intxx, string, date or timestamp");
-    PhysicalPlanFailCheck(catalog, last_join_window, kRequestMode, common::kPhysicalPlanError,
+    PhysicalPlanFailCheck(
+        catalog, last_join_window, kRequestMode, common::kPhysicalPlanError,
         "unsupported partition key: 't2.col3', type is float, should be bool, intxx, string, date or timestamp");
 }
 
@@ -498,10 +483,9 @@ TEST_F(TransformTest, PhysicalPlanFailOnOnlyFullGroupBy) {
 
     auto catalog = BuildSimpleCatalog(db);
     // ONLY_FULL_GROUP_BY Rule #1:
-    PhysicalPlanFailCheck(
-        catalog, "SELECT col1, SUM(col3) from t1;", kBatchMode, common::kPlanError,
-        "In aggregated query without GROUP BY, expression #0 of SELECT list contains nonaggregated "
-        "project 'col1'; this is incompatible with sql_mode=only_full_group_by");
+    PhysicalPlanFailCheck(catalog, "SELECT col1, SUM(col3) from t1;", kBatchMode, common::kPlanError,
+                          "In aggregated query without GROUP BY, expression #0 of SELECT list contains nonaggregated "
+                          "project 'col1'; this is incompatible with sql_mode=only_full_group_by");
     // ONLY_FULL_GROUP_BY Rule #1:
     PhysicalPlanFailCheck(catalog, "SELECT col1, SUM(col2) from t1 HAVING SUM(col2) > 0;", kBatchMode,
                           common::kPlanError,
@@ -509,8 +493,7 @@ TEST_F(TransformTest, PhysicalPlanFailOnOnlyFullGroupBy) {
                           "project 'col1'; this is incompatible with sql_mode=only_full_group_by");
 
     // ONLY_FULL_GROUP_BY Rule #2:
-    PhysicalPlanFailCheck(catalog,
-                          "SELECT col1 from t1 HAVING SUM(col2) > 0;", kBatchMode, common::kPlanError,
+    PhysicalPlanFailCheck(catalog, "SELECT col1 from t1 HAVING SUM(col2) > 0;", kBatchMode, common::kPlanError,
                           "Having clause can only be used in conjunction with aggregated query");
     // ONLY_FULL_GROUP_BY Rule #3:
     PhysicalPlanFailCheck(catalog, "SELECT SUM(col1) from t1 HAVING col2 > 0;", kBatchMode, common::kPlanError,
@@ -540,42 +523,22 @@ TEST_F(TransformTest, PhysicalColumnResolveFailTest) {
     AddTable(db, table_def);
 
     auto catalog = BuildSimpleCatalog(db);
-    PhysicalPlanFailCheck(
-        catalog,
-        "select c1 from (select col1 as c1, col1 as c1, col3 from t1) as tt;",
-        kBatchMode, common::kOk,
-        "ok");
-    PhysicalPlanFailCheck(
-        catalog,
-        "select c1 from (select col1 as c1, col1 as c1, col3 from t1) as tt;",
-        kRequestMode, common::kOk,
-        "ok");
+    PhysicalPlanFailCheck(catalog, "select c1 from (select col1 as c1, col1 as c1, col3 from t1) as tt;", kBatchMode,
+                          common::kOk, "ok");
+    PhysicalPlanFailCheck(catalog, "select c1 from (select col1 as c1, col1 as c1, col3 from t1) as tt;", kRequestMode,
+                          common::kOk, "ok");
 
-    PhysicalPlanFailCheck(
-        catalog,
-        "select c1 from t1;",
-        kBatchMode, common::kColumnNotFound,
-        "Fail to find column c1");
-    PhysicalPlanFailCheck(
-        catalog,
-        "select c1 from t1;",
-        kRequestMode, common::kColumnNotFound,
-        "Fail to find column c1");
+    PhysicalPlanFailCheck(catalog, "select c1 from t1;", kBatchMode, common::kColumnNotFound, "Fail to find column c1");
+    PhysicalPlanFailCheck(catalog, "select c1 from t1;", kRequestMode, common::kColumnNotFound,
+                          "Fail to find column c1");
 
-    PhysicalPlanFailCheck(
-        catalog,
-        "select c1 from (select col1 as c1, col2 as c1, col3 from t1) as tt;",
-        kBatchMode, common::kColumnAmbiguous,
-        "Ambiguous column name c1");
-    PhysicalPlanFailCheck(
-        catalog,
-        "select c1 from (select col1 as c1, col2 as c1, col3 from t1) as tt;",
-        kRequestMode, common::kColumnAmbiguous,
-        "Ambiguous column name c1");
+    PhysicalPlanFailCheck(catalog, "select c1 from (select col1 as c1, col2 as c1, col3 from t1) as tt;", kBatchMode,
+                          common::kColumnAmbiguous, "Ambiguous column name c1");
+    PhysicalPlanFailCheck(catalog, "select c1 from (select col1 as c1, col2 as c1, col3 from t1) as tt;", kRequestMode,
+                          common::kColumnAmbiguous, "Ambiguous column name c1");
 
-    PhysicalPlanFailCheck(
-        catalog,
-        R"sql(select * from
+    PhysicalPlanFailCheck(catalog,
+                          R"sql(select * from
               (
                 SELECT col1 as id, col1 as id, sum(col2) OVER w1 as w1_col2_sum,
                 FROM t1
@@ -588,11 +551,10 @@ TEST_F(TransformTest, PhysicalColumnResolveFailTest) {
                 WINDOW w2 AS (PARTITION BY col1 ORDER BY col5 ROWS_RANGE BETWEEN 1d OPEN PRECEDING AND CURRENT ROW)
               ) as out1
               ON out0.id = out1.id;)sql",
-        kBatchMode, common::kOk, "ok");
+                          kBatchMode, common::kOk, "ok");
 
-    PhysicalPlanFailCheck(
-        catalog,
-        R"sql(select * from
+    PhysicalPlanFailCheck(catalog,
+                          R"sql(select * from
               (
                 SELECT col1 as id, col2 as id, sum(col2) OVER w1 as w1_col2_sum,
                 FROM t1
@@ -604,62 +566,52 @@ TEST_F(TransformTest, PhysicalColumnResolveFailTest) {
                 FROM t1
                 WINDOW w2 AS (PARTITION BY col1 ORDER BY col5 ROWS_RANGE BETWEEN 1d OPEN PRECEDING AND CURRENT ROW)
               ) as out1 ON out0.id = out1.id;)sql",
-        kBatchMode, common::kColumnAmbiguous,
-        "Ambiguous column name .out0.id");
+                          kBatchMode, common::kColumnAmbiguous, "Ambiguous column name .out0.id");
 }
 
 TEST_F(TransformTest, TransfromConditionsTest) {
     std::vector<std::pair<std::string, std::vector<std::string>>> sql_exp;
 
-    sql_exp.push_back(std::make_pair(
-        "select t1.col1=t2.col1 or t1.col2 = t2.col2 and t1.col3 = t2.col3 "
-        "from t1,t2;",
-        std::vector<std::string>({"t1.col1 = t2.col1 OR t1.col2 = t2.col2 AND "
-                                  "t1.col3 = t2.col3"})));  // expr1
+    sql_exp.push_back(
+        std::make_pair("select t1.col1=t2.col1 or t1.col2 = t2.col2 and t1.col3 = t2.col3 "
+                       "from t1,t2;",
+                       std::vector<std::string>({"t1.col1 = t2.col1 OR t1.col2 = t2.col2 AND "
+                                                 "t1.col3 = t2.col3"})));  // expr1
 
-    sql_exp.push_back(std::make_pair(
-        "select t1.col1=t2.col1 or t1.col2 = t2.col2 from t1,t2;",
-        std::vector<std::string>(
-            {"t1.col1 = t2.col1 OR t1.col2 = t2.col2"})));  // expr1
+    sql_exp.push_back(std::make_pair("select t1.col1=t2.col1 or t1.col2 = t2.col2 from t1,t2;",
+                                     std::vector<std::string>({"t1.col1 = t2.col1 OR t1.col2 = t2.col2"})));  // expr1
 
-    sql_exp.push_back(std::make_pair(
-        "select t1.col1=t2.col1 and t1.col2 = t2.col2 from t1,t2;",
-        std::vector<std::string>({"t1.col1 = t2.col1",      // expr1
-                                  "t1.col2 = t2.col2"})));  // expr2
+    sql_exp.push_back(std::make_pair("select t1.col1=t2.col1 and t1.col2 = t2.col2 from t1,t2;",
+                                     std::vector<std::string>({"t1.col1 = t2.col1",      // expr1
+                                                               "t1.col2 = t2.col2"})));  // expr2
 
-    sql_exp.push_back(std::make_pair(
-        "select (t1.col1=t2.col1 and t1.col2 = t2.col2) from t1,t2;",
-        std::vector<std::string>({"t1.col1 = t2.col1",      // expr1
-                                  "t1.col2 = t2.col2"})));  // expr2
+    sql_exp.push_back(std::make_pair("select (t1.col1=t2.col1 and t1.col2 = t2.col2) from t1,t2;",
+                                     std::vector<std::string>({"t1.col1 = t2.col1",      // expr1
+                                                               "t1.col2 = t2.col2"})));  // expr2
 
-    sql_exp.push_back(std::make_pair(
-        "select t1.col1=t2.col1 and t1.col2 = t2.col2 and "
-        "t1.col3+t1.col4=t2.col3 from t1,t2;",
-        std::vector<std::string>({"t1.col1 = t2.col1",                // expr1
-                                  "t1.col2 = t2.col2",                // expr2
-                                  "t1.col3 + t1.col4 = t2.col3"})));  // expr3
+    sql_exp.push_back(
+        std::make_pair("select t1.col1=t2.col1 and t1.col2 = t2.col2 and "
+                       "t1.col3+t1.col4=t2.col3 from t1,t2;",
+                       std::vector<std::string>({"t1.col1 = t2.col1",                // expr1
+                                                 "t1.col2 = t2.col2",                // expr2
+                                                 "t1.col3 + t1.col4 = t2.col3"})));  // expr3
 
-    sql_exp.push_back(std::make_pair(
-        "select t1.col1 = t2.col2 and t2.col5 >= t1.col5 from t1,t2;",
-        std::vector<std::string>({"t1.col1 = t2.col2",       // expr1
-                                  "t2.col5 >= t1.col5"})));  // expr2
+    sql_exp.push_back(std::make_pair("select t1.col1 = t2.col2 and t2.col5 >= t1.col5 from t1,t2;",
+                                     std::vector<std::string>({"t1.col1 = t2.col2",       // expr1
+                                                               "t2.col5 >= t1.col5"})));  // expr2
     for (size_t i = 0; i < sql_exp.size(); i++) {
         std::string sql = sql_exp[i].first;
         std::vector<std::string>& exp_list = sql_exp[i].second;
         node::ExprNode* condition;
         boost::to_lower(sql);
         ExtractExprFromSimpleSql(&manager, sql, &condition);
-        LOG(INFO) << "TEST condition [" << i
-                  << "]: " << node::ExprString(condition);
+        LOG(INFO) << "TEST condition [" << i << "]: " << node::ExprString(condition);
         node::ExprListNode and_condition_list;
-        ConditionOptimized::TransfromAndConditionList(condition,
-                                                      &and_condition_list);
-        LOG(INFO) << "and condition list: "
-                  << node::ExprString(&and_condition_list);
+        ConditionOptimized::TransfromAndConditionList(condition, &and_condition_list);
+        LOG(INFO) << "and condition list: " << node::ExprString(&and_condition_list);
         ASSERT_EQ(exp_list.size(), and_condition_list.children_.size());
         for (size_t i = 0; i < exp_list.size(); i++) {
-            ASSERT_EQ(exp_list[i],
-                      node::ExprString(and_condition_list.children_[i]));
+            ASSERT_EQ(exp_list[i], node::ExprString(and_condition_list.children_[i]));
         }
     }
 }
@@ -681,24 +633,22 @@ TEST_F(TransformTest, TransformEqualExprPairTest) {
         right_ctx.BuildTrivial(t2.catalog(), {&t2});
     }
 
-    std::vector<std::pair<std::string, std::pair<std::string, std::string>>>
-        sql_exp;
+    std::vector<std::pair<std::string, std::pair<std::string, std::string>>> sql_exp;
 
-    sql_exp.push_back(std::make_pair("select t1.col1=t2.col1 from t1,t2;",
-                                     std::make_pair("t1.col1", "t2.col1")));
+    sql_exp.push_back(std::make_pair("select t1.col1=t2.col1 from t1,t2;", std::make_pair("t1.col1", "t2.col1")));
 
-//    sql_exp.push_back(std::make_pair("select t2.col1=t1.col1 from t1,t2;",
-//                                     std::make_pair("t1.col1", "t2.col1")));
-//
-//    // Fail Extract Equal Pair
-//    sql_exp.push_back(std::make_pair(
-//        "select t2.col1+t1.col1=t2.col3 from t1,t2;", std::make_pair("", "")));
-//    sql_exp.push_back(std::make_pair("select t1.col1=t1.col2 from t1,t2;",
-//                                     std::make_pair("", "")));
-//    sql_exp.push_back(std::make_pair("select t1.col1=t3.col2 from t1,t2;",
-//                                     std::make_pair("", "")));
-//    sql_exp.push_back(std::make_pair("select t2.col1>t1.col1 from t1,t2;",
-//                                     std::make_pair("", "")));
+    //    sql_exp.push_back(std::make_pair("select t2.col1=t1.col1 from t1,t2;",
+    //                                     std::make_pair("t1.col1", "t2.col1")));
+    //
+    //    // Fail Extract Equal Pair
+    //    sql_exp.push_back(std::make_pair(
+    //        "select t2.col1+t1.col1=t2.col3 from t1,t2;", std::make_pair("", "")));
+    //    sql_exp.push_back(std::make_pair("select t1.col1=t1.col2 from t1,t2;",
+    //                                     std::make_pair("", "")));
+    //    sql_exp.push_back(std::make_pair("select t1.col1=t3.col2 from t1,t2;",
+    //                                     std::make_pair("", "")));
+    //    sql_exp.push_back(std::make_pair("select t2.col1>t1.col1 from t1,t2;",
+    //                                     std::make_pair("", "")));
 
     for (size_t i = 0; i < sql_exp.size(); i++) {
         std::string sql = sql_exp[i].first;
@@ -706,27 +656,22 @@ TEST_F(TransformTest, TransformEqualExprPairTest) {
         node::ExprNode* condition;
         boost::to_lower(sql);
         ExtractExprFromSimpleSql(&manager, sql, &condition);
-        LOG(INFO) << "TEST condition [" << i
-                  << "]: " << node::ExprString(condition);
+        LOG(INFO) << "TEST condition [" << i << "]: " << node::ExprString(condition);
         node::ExprListNode mock_condition_list;
         mock_condition_list.AddChild(condition);
 
         node::ExprListNode out_condition_list;
         std::vector<ExprPair> mock_expr_pairs;
 
-        ConditionOptimized::TransformJoinEqualExprPair(
-            &left_ctx, &right_ctx, &mock_condition_list, &out_condition_list,
-            mock_expr_pairs);
+        ConditionOptimized::TransformJoinEqualExprPair(&left_ctx, &right_ctx, &mock_condition_list, &out_condition_list,
+                                                       mock_expr_pairs);
 
         ExprPair mock_pair;
-        ExprPair expr_pair =
-            mock_expr_pairs.empty() ? mock_pair : mock_expr_pairs[0];
-        LOG(INFO) << "REST CONDITION: "
-                  << node::ExprString(&out_condition_list);
+        ExprPair expr_pair = mock_expr_pairs.empty() ? mock_pair : mock_expr_pairs[0];
+        LOG(INFO) << "REST CONDITION: " << node::ExprString(&out_condition_list);
         ASSERT_EQ(exp_list.first, node::ExprString(expr_pair.left_expr_));
         ASSERT_EQ(exp_list.second, node::ExprString(expr_pair.right_expr_));
-        ASSERT_EQ(mock_condition_list.children_.size(),
-                  out_condition_list.children_.size() + mock_expr_pairs.size());
+        ASSERT_EQ(mock_condition_list.children_.size(), out_condition_list.children_.size() + mock_expr_pairs.size());
     }
 }
 
@@ -841,9 +786,7 @@ class KeyGenTest : public ::testing::TestWithParam<std::string> {
 };
 
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(KeyGenTest);
-INSTANTIATE_TEST_SUITE_P(KeyGen, KeyGenTest,
-                        testing::Values("select col1 from t1;",
-                                        "select col1, col2 from t1;"));
+INSTANTIATE_TEST_SUITE_P(KeyGen, KeyGenTest, testing::Values("select col1 from t1;", "select col1, col2 from t1;"));
 
 TEST_P(KeyGenTest, GenTest) {
     base::Status status;
@@ -897,10 +840,8 @@ class FilterGenTest : public ::testing::TestWithParam<std::string> {
 };
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(FilterGenTest);
 INSTANTIATE_TEST_SUITE_P(FilterGen, FilterGenTest,
-                        testing::Values("select t1.col1=t2.col1 from t1,t2;",
-                                        "select t1.col1!=t2.col2 from t1,t2;",
-                                        "select t1.col1>t2.col2 from t1,t2;",
-                                        "select t1.col1<t2.col2 from t1,t2;"));
+                         testing::Values("select t1.col1=t2.col1 from t1,t2;", "select t1.col1!=t2.col2 from t1,t2;",
+                                         "select t1.col1>t2.col2 from t1,t2;", "select t1.col1<t2.col2 from t1,t2;"));
 TEST_P(FilterGenTest, GenFilter) {
     base::Status status;
 
@@ -928,27 +869,21 @@ TEST_P(FilterGenTest, GenFilter) {
 
     auto plan_ctx = transformer.GetPlanContext();
     PhysicalTableProviderNode* table_provider1;
-    plan_ctx->CreateOp<PhysicalTableProviderNode>(
-        &table_provider1, catalog->GetTable("db", "t1"));
+    plan_ctx->CreateOp<PhysicalTableProviderNode>(&table_provider1, catalog->GetTable("db", "t1"));
 
     PhysicalTableProviderNode* table_provider2;
-    plan_ctx->CreateOp<PhysicalTableProviderNode>(
-        &table_provider2, catalog->GetTable("db", "t2"));
+    plan_ctx->CreateOp<PhysicalTableProviderNode>(&table_provider2, catalog->GetTable("db", "t2"));
 
     PhysicalJoinNode* join_node = nullptr;
-    plan_ctx->CreateOp<PhysicalJoinNode>(
-        &join_node, table_provider1, table_provider2, node::kJoinTypeConcat);
+    plan_ctx->CreateOp<PhysicalJoinNode>(&join_node, table_provider1, table_provider2, node::kJoinTypeConcat);
 
     ConditionFilter filter(condition);
-    ASSERT_TRUE(
-        transformer.GenConditionFilter(&filter, join_node->schemas_ctx())
-            .isOK());
+    ASSERT_TRUE(transformer.GenConditionFilter(&filter, join_node->schemas_ctx()).isOK());
     m->print(::llvm::errs(), NULL);
     ASSERT_FALSE(filter.fn_info().fn_name().empty());
 }
 
-class TransformPassOptimizedTest
-    : public ::testing::TestWithParam<std::pair<std::string, std::string>> {
+class TransformPassOptimizedTest : public ::testing::TestWithParam<std::pair<std::string, std::string>> {
  public:
     TransformPassOptimizedTest() {}
     ~TransformPassOptimizedTest() {}
@@ -957,86 +892,75 @@ GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(TransformPassOptimizedTest);
 INSTANTIATE_TEST_SUITE_P(
     GroupHavingOptimized, TransformPassOptimizedTest,
     testing::Values(
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM t1 group by col1 HAVING sum(col2) > 100;",
-            "PROJECT(type=GroupAggregation, group_keys=(col1), having_condition=sum(col2) > 100)\n"
-            "  DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM t1 group by col1, col2 HAVING sum(col2) > 100;",
-            "PROJECT(type=GroupAggregation, group_keys=(col1,col2), having_condition=sum(col2) > 100)\n"
-            "  DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM t1 group by col1, col2, col6 HAVING sum(col2) > 100;",
-            "PROJECT(type=GroupAggregation, group_keys=(col1,col2,col6), having_condition=sum(col2) > 100)\n"
-            "  GROUP_BY(group_keys=(col6))\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+        std::make_pair("SELECT sum(col1) as col1sum FROM t1 group by col1 HAVING sum(col2) > 100;",
+                       "PROJECT(type=GroupAggregation, group_keys=(col1), having_condition=sum(col2) > 100)\n"
+                       "  DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+        std::make_pair("SELECT sum(col1) as col1sum FROM t1 group by col1, col2 HAVING sum(col2) > 100;",
+                       "PROJECT(type=GroupAggregation, group_keys=(col1,col2), having_condition=sum(col2) > 100)\n"
+                       "  DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+        std::make_pair("SELECT sum(col1) as col1sum FROM t1 group by col1, col2, col6 HAVING sum(col2) > 100;",
+                       "PROJECT(type=GroupAggregation, group_keys=(col1,col2,col6), having_condition=sum(col2) > 100)\n"
+                       "  GROUP_BY(group_keys=(col6))\n"
+                       "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
         std::make_pair(
             "SELECT sum(col1) as col1sum FROM t1 group by col6, col2, col1 HAVING col1 > 0 AND col2 > 0;",
             "PROJECT(type=GroupAggregation, group_keys=(col6,col2,col1), having_condition=col1 > 0 AND col2 > 0)\n"
             "  GROUP_BY(group_keys=(col6))\n"
             "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM (select c1 as col1, c2 as col2 , "
-            "c6 as col6 from tc) group by col6, col2, col1 HAVING col1 > 0;",
-            "PROJECT(type=GroupAggregation, group_keys=(col6,col2,col1), having_condition=col1 > 0)\n"
-            "  GROUP_BY(group_keys=(col6))\n"
-            "    SIMPLE_PROJECT(sources=(c1 -> col1, c2 -> col2, c6 -> col6))\n"
-            "      DATA_PROVIDER(type=Partition, table=tc, "
-            "index=index12_tc)")));
+        std::make_pair("SELECT sum(col1) as col1sum FROM (select c1 as col1, c2 as col2 , "
+                       "c6 as col6 from tc) group by col6, col2, col1 HAVING col1 > 0;",
+                       "PROJECT(type=GroupAggregation, group_keys=(col6,col2,col1), having_condition=col1 > 0)\n"
+                       "  GROUP_BY(group_keys=(col6))\n"
+                       "    SIMPLE_PROJECT(sources=(c1 -> col1, c2 -> col2, c6 -> col6))\n"
+                       "      DATA_PROVIDER(type=Partition, table=tc, "
+                       "index=index12_tc)")));
 INSTANTIATE_TEST_SUITE_P(
     GroupOptimized, TransformPassOptimizedTest,
-    testing::Values(
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM t1 group by col1;",
-            "PROJECT(type=GroupAggregation, group_keys=(col1))\n"
-            "  DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM t1 group by col1, col2;",
-            "PROJECT(type=GroupAggregation, group_keys=(col1,col2))\n"
-            "  DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM t1 group by col1, col2, col6;",
-            "PROJECT(type=GroupAggregation, group_keys=(col1,col2,col6))\n"
-            "  GROUP_BY(group_keys=(col6))\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM t1 group by col6, col2, col1;",
-            "PROJECT(type=GroupAggregation, group_keys=(col6,col2,col1))\n"
-            "  GROUP_BY(group_keys=(col6))\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        std::make_pair(
-            "SELECT sum(col1) as col1sum FROM (select c1 as col1, c2 as col2 , "
-            "c6 as col6 from tc) group by col6, col2, col1;",
-            "PROJECT(type=GroupAggregation, group_keys=(col6,col2,col1))\n"
-            "  GROUP_BY(group_keys=(col6))\n"
-            "    SIMPLE_PROJECT(sources=(c1 -> col1, c2 -> col2, c6 -> col6))\n"
-            "      DATA_PROVIDER(type=Partition, table=tc, "
-            "index=index12_tc)")));
+    testing::Values(std::make_pair("SELECT sum(col1) as col1sum FROM t1 group by col1;",
+                                   "PROJECT(type=GroupAggregation, group_keys=(col1))\n"
+                                   "  DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 group by col1, col2;",
+                                   "PROJECT(type=GroupAggregation, group_keys=(col1,col2))\n"
+                                   "  DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 group by col1, col2, col6;",
+                                   "PROJECT(type=GroupAggregation, group_keys=(col1,col2,col6))\n"
+                                   "  GROUP_BY(group_keys=(col6))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 group by col6, col2, col1;",
+                                   "PROJECT(type=GroupAggregation, group_keys=(col6,col2,col1))\n"
+                                   "  GROUP_BY(group_keys=(col6))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM (select c1 as col1, c2 as col2 , "
+                                   "c6 as col6 from tc) group by col6, col2, col1;",
+                                   "PROJECT(type=GroupAggregation, group_keys=(col6,col2,col1))\n"
+                                   "  GROUP_BY(group_keys=(col6))\n"
+                                   "    SIMPLE_PROJECT(sources=(c1 -> col1, c2 -> col2, c6 -> col6))\n"
+                                   "      DATA_PROVIDER(type=Partition, table=tc, "
+                                   "index=index12_tc)")));
 INSTANTIATE_TEST_SUITE_P(
     WhereOptimized, TransformPassOptimizedTest,
-    testing::Values(
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10;",
-                       "PROJECT(type=Aggregation)\n"
-                       "  FILTER_BY(condition=, left_keys=(), right_keys=(), index_keys=(10))\n"
-                       "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 = 20;",
-                       "PROJECT(type=Aggregation)\n"
-                       "  FILTER_BY(condition=, left_keys=(), right_keys=(), index_keys=(10,20))\n"
-                       "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 < 20;",
-                       "PROJECT(type=Aggregation)\n"
-                       "  FILTER_BY(condition=col2 < 20, left_keys=(), right_keys=(), index_keys=(10))\n"
-                       "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col0 = \"test\";",
-                       "PROJECT(type=Aggregation)\n"
-                       "  FILTER_BY(condition=test = col0, left_keys=(), right_keys=(), index_keys=(10))\n"
-                       "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        std::make_pair("SELECT sum(col1) as col1sum FROM (select c1 as col1, c2 as col2 , "
-                       "c3 as col3 from tc) where col1 = 10 and col2 = 20;",
-                       "PROJECT(type=Aggregation)\n"
-                       "  FILTER_BY(condition=, left_keys=(), right_keys=(), index_keys=(10,20))\n"
-                       "    SIMPLE_PROJECT(sources=(c1 -> col1, c2 -> col2, c3 -> col3))\n"
-                       "      DATA_PROVIDER(type=Partition, table=tc, index=index12_tc)")));
+    testing::Values(std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10;",
+                                   "PROJECT(type=Aggregation)\n"
+                                   "  FILTER_BY(condition=, left_keys=(), right_keys=(), index_keys=(10))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 = 20;",
+                                   "PROJECT(type=Aggregation)\n"
+                                   "  FILTER_BY(condition=, left_keys=(), right_keys=(), index_keys=(10,20))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 < 20;",
+                                   "PROJECT(type=Aggregation)\n"
+                                   "  FILTER_BY(condition=col2 < 20, left_keys=(), right_keys=(), index_keys=(10))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col0 = \"test\";",
+                                   "PROJECT(type=Aggregation)\n"
+                                   "  FILTER_BY(condition=test = col0, left_keys=(), right_keys=(), index_keys=(10))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                    std::make_pair("SELECT sum(col1) as col1sum FROM (select c1 as col1, c2 as col2 , "
+                                   "c3 as col3 from tc) where col1 = 10 and col2 = 20;",
+                                   "PROJECT(type=Aggregation)\n"
+                                   "  FILTER_BY(condition=, left_keys=(), right_keys=(), index_keys=(10,20))\n"
+                                   "    SIMPLE_PROJECT(sources=(c1 -> col1, c2 -> col2, c3 -> col3))\n"
+                                   "      DATA_PROVIDER(type=Partition, table=tc, index=index12_tc)")));
 INSTANTIATE_TEST_SUITE_P(
     WhereGroupOptimized, TransformPassOptimizedTest,
     testing::Values(
@@ -1069,298 +993,278 @@ INSTANTIATE_TEST_SUITE_P(
                        "      DATA_PROVIDER(type=Partition, table=tc, index=index12_tc)")));
 INSTANTIATE_TEST_SUITE_P(
     SortOptimized, TransformPassOptimizedTest,
-    testing::Values(
-        std::make_pair(
-            "SELECT "
-            "col1, "
-            "sum(col3) OVER w1 as w1_col3_sum, "
-            "sum(col2) OVER w1 as w1_col2_sum "
-            "FROM t1 WINDOW w1 AS (PARTITION BY col1 ORDER BY col5 "
-            "ROWS_RANGE BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
-            "0))\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        std::make_pair(
-            "SELECT "
-            "col1, "
-            "sum(col3) OVER w1 as w1_col3_sum, "
-            "sum(col2) OVER w1 as w1_col2_sum "
-            "FROM t1 WINDOW w1 AS (PARTITION BY col2, col1 ORDER BY col5 "
-            "ROWS_RANGE BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), "
-            "range=(col5, -3, 0))\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        std::make_pair("SELECT "
-                       "col1, "
-                       "sum(col3) OVER w1 as w1_col3_sum, "
-                       "sum(col2) OVER w1 as w1_col2_sum "
-                       "FROM t1 WINDOW w1 AS (PARTITION BY col6 ORDER BY col5 "
-                       "ROWS_RANGE BETWEEN 3 "
-                       "PRECEDING AND CURRENT ROW) limit 10;",
-                       "LIMIT(limit=10, optimized)\n"
-                       "  PROJECT(type=WindowAggregation, limit=10)\n"
-                       "    +-WINDOW(partition_keys=(col6), orders=(col5 ASC), "
-                       "range=(col5, "
-                       "-3, 0))\n"
-                       "    DATA_PROVIDER(table=t1)")));
+    testing::Values(std::make_pair("SELECT "
+                                   "col1, "
+                                   "sum(col3) OVER w1 as w1_col3_sum, "
+                                   "sum(col2) OVER w1 as w1_col2_sum "
+                                   "FROM t1 WINDOW w1 AS (PARTITION BY col1 ORDER BY col5 "
+                                   "ROWS_RANGE BETWEEN 3 "
+                                   "PRECEDING AND CURRENT ROW) limit 10;",
+                                   "LIMIT(limit=10, optimized)\n"
+                                   "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                   "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
+                                   "0))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                    std::make_pair("SELECT "
+                                   "col1, "
+                                   "sum(col3) OVER w1 as w1_col3_sum, "
+                                   "sum(col2) OVER w1 as w1_col2_sum "
+                                   "FROM t1 WINDOW w1 AS (PARTITION BY col2, col1 ORDER BY col5 "
+                                   "ROWS_RANGE BETWEEN 3 "
+                                   "PRECEDING AND CURRENT ROW) limit 10;",
+                                   "LIMIT(limit=10, optimized)\n"
+                                   "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                   "    +-WINDOW(partition_keys=(), orders=(ASC), "
+                                   "range=(col5, -3, 0))\n"
+                                   "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+                    std::make_pair("SELECT "
+                                   "col1, "
+                                   "sum(col3) OVER w1 as w1_col3_sum, "
+                                   "sum(col2) OVER w1 as w1_col2_sum "
+                                   "FROM t1 WINDOW w1 AS (PARTITION BY col6 ORDER BY col5 "
+                                   "ROWS_RANGE BETWEEN 3 "
+                                   "PRECEDING AND CURRENT ROW) limit 10;",
+                                   "LIMIT(limit=10, optimized)\n"
+                                   "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                   "    +-WINDOW(partition_keys=(col6), orders=(col5 ASC), "
+                                   "range=(col5, "
+                                   "-3, 0))\n"
+                                   "    DATA_PROVIDER(table=t1)")));
 
-INSTANTIATE_TEST_SUITE_P(
-    JoinFilterOptimized, TransformPassOptimizedTest,
-    testing::Values(
-        // 0
-        std::make_pair(
-            "SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
-            "t2 order by t2.col5 on "
-            " t1.col1 = t2.col2 and t2.col5 >= t1.col5;",
-            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
-            "  JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=t2.col5 "
-            ">= t1.col5, "
-            "left_keys=(t1.col1), right_keys=(t2.col2), index_keys=)\n"
-            "    DATA_PROVIDER(table=t1)\n"
-            "    DATA_PROVIDER(table=t2)"),
-        // 1
-        std::make_pair(
-            "SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
-            "t2 order by t2.col5 on "
-            " t1.col1 = t2.col1 and t2.col5 >= t1.col5;",
-            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
-            "  JOIN(type=LastJoin, right_sort=(ASC), condition=t2.col5 >= "
-            "t1.col5, left_keys=(), "
-            "right_keys=(), index_keys=(t1.col1))\n"
-            "    DATA_PROVIDER(table=t1)\n"
-            "    DATA_PROVIDER(type=Partition, table=t2, index=index1_t2)"),
-        // 2
-        std::make_pair(
-            "SELECT "
-            "t2.col1, "
-            "sum(t1.col3) OVER w1 as w1_col3_sum, "
-            "sum(t1.col2) OVER w1 as w1_col2_sum "
-            "FROM t1 last join t2 order by t2.col5 on t1.col1 = t2.col1 "
-            "WINDOW w1 AS (PARTITION BY t1.col0 ORDER BY t1.col5 "
-            "ROWS_RANGE BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(t1.col0), orders=(t1.col5 ASC), "
-            "range=(t1.col5, -3, 0))\n"
-            "    +-JOIN(type=LastJoin, right_sort=(ASC), condition=, "
-            "left_keys=(), "
-            "right_keys=(), index_keys=(t1.col1))\n"
-            "        DATA_PROVIDER(type=Partition, table=t2, index=index1_t2)\n"
-            "    DATA_PROVIDER(table=t1)"),
-        // 3
-        std::make_pair(
-            "SELECT "
-            "t2.col1, "
-            "sum(t1.col3) OVER w1 as w1_col3_sum, "
-            "sum(t1.col2) OVER w1 as w1_col2_sum "
-            "FROM t1 last join t2 order by t2.col5 on t1.col1 = t2.col1 "
-            "WINDOW w1 AS (PARTITION BY t1.col1 ORDER BY t1.col5 "
-            "ROWS_RANGE BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(t1.col5, "
-            "-3, 0))\n"
-            "    +-JOIN(type=LastJoin, right_sort=(ASC), condition=, "
-            "left_keys=(), "
-            "right_keys=(), index_keys=(t1.col1))\n"
-            "        DATA_PROVIDER(type=Partition, table=t2, index=index1_t2)\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        // 4
-        std::make_pair(
-            "SELECT "
-            "t2.col1, "
-            "sum(t1.col3) OVER w1 as w1_col3_sum, "
-            "sum(t1.col2) OVER w1 as w1_col2_sum "
-            "FROM t1 last join t2 order by t2.col5 on t1.col0 = t2.col0 last "
-            "join t3 order by t3.col5 on "
-            "t2.col0=t3.col0 "
-            "WINDOW w1 AS (PARTITION BY t1.col1 ORDER BY t1.col5 "
-            "ROWS_RANGE BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(t1.col5, "
-            "-3, 0))\n"
-            "    +-JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
-            "left_keys=(t1.col0), "
-            "right_keys=(t2.col0), index_keys=)\n"
-            "        DATA_PROVIDER(table=t2)\n"
-            "    +-JOIN(type=LastJoin, right_sort=(t3.col5 ASC), condition=, "
-            "left_keys=(t2.col0), "
-            "right_keys=(t3.col0), index_keys=)\n"
-            "        DATA_PROVIDER(table=t3)\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        // 5
-        std::make_pair(
-            "SELECT "
-            "t2.col1, "
-            "sum(t1.col3) OVER w1 as w1_col3_sum, "
-            "sum(t1.col2) OVER w1 as w1_col2_sum "
-            "FROM t1 last join t2 order by t2.col5 on t1.col2 = t2.col2 last "
-            "join t3 order by t3.col5 on "
-            "t2.col2=t3.col2 "
-            "WINDOW w1 AS (PARTITION BY t1.col0 ORDER BY t1.col5 "
-            "ROWS_RANGE BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(t1.col0), orders=(t1.col5 ASC), "
-            "range=(t1.col5, -3, 0))\n"
-            "    +-JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
-            "left_keys=(t1.col2), "
-            "right_keys=(t2.col2), index_keys=)\n"
-            "        DATA_PROVIDER(table=t2)\n"
-            "    +-JOIN(type=LastJoin, right_sort=(ASC), condition=, "
-            "left_keys=(), "
-            "right_keys=(), index_keys=(t2.col2))\n"
-            "        DATA_PROVIDER(type=Partition, table=t3, index=index2_t3)\n"
-            "    DATA_PROVIDER(table=t1)"),
-        // 6 window partition keys resolved from secondary table.
-        // Join optimized doesn't work
-        std::make_pair(
-            "SELECT "
-            "t2.col1, "
-            "sum(t1.col3) OVER w1 as w1_col3_sum, "
-            "sum(t1.col2) OVER w1 as w1_col2_sum "
-            "FROM t1 last join t2 order by t2.col5 on t1.col2 = t2.col2 last "
-            "join t3 order by t3.col5 on "
-            "t2.col2=t3.col2 "
-            "WINDOW w1 AS (PARTITION BY t3.col0 ORDER BY t1.col5 "
-            "ROWS_RANGE BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(t3.col0), orders=(t1.col5 ASC), "
-            "range=(t1.col5, -3, 0))\n"
-            "    JOIN(type=LastJoin, right_sort=(ASC), condition=, "
-            "left_keys=(), right_keys=(), "
-            "index_keys=(t2.col2))\n"
-            "      JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
-            "left_keys=(t1.col2), "
-            "right_keys=(t2.col2), index_keys=)\n"
-            "        DATA_PROVIDER(table=t1)\n"
-            "        DATA_PROVIDER(table=t2)\n"
-            "      DATA_PROVIDER(type=Partition, table=t3, index=index2_t3)")));
+INSTANTIATE_TEST_SUITE_P(JoinFilterOptimized, TransformPassOptimizedTest,
+                         testing::Values(
+                             // 0
+                             std::make_pair("SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
+                                            "t2 order by t2.col5 on "
+                                            " t1.col1 = t2.col2 and t2.col5 >= t1.col5;",
+                                            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
+                                            "  JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=t2.col5 "
+                                            ">= t1.col5, "
+                                            "left_keys=(t1.col1), right_keys=(t2.col2), index_keys=)\n"
+                                            "    DATA_PROVIDER(table=t1)\n"
+                                            "    DATA_PROVIDER(table=t2)"),
+                             // 1
+                             std::make_pair("SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
+                                            "t2 order by t2.col5 on "
+                                            " t1.col1 = t2.col1 and t2.col5 >= t1.col5;",
+                                            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
+                                            "  JOIN(type=LastJoin, right_sort=(ASC), condition=t2.col5 >= "
+                                            "t1.col5, left_keys=(), "
+                                            "right_keys=(), index_keys=(t1.col1))\n"
+                                            "    DATA_PROVIDER(table=t1)\n"
+                                            "    DATA_PROVIDER(type=Partition, table=t2, index=index1_t2)"),
+                             // 2
+                             std::make_pair("SELECT "
+                                            "t2.col1, "
+                                            "sum(t1.col3) OVER w1 as w1_col3_sum, "
+                                            "sum(t1.col2) OVER w1 as w1_col2_sum "
+                                            "FROM t1 last join t2 order by t2.col5 on t1.col1 = t2.col1 "
+                                            "WINDOW w1 AS (PARTITION BY t1.col0 ORDER BY t1.col5 "
+                                            "ROWS_RANGE BETWEEN 3 "
+                                            "PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(t1.col0), orders=(t1.col5 ASC), "
+                                            "range=(t1.col5, -3, 0))\n"
+                                            "    +-JOIN(type=LastJoin, right_sort=(ASC), condition=, "
+                                            "left_keys=(), "
+                                            "right_keys=(), index_keys=(t1.col1))\n"
+                                            "        DATA_PROVIDER(type=Partition, table=t2, index=index1_t2)\n"
+                                            "    DATA_PROVIDER(table=t1)"),
+                             // 3
+                             std::make_pair("SELECT "
+                                            "t2.col1, "
+                                            "sum(t1.col3) OVER w1 as w1_col3_sum, "
+                                            "sum(t1.col2) OVER w1 as w1_col2_sum "
+                                            "FROM t1 last join t2 order by t2.col5 on t1.col1 = t2.col1 "
+                                            "WINDOW w1 AS (PARTITION BY t1.col1 ORDER BY t1.col5 "
+                                            "ROWS_RANGE BETWEEN 3 "
+                                            "PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(t1.col5, "
+                                            "-3, 0))\n"
+                                            "    +-JOIN(type=LastJoin, right_sort=(ASC), condition=, "
+                                            "left_keys=(), "
+                                            "right_keys=(), index_keys=(t1.col1))\n"
+                                            "        DATA_PROVIDER(type=Partition, table=t2, index=index1_t2)\n"
+                                            "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                             // 4
+                             std::make_pair("SELECT "
+                                            "t2.col1, "
+                                            "sum(t1.col3) OVER w1 as w1_col3_sum, "
+                                            "sum(t1.col2) OVER w1 as w1_col2_sum "
+                                            "FROM t1 last join t2 order by t2.col5 on t1.col0 = t2.col0 last "
+                                            "join t3 order by t3.col5 on "
+                                            "t2.col0=t3.col0 "
+                                            "WINDOW w1 AS (PARTITION BY t1.col1 ORDER BY t1.col5 "
+                                            "ROWS_RANGE BETWEEN 3 "
+                                            "PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(t1.col5, "
+                                            "-3, 0))\n"
+                                            "    +-JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
+                                            "left_keys=(t1.col0), "
+                                            "right_keys=(t2.col0), index_keys=)\n"
+                                            "        DATA_PROVIDER(table=t2)\n"
+                                            "    +-JOIN(type=LastJoin, right_sort=(t3.col5 ASC), condition=, "
+                                            "left_keys=(t2.col0), "
+                                            "right_keys=(t3.col0), index_keys=)\n"
+                                            "        DATA_PROVIDER(table=t3)\n"
+                                            "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                             // 5
+                             std::make_pair("SELECT "
+                                            "t2.col1, "
+                                            "sum(t1.col3) OVER w1 as w1_col3_sum, "
+                                            "sum(t1.col2) OVER w1 as w1_col2_sum "
+                                            "FROM t1 last join t2 order by t2.col5 on t1.col2 = t2.col2 last "
+                                            "join t3 order by t3.col5 on "
+                                            "t2.col2=t3.col2 "
+                                            "WINDOW w1 AS (PARTITION BY t1.col0 ORDER BY t1.col5 "
+                                            "ROWS_RANGE BETWEEN 3 "
+                                            "PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(t1.col0), orders=(t1.col5 ASC), "
+                                            "range=(t1.col5, -3, 0))\n"
+                                            "    +-JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
+                                            "left_keys=(t1.col2), "
+                                            "right_keys=(t2.col2), index_keys=)\n"
+                                            "        DATA_PROVIDER(table=t2)\n"
+                                            "    +-JOIN(type=LastJoin, right_sort=(ASC), condition=, "
+                                            "left_keys=(), "
+                                            "right_keys=(), index_keys=(t2.col2))\n"
+                                            "        DATA_PROVIDER(type=Partition, table=t3, index=index2_t3)\n"
+                                            "    DATA_PROVIDER(table=t1)"),
+                             // 6 window partition keys resolved from secondary table.
+                             // Join optimized doesn't work
+                             std::make_pair("SELECT "
+                                            "t2.col1, "
+                                            "sum(t1.col3) OVER w1 as w1_col3_sum, "
+                                            "sum(t1.col2) OVER w1 as w1_col2_sum "
+                                            "FROM t1 last join t2 order by t2.col5 on t1.col2 = t2.col2 last "
+                                            "join t3 order by t3.col5 on "
+                                            "t2.col2=t3.col2 "
+                                            "WINDOW w1 AS (PARTITION BY t3.col0 ORDER BY t1.col5 "
+                                            "ROWS_RANGE BETWEEN 3 "
+                                            "PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(t3.col0), orders=(t1.col5 ASC), "
+                                            "range=(t1.col5, -3, 0))\n"
+                                            "    JOIN(type=LastJoin, right_sort=(ASC), condition=, "
+                                            "left_keys=(), right_keys=(), "
+                                            "index_keys=(t2.col2))\n"
+                                            "      JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
+                                            "left_keys=(t1.col2), "
+                                            "right_keys=(t2.col2), index_keys=)\n"
+                                            "        DATA_PROVIDER(table=t1)\n"
+                                            "        DATA_PROVIDER(table=t2)\n"
+                                            "      DATA_PROVIDER(type=Partition, table=t3, index=index2_t3)")));
 
-INSTANTIATE_TEST_SUITE_P(
-    WindowUnionOptimized, TransformPassOptimizedTest,
-    testing::Values(
-        // 0
-        std::make_pair(
-            "SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
-            "      WINDOW w1 AS (UNION t3 PARTITION BY col1 ORDER BY col5 "
-            "ROWS_RANGE "
-            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
-            "0))\n"
-            "    +-UNION(partition_keys=(col1), orders=(col5 ASC), "
-            "range=(col5, -3, 0))\n"
-            "        RENAME(name=t1)\n"
-            "          DATA_PROVIDER(table=t3)\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
-        // 1
-        std::make_pair(
-            "SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
-            "      WINDOW w1 AS (UNION t3 PARTITION BY col1,col2 ORDER BY col5 "
-            "ROWS_RANGE "
-            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
-            "0))\n"
-            "    +-UNION(partition_keys=(col1), orders=(ASC), range=(col5, "
-            "-3, 0))\n"
-            "        RENAME(name=t1)\n"
-            "          DATA_PROVIDER(type=Partition, table=t3, index=index2_t3)\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)")));
+INSTANTIATE_TEST_SUITE_P(WindowUnionOptimized, TransformPassOptimizedTest,
+                         testing::Values(
+                             // 0
+                             std::make_pair("SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
+                                            "      WINDOW w1 AS (UNION t3 PARTITION BY col1 ORDER BY col5 "
+                                            "ROWS_RANGE "
+                                            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
+                                            "0))\n"
+                                            "    +-UNION(partition_keys=(col1), orders=(col5 ASC), "
+                                            "range=(col5, -3, 0))\n"
+                                            "        RENAME(name=t1)\n"
+                                            "          DATA_PROVIDER(table=t3)\n"
+                                            "    DATA_PROVIDER(type=Partition, table=t1, index=index1)"),
+                             // 1
+                             std::make_pair("SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
+                                            "      WINDOW w1 AS (UNION t3 PARTITION BY col1,col2 ORDER BY col5 "
+                                            "ROWS_RANGE "
+                                            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
+                                            "0))\n"
+                                            "    +-UNION(partition_keys=(col1), orders=(ASC), range=(col5, "
+                                            "-3, 0))\n"
+                                            "        RENAME(name=t1)\n"
+                                            "          DATA_PROVIDER(type=Partition, table=t3, index=index2_t3)\n"
+                                            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)")));
 
-INSTANTIATE_TEST_SUITE_P(
-    SimpleProjectOptimized, TransformPassOptimizedTest,
-    testing::Values(
-        // SIMPLE SELECT COLUMNS
-        std::make_pair("SELECT COL0, COL1, COL2, COL6 FROM t1 LIMIT 10;",
-                       "LIMIT(limit=10)\n"
-                       "  SIMPLE_PROJECT(sources=(col0, col1, col2, col6))\n"
-                       "    DATA_PROVIDER(table=t1)"),
-        // SIMPLE SELECT COLUMNS and CONST VALUES
-        std::make_pair(
-            "SELECT c0 as col0, c1 as col1, c2 as col2, 0.0f as col3, 0.0 as "
-            "col4, c5 as col5, c6 as col6 from tb LIMIT 10;\n",
-            "LIMIT(limit=10)\n"
-            "  SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> col2, "
-            "0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> col6))\n"
-            "    DATA_PROVIDER(table=tb)"),
-        // SIMPLE SELECT FROM SIMPLE SELECT FROM SIMPLE SELECT
-        std::make_pair(
-            "SELECT x, y , z, 1, 1.0 from (select col0 as x, col1 as y, col2 "
-            "as z from (select c0 as col0, c1 as col1, c2 "
-            "as col2, 0.0f as col3, 0.0 as "
-            "col4, c5 as col5, c6 as col6 from tb)) LIMIT 10;\n",
-            "LIMIT(limit=10)\n"
-            "  SIMPLE_PROJECT(sources=(c0 -> x, c1 -> y, c2 -> z, 1, "
-            "1.000000))\n"
-            "    DATA_PROVIDER(table=tb)"),
-        // SIMPLE SELECT COLUMNS and CONST VALUES
-        std::make_pair(
-            "SELECT col3+col4 as col01 from (select c0 as col0, c1 as col1, c2 "
-            "as col2, 0.0f as col3, 0.0 as "
-            "col4, c5 as col5, c6 as col6 from tb) LIMIT 10;\n",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=TableProject, limit=10)\n"
-            "    SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> col2, "
-            "0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> col6))\n"
-            "      DATA_PROVIDER(table=tb)"),
-        // SIMPLE SELECT COLUMNS and CONST VALUES
-        std::make_pair(
-            "SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
-            "      WINDOW w1 AS (UNION (select c0 as col0, c1 as col1, c2 as "
-            "col2, 0.0f as col3, 0.0 as col4, c5 as col5, c6 as col6 from tb) "
-            "PARTITION BY col1,col2 ORDER BY col5 "
-            "ROWS_RANGE "
-            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
-            "0))\n"
-            "    +-UNION(partition_keys=(col1,col2), orders=(col5 ASC), "
-            "range=(col5, -3, 0))\n"
-            "        RENAME(name=t1)\n"
-            "          SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> "
-            "col2, 0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> "
-            "col6))\n"
-            "            DATA_PROVIDER(table=tb)\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
-        // SIMPLE SELECT COLUMNS and CONST VALUES
-        std::make_pair(
-            "SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
-            "      WINDOW w1 AS (UNION (select c0 as col0, c1 as col1, c2 as "
-            "col2, 0.0f as col3, 0.0 as col4, c5 as col5, c6 as col6 from tc) "
-            "PARTITION BY col1,col2 ORDER BY col5 "
-            "ROWS_RANGE "
-            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
-            "0))\n"
-            "    +-UNION(partition_keys=(), orders=(ASC), range=(col5, -3, "
-            "0))\n"
-            "        RENAME(name=t1)\n"
-            "          SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> "
-            "col2, 0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> "
-            "col6))\n"
-            "            DATA_PROVIDER(type=Partition, table=tc, "
-            "index=index12_tc)\n"
-            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)")));
+INSTANTIATE_TEST_SUITE_P(SimpleProjectOptimized, TransformPassOptimizedTest,
+                         testing::Values(
+                             // SIMPLE SELECT COLUMNS
+                             std::make_pair("SELECT COL0, COL1, COL2, COL6 FROM t1 LIMIT 10;",
+                                            "LIMIT(limit=10)\n"
+                                            "  SIMPLE_PROJECT(sources=(col0, col1, col2, col6))\n"
+                                            "    DATA_PROVIDER(table=t1)"),
+                             // SIMPLE SELECT COLUMNS and CONST VALUES
+                             std::make_pair("SELECT c0 as col0, c1 as col1, c2 as col2, 0.0f as col3, 0.0 as "
+                                            "col4, c5 as col5, c6 as col6 from tb LIMIT 10;\n",
+                                            "LIMIT(limit=10)\n"
+                                            "  SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> col2, "
+                                            "0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> col6))\n"
+                                            "    DATA_PROVIDER(table=tb)"),
+                             // SIMPLE SELECT FROM SIMPLE SELECT FROM SIMPLE SELECT
+                             std::make_pair("SELECT x, y , z, 1, 1.0 from (select col0 as x, col1 as y, col2 "
+                                            "as z from (select c0 as col0, c1 as col1, c2 "
+                                            "as col2, 0.0f as col3, 0.0 as "
+                                            "col4, c5 as col5, c6 as col6 from tb)) LIMIT 10;\n",
+                                            "LIMIT(limit=10)\n"
+                                            "  SIMPLE_PROJECT(sources=(c0 -> x, c1 -> y, c2 -> z, 1, "
+                                            "1.000000))\n"
+                                            "    DATA_PROVIDER(table=tb)"),
+                             // SIMPLE SELECT COLUMNS and CONST VALUES
+                             std::make_pair("SELECT col3+col4 as col01 from (select c0 as col0, c1 as col1, c2 "
+                                            "as col2, 0.0f as col3, 0.0 as "
+                                            "col4, c5 as col5, c6 as col6 from tb) LIMIT 10;\n",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=TableProject, limit=10)\n"
+                                            "    SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> col2, "
+                                            "0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> col6))\n"
+                                            "      DATA_PROVIDER(table=tb)"),
+                             // SIMPLE SELECT COLUMNS and CONST VALUES
+                             std::make_pair("SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
+                                            "      WINDOW w1 AS (UNION (select c0 as col0, c1 as col1, c2 as "
+                                            "col2, 0.0f as col3, 0.0 as col4, c5 as col5, c6 as col6 from tb) "
+                                            "PARTITION BY col1,col2 ORDER BY col5 "
+                                            "ROWS_RANGE "
+                                            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
+                                            "0))\n"
+                                            "    +-UNION(partition_keys=(col1,col2), orders=(col5 ASC), "
+                                            "range=(col5, -3, 0))\n"
+                                            "        RENAME(name=t1)\n"
+                                            "          SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> "
+                                            "col2, 0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> "
+                                            "col6))\n"
+                                            "            DATA_PROVIDER(table=tb)\n"
+                                            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)"),
+                             // SIMPLE SELECT COLUMNS and CONST VALUES
+                             std::make_pair("SELECT col1, col5, sum(col2) OVER w1 as w1_col2_sum FROM t1\n"
+                                            "      WINDOW w1 AS (UNION (select c0 as col0, c1 as col1, c2 as "
+                                            "col2, 0.0f as col3, 0.0 as col4, c5 as col5, c6 as col6 from tc) "
+                                            "PARTITION BY col1,col2 ORDER BY col5 "
+                                            "ROWS_RANGE "
+                                            "BETWEEN 3 PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(), orders=(ASC), range=(col5, -3, "
+                                            "0))\n"
+                                            "    +-UNION(partition_keys=(), orders=(ASC), range=(col5, -3, "
+                                            "0))\n"
+                                            "        RENAME(name=t1)\n"
+                                            "          SIMPLE_PROJECT(sources=(c0 -> col0, c1 -> col1, c2 -> "
+                                            "col2, 0.000000 -> col3, 0.000000 -> col4, c5 -> col5, c6 -> "
+                                            "col6))\n"
+                                            "            DATA_PROVIDER(type=Partition, table=tc, "
+                                            "index=index12_tc)\n"
+                                            "    DATA_PROVIDER(type=Partition, table=t1, index=index12)")));
 TEST_P(TransformPassOptimizedTest, PassOptimizedTest) {
     hybridse::type::TableDef table_def;
     BuildTableDef(table_def);
@@ -1427,76 +1331,70 @@ TEST_P(TransformPassOptimizedTest, PassOptimizedTest) {
     PhysicalPlanCheck(catalog, in_out.first, in_out.second);
 }
 
-class SimpleCataLogTransformPassOptimizedTest
-    : public ::testing::TestWithParam<std::pair<std::string, std::string>> {
+class SimpleCataLogTransformPassOptimizedTest : public ::testing::TestWithParam<std::pair<std::string, std::string>> {
  public:
     SimpleCataLogTransformPassOptimizedTest() {}
     ~SimpleCataLogTransformPassOptimizedTest() {}
 };
 GTEST_ALLOW_UNINSTANTIATED_PARAMETERIZED_TEST(SimpleCataLogTransformPassOptimizedTest);
 // LeftJoinPass dosen't work in simple catalog
-INSTANTIATE_TEST_SUITE_P(
-    JoinFilterOptimized, SimpleCataLogTransformPassOptimizedTest,
-    testing::Values(
-        // 0
-        std::make_pair(
-            "SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
-            "t2 order by t2.col5 on "
-            " t1.col1 = t2.col2 and t2.col5 >= t1.col5;",
-            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
-            "  JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=t2.col5 "
-            ">= t1.col5, "
-            "left_keys=(t1.col1), right_keys=(t2.col2), index_keys=)\n"
-            "    DATA_PROVIDER(table=t1)\n"
-            "    DATA_PROVIDER(table=t2)"),
-        // 1
-        std::make_pair(
-            "SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
-            "t2 order by t2.col5 on "
-            " t1.col1 = t2.col1 and t2.col5 >= t1.col5;",
-            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
-            "  JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=t2.col5 "
-            ">= t1.col5, "
-            "left_keys=(t1.col1), right_keys=(t2.col1), index_keys=)\n"
-            "    DATA_PROVIDER(table=t1)\n"
-            "    DATA_PROVIDER(table=t2)"),
-        // 2
-        std::make_pair(
-            "SELECT "
-            "t2.col1, "
-            "sum(t1.col3) OVER w1 as w1_col3_sum, "
-            "sum(t1.col2) OVER w1 as w1_col2_sum "
-            "FROM t1 last join t2 order by t2.col5 on t1.col1 = t2.col1 "
-            "WINDOW w1 AS (PARTITION BY t1.col0 ORDER BY t1.col5 ROWS_RANGE "
-            "BETWEEN 3 "
-            "PRECEDING AND CURRENT ROW) limit 10;",
-            "LIMIT(limit=10, optimized)\n"
-            "  PROJECT(type=WindowAggregation, limit=10)\n"
-            "    +-WINDOW(partition_keys=(t1.col0), orders=(t1.col5 ASC), "
-            "range=(t1.col5, -3, 0))\n"
-            "    JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
-            "left_keys=(t1.col1), "
-            "right_keys=(t2.col1), index_keys=)\n"
-            "      DATA_PROVIDER(table=t1)\n"
-            "      DATA_PROVIDER(table=t2)")));
+INSTANTIATE_TEST_SUITE_P(JoinFilterOptimized, SimpleCataLogTransformPassOptimizedTest,
+                         testing::Values(
+                             // 0
+                             std::make_pair("SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
+                                            "t2 order by t2.col5 on "
+                                            " t1.col1 = t2.col2 and t2.col5 >= t1.col5;",
+                                            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
+                                            "  JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=t2.col5 "
+                                            ">= t1.col5, "
+                                            "left_keys=(t1.col1), right_keys=(t2.col2), index_keys=)\n"
+                                            "    DATA_PROVIDER(table=t1)\n"
+                                            "    DATA_PROVIDER(table=t2)"),
+                             // 1
+                             std::make_pair("SELECT t1.col1 as t1_col1, t2.col2 as t2_col2 FROM t1 last join "
+                                            "t2 order by t2.col5 on "
+                                            " t1.col1 = t2.col1 and t2.col5 >= t1.col5;",
+                                            "SIMPLE_PROJECT(sources=(t1.col1 -> t1_col1, t2.col2 -> t2_col2))\n"
+                                            "  JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=t2.col5 "
+                                            ">= t1.col5, "
+                                            "left_keys=(t1.col1), right_keys=(t2.col1), index_keys=)\n"
+                                            "    DATA_PROVIDER(table=t1)\n"
+                                            "    DATA_PROVIDER(table=t2)"),
+                             // 2
+                             std::make_pair("SELECT "
+                                            "t2.col1, "
+                                            "sum(t1.col3) OVER w1 as w1_col3_sum, "
+                                            "sum(t1.col2) OVER w1 as w1_col2_sum "
+                                            "FROM t1 last join t2 order by t2.col5 on t1.col1 = t2.col1 "
+                                            "WINDOW w1 AS (PARTITION BY t1.col0 ORDER BY t1.col5 ROWS_RANGE "
+                                            "BETWEEN 3 "
+                                            "PRECEDING AND CURRENT ROW) limit 10;",
+                                            "LIMIT(limit=10, optimized)\n"
+                                            "  PROJECT(type=WindowAggregation, limit=10)\n"
+                                            "    +-WINDOW(partition_keys=(t1.col0), orders=(t1.col5 ASC), "
+                                            "range=(t1.col5, -3, 0))\n"
+                                            "    JOIN(type=LastJoin, right_sort=(t2.col5 ASC), condition=, "
+                                            "left_keys=(t1.col1), "
+                                            "right_keys=(t2.col1), index_keys=)\n"
+                                            "      DATA_PROVIDER(table=t1)\n"
+                                            "      DATA_PROVIDER(table=t2)")));
 
 INSTANTIATE_TEST_SUITE_P(
     WhereOptimized, SimpleCataLogTransformPassOptimizedTest,
-    testing::Values(
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10;",
-                       "PROJECT(type=Aggregation)\n"
+    testing::Values(std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10;",
+                                   "PROJECT(type=Aggregation)\n"
                                    "  FILTER_BY(condition=, left_keys=(10), right_keys=(col1), index_keys=)\n"
                                    "    DATA_PROVIDER(table=t1)"),
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 = 20;",
-                       "PROJECT(type=Aggregation)\n"
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 = 20;",
+                                   "PROJECT(type=Aggregation)\n"
                                    "  FILTER_BY(condition=, left_keys=(10,20), right_keys=(col1,col2), index_keys=)\n"
                                    "    DATA_PROVIDER(table=t1)"),
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 < 20;",
-                       "PROJECT(type=Aggregation)\n"
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col2 < 20;",
+                                   "PROJECT(type=Aggregation)\n"
                                    "  FILTER_BY(condition=col2 < 20, left_keys=(10), right_keys=(col1), index_keys=)\n"
                                    "    DATA_PROVIDER(table=t1)"),
-        std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col0 = \"test\";",
-                       "PROJECT(type=Aggregation)\n"
+                    std::make_pair("SELECT sum(col1) as col1sum FROM t1 where col1 = 10 and col0 = \"test\";",
+                                   "PROJECT(type=Aggregation)\n"
                                    "  FILTER_BY(condition=, left_keys=(10,test), right_keys=(col1,col0), index_keys=)\n"
                                    "    DATA_PROVIDER(table=t1)")));
 TEST_P(SimpleCataLogTransformPassOptimizedTest, PassOptimizedTest) {

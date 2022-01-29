@@ -24,6 +24,7 @@
 #include <string>
 #include <utility>
 #include <vector>
+
 #include "base/raw_buffer.h"
 #include "base/spin_lock.h"
 #include "codec/fe_row_codec.h"
@@ -57,7 +58,6 @@ class EngineOptions {
     inline void SetCompileOnly(bool flag) { this->compile_only_ = flag; }
     /// Return if only support to compile physical plan.
     inline bool IsCompileOnly() const { return compile_only_; }
-
 
     /// Set `true` if the engine only generate physical plan, default `false`.
     ///
@@ -96,9 +96,7 @@ class EngineOptions {
         return this;
     }
     /// Return if the engine support batch window parallelization.
-    inline bool IsEnableBatchWindowParallelization() const {
-        return enable_batch_window_parallelization_;
-    }
+    inline bool IsEnableBatchWindowParallelization() const { return enable_batch_window_parallelization_; }
 
     /// Set `true` to enable window column purning
     inline EngineOptions* SetEnableWindowColumnPruning(bool flag) {
@@ -106,23 +104,17 @@ class EngineOptions {
         return this;
     }
     /// Return if the engine window column purning
-    inline bool IsEnableWindowColumnPruning() const {
-        return enable_window_column_pruning_;
-    }
+    inline bool IsEnableWindowColumnPruning() const { return enable_window_column_pruning_; }
 
     /// Set the maximum number of cache entries, default is `50`.
-    inline void SetMaxSqlCacheSize(uint32_t size) {
-        max_sql_cache_size_ = size;
-    }
+    inline void SetMaxSqlCacheSize(uint32_t size) { max_sql_cache_size_ = size; }
     /// Return the maximum number of entries we can hold for compiling cache.
     inline uint32_t GetMaxSqlCacheSize() const { return max_sql_cache_size_; }
 
     /// Set `true` to enable spark unsafe row format, default `false`.
     EngineOptions* SetEnableSparkUnsaferowFormat(bool flag);
     /// Return if the engine can support can support spark unsafe row format.
-    inline bool IsEnableSparkUnsaferowFormat() const {
-        return enable_spark_unsaferow_format_;
-    }
+    inline bool IsEnableSparkUnsaferowFormat() const { return enable_spark_unsaferow_format_; }
 
     /// Return JitOptions
     inline hybridse::vm::JitOptions& jit_options() { return jit_options_; }
@@ -150,23 +142,16 @@ class RunSession {
     virtual ~RunSession();
 
     /// Return query result schema.
-    virtual const Schema& GetSchema() const {
-        return compile_info_->GetSchema();
-    }
+    virtual const Schema& GetSchema() const { return compile_info_->GetSchema(); }
 
     /// Return query schema string.
-    virtual const std::string& GetEncodedSchema() const {
-        return compile_info_->GetEncodedSchema();
-    }
+    virtual const std::string& GetEncodedSchema() const { return compile_info_->GetEncodedSchema(); }
 
     /// Return query related compile information.
-    virtual std::shared_ptr<hybridse::vm::CompileInfo> GetCompileInfo() {
-        return compile_info_;
-    }
+    virtual std::shared_ptr<hybridse::vm::CompileInfo> GetCompileInfo() { return compile_info_; }
 
     /// Update query related compile information.
-    bool SetCompileInfo(
-        const std::shared_ptr<hybridse::vm::CompileInfo>& compile_info);
+    bool SetCompileInfo(const std::shared_ptr<hybridse::vm::CompileInfo>& compile_info);
 
     /// Enable printing debug information while running a query.
     void EnableDebug() { is_debug_ = true; }
@@ -191,8 +176,7 @@ class RunSession {
 /// \brief BatchRunSession is a kind of RunSession designed for batch mode query.
 class BatchRunSession : public RunSession {
  public:
-    explicit BatchRunSession(bool mini_batch = false)
-        : RunSession(kBatchMode), parameter_schema_() {}
+    explicit BatchRunSession(bool mini_batch = false) : RunSession(kBatchMode), parameter_schema_() {}
     ~BatchRunSession() {}
     /// \brief Query sql with parameter row in batch mode.
     /// Query results will be returned as std::vector<Row> in output
@@ -207,6 +191,7 @@ class BatchRunSession : public RunSession {
     void SetParameterSchema(const codec::Schema& schema) { parameter_schema_ = schema; }
     /// Return query parameter schema.
     virtual const Schema& GetParameterSchema() const { return parameter_schema_; }
+
  private:
     codec::Schema parameter_schema_;
 };
@@ -216,21 +201,14 @@ class BatchRunSession : public RunSession {
 /// we are not going to support Run() method for it
 class MockRequestRunSession : public RunSession {
  public:
-    MockRequestRunSession() : RunSession(kMockRequestMode) {
-    }
+    MockRequestRunSession() : RunSession(kMockRequestMode) {}
     ~MockRequestRunSession() {}
     /// \brief Return the schema of request row
-    virtual const Schema& GetRequestSchema() const {
-        return compile_info_->GetRequestSchema();
-    }
+    virtual const Schema& GetRequestSchema() const { return compile_info_->GetRequestSchema(); }
     /// \brief Return the name of request table name
-    virtual const std::string& GetRequestName() const {
-        return compile_info_->GetRequestName();
-    }
+    virtual const std::string& GetRequestName() const { return compile_info_->GetRequestName(); }
     /// \brief Return the name of request table db
-    virtual const std::string& GetRequestDbName() const {
-        return compile_info_->GetRequestDbName();
-    }
+    virtual const std::string& GetRequestDbName() const { return compile_info_->GetRequestDbName(); }
 };
 /// \brief RequestRunSession is a kind of RunSession designed for request mode query.
 ///
@@ -255,17 +233,11 @@ class RequestRunSession : public RunSession {
     int32_t Run(uint32_t task_id, const Row& in_row, Row* output);  // NOLINT
 
     /// \brief Return the schema of request row
-    virtual const Schema& GetRequestSchema() const {
-        return compile_info_->GetRequestSchema();
-    }
+    virtual const Schema& GetRequestSchema() const { return compile_info_->GetRequestSchema(); }
     /// \brief Return the name of request table name
-    virtual const std::string& GetRequestName() const {
-        return compile_info_->GetRequestName();
-    }
+    virtual const std::string& GetRequestName() const { return compile_info_->GetRequestName(); }
     /// \brief Return the name of request table db
-    virtual const std::string& GetRequestDbName() const {
-        return compile_info_->GetRequestDbName();
-    }
+    virtual const std::string& GetRequestDbName() const { return compile_info_->GetRequestDbName(); }
 };
 /// \brief BatchRequestRunSession is a kind of RunSession designed for batch request mode query.
 ///
@@ -276,17 +248,11 @@ class BatchRequestRunSession : public RunSession {
     ~BatchRequestRunSession() {}
 
     /// \brief Return the schema of request row
-    const Schema& GetRequestSchema() const {
-        return compile_info_->GetRequestSchema();
-    }
+    const Schema& GetRequestSchema() const { return compile_info_->GetRequestSchema(); }
     /// \brief Return the name of request table name
-    const std::string& GetRequestName() const {
-        return compile_info_->GetRequestName();
-    }
+    const std::string& GetRequestName() const { return compile_info_->GetRequestName(); }
     /// \brief Return the name of request db name
-    const std::string& GetRequestDbName() const {
-        return compile_info_->GetRequestDbName();
-    }
+    const std::string& GetRequestDbName() const { return compile_info_->GetRequestDbName(); }
 
     /// \brief Run query in batch request mode.
     /// \param request_batch: a batch of request rows
@@ -305,9 +271,7 @@ class BatchRequestRunSession : public RunSession {
     void AddCommonColumnIdx(size_t idx) { common_column_indices_.insert(idx); }
 
     /// \brief Return a set of common column indices
-    const std::set<size_t>& common_column_indices() const {
-        return common_column_indices_;
-    }
+    const std::set<size_t>& common_column_indices() const { return common_column_indices_; }
 
  private:
     std::set<size_t> common_column_indices_;
@@ -323,9 +287,8 @@ struct ExplainOutput {
     std::string ir;               ///< Codegen IR String
     vm::Schema output_schema;     ///< The schema of query result
     vm::Router router;            ///< The Router for request-mode query
-    uint32_t limit_cnt;                ///< The limit count
+    uint32_t limit_cnt;           ///< The limit count
 };
-
 
 /// \brief An engine is responsible to compile SQL on the specific Catalog.
 ///
@@ -365,8 +328,7 @@ class Engine {
     /// \brief Search all tables related to the specific sql in db.
     ///
     /// The tables' names are returned in tables
-    bool GetDependentTables(const std::string& sql, const std::string& db,
-                            EngineMode engine_mode,
+    bool GetDependentTables(const std::string& sql, const std::string& db, EngineMode engine_mode,
                             std::set<std::pair<std::string, std::string>>* db_tables,
                             base::Status& status);  // NOLINT
 
@@ -375,17 +337,15 @@ class Engine {
     /// The results are returned as ExplainOutput in explain_output.
     /// The success or fail status message is returned as Status in status.
     /// TODO: base::Status* status -> base::Status& status
-    bool Explain(const std::string& sql, const std::string& db,
-                 EngineMode engine_mode, ExplainOutput* explain_output, base::Status* status);
+    bool Explain(const std::string& sql, const std::string& db, EngineMode engine_mode, ExplainOutput* explain_output,
+                 base::Status* status);
     /// \brief Explain sql compiling result.
     ///
     /// The results are returned as ExplainOutput in explain_output.
     /// The success or fail status message is returned as Status in status.
     /// TODO: base::Status* status -> base::Status& status
-    bool Explain(const std::string& sql, const std::string& db,
-                 EngineMode engine_mode, const codec::Schema& parameter_schema,
-                 ExplainOutput* explain_output,
-                 base::Status* status);
+    bool Explain(const std::string& sql, const std::string& db, EngineMode engine_mode,
+                 const codec::Schema& parameter_schema, ExplainOutput* explain_output, base::Status* status);
 
     /// \brief Same as above, but allowing compiling with configuring common column indices.
     ///
@@ -407,20 +367,16 @@ class Engine {
  private:
     bool GetDependentTables(const node::PlanNode* node, const std::string& default_db,
                             std::set<std::pair<std::string, std::string>>* db_tables, base::Status& status);  // NOLINT
-    std::shared_ptr<CompileInfo> GetCacheLocked(const std::string& db,
-                                                const std::string& sql,
-                                                EngineMode engine_mode);
-    bool SetCacheLocked(const std::string& db, const std::string& sql,
-                        EngineMode engine_mode,
+    std::shared_ptr<CompileInfo> GetCacheLocked(const std::string& db, const std::string& sql, EngineMode engine_mode);
+    bool SetCacheLocked(const std::string& db, const std::string& sql, EngineMode engine_mode,
                         std::shared_ptr<CompileInfo> info);
 
     bool IsCompatibleCache(RunSession& session,  // NOLINT
                            std::shared_ptr<CompileInfo> info,
                            base::Status& status);  // NOLINT
 
-    bool Explain(const std::string& sql, const std::string& db,
-                 EngineMode engine_mode, const codec::Schema& parameter_schema,
-                 const std::set<size_t>& common_column_indices,
+    bool Explain(const std::string& sql, const std::string& db, EngineMode engine_mode,
+                 const codec::Schema& parameter_schema, const std::set<size_t>& common_column_indices,
                  ExplainOutput* explain_output, base::Status* status);
     std::shared_ptr<Catalog> cl_;
     EngineOptions options_;
@@ -433,13 +389,8 @@ class Engine {
 /// Local tablet won't invoke rpc to run a task remotely.
 class LocalTablet : public Tablet {
  public:
-    explicit LocalTablet(
-        hybridse::vm::Engine* engine,
-        std::shared_ptr<hybridse::vm::CompileInfoCache> sp_cache)
-        : Tablet(),
-          name_("LocalTablet"),
-          engine_(engine),
-          sp_cache_(sp_cache) {}
+    explicit LocalTablet(hybridse::vm::Engine* engine, std::shared_ptr<hybridse::vm::CompileInfoCache> sp_cache)
+        : Tablet(), name_("LocalTablet"), engine_(engine), sp_cache_(sp_cache) {}
     ~LocalTablet() {}
 
     /// Run a task in request mode locally
@@ -450,11 +401,8 @@ class LocalTablet : public Tablet {
     /// \param is_procedure: whether sql is a procedure or not
     /// \param is_debug: whether printing debug information while running
     /// \return result row as RowHandler pointer
-    std::shared_ptr<RowHandler> SubQuery(uint32_t task_id,
-                                         const std::string& db,
-                                         const std::string& sql, const Row& row,
-                                         const bool is_procedure,
-                                         const bool is_debug) override;
+    std::shared_ptr<RowHandler> SubQuery(uint32_t task_id, const std::string& db, const std::string& sql,
+                                         const Row& row, const bool is_procedure, const bool is_debug) override;
 
     /// Run a task in batch-request mode locally
     /// \param task_id: id of task
@@ -466,11 +414,10 @@ class LocalTablet : public Tablet {
     /// \param is_procedure: whether run procedure or not
     /// \param is_debug: whether printing debug information while running
     /// \return result rows as TableHandler pointer
-    virtual std::shared_ptr<TableHandler> SubQuery(
-        uint32_t task_id, const std::string& db, const std::string& sql,
-        const std::set<size_t>& common_column_indices,
-        const std::vector<Row>& in_rows, const bool request_is_common,
-        const bool is_procedure, const bool is_debug);
+    virtual std::shared_ptr<TableHandler> SubQuery(uint32_t task_id, const std::string& db, const std::string& sql,
+                                                   const std::set<size_t>& common_column_indices,
+                                                   const std::vector<Row>& in_rows, const bool request_is_common,
+                                                   const bool is_procedure, const bool is_debug);
 
     /// Return the name of tablet
     const std::string& GetName() const { return name_; }

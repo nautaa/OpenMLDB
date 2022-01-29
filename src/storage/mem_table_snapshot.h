@@ -68,18 +68,21 @@ class MemTableSnapshot : public Snapshot {
     base::Status GetAllDecoder(std::shared_ptr<Table> table, std::map<uint8_t, codec::RowView>* decoder_map);
 
     base::Status GetIndexKey(std::shared_ptr<Table> table, const std::shared_ptr<IndexDef>& index,
-            const base::Slice& data, std::map<uint8_t, codec::RowView>* decoder_map, std::string* index_key);
+                             const base::Slice& data, std::map<uint8_t, codec::RowView>* decoder_map,
+                             std::string* index_key);
 
     base::Status ExtractIndexFromSnapshot(std::shared_ptr<Table> table, const ::openmldb::api::Manifest& manifest,
-            WriteHandle* wh, const std::vector<::openmldb::common::ColumnKey>& add_indexs,
-            uint32_t partition_num, uint64_t* count, uint64_t* expired_key_num, uint64_t* deleted_key_num);
+                                          WriteHandle* wh, const std::vector<::openmldb::common::ColumnKey>& add_indexs,
+                                          uint32_t partition_num, uint64_t* count, uint64_t* expired_key_num,
+                                          uint64_t* deleted_key_num);
 
     int CheckDeleteAndUpdate(std::shared_ptr<Table> table, ::openmldb::api::LogEntry* new_entry);
 
-    base::Status ExtractIndexFromBinlog(std::shared_ptr<Table> table,
-            WriteHandle* wh, const std::vector<::openmldb::common::ColumnKey>& add_indexs,
-            uint64_t collected_offset, uint32_t partition_num, uint64_t* offset,
-            uint64_t* last_term, uint64_t* count, uint64_t* expired_key_num, uint64_t* deleted_key_num);
+    base::Status ExtractIndexFromBinlog(std::shared_ptr<Table> table, WriteHandle* wh,
+                                        const std::vector<::openmldb::common::ColumnKey>& add_indexs,
+                                        uint64_t collected_offset, uint32_t partition_num, uint64_t* offset,
+                                        uint64_t* last_term, uint64_t* count, uint64_t* expired_key_num,
+                                        uint64_t* deleted_key_num);
 
     int ExtractIndexFromSnapshot(std::shared_ptr<Table> table, const ::openmldb::api::Manifest& manifest,
                                  WriteHandle* wh,
@@ -102,7 +105,7 @@ class MemTableSnapshot : public Snapshot {
                          uint64_t& out_offset);  // NOLINT
 
     int ExtractIndexData(std::shared_ptr<Table> table, const std::vector<::openmldb::common::ColumnKey>& column_key,
-                        uint32_t partition_num, uint64_t* out_offset);
+                         uint32_t partition_num, uint64_t* out_offset);
 
     bool DumpIndexData(std::shared_ptr<Table> table, const ::openmldb::common::ColumnKey& column_key, uint32_t idx,
                        const std::vector<::openmldb::log::WriteHandle*>& whs);

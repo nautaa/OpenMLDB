@@ -247,16 +247,16 @@ class Segment {
 
  private:
     void FreeList(::openmldb::base::Node<uint64_t, DataBlock*>* node, uint64_t& gc_idx_cnt,  // NOLINT
-                  uint64_t& gc_record_cnt,         // NOLINT
-                  uint64_t& gc_record_byte_size);  // NOLINT
+                  uint64_t& gc_record_cnt,                                                   // NOLINT
+                  uint64_t& gc_record_byte_size);                                            // NOLINT
     void SplitList(KeyEntry* entry, uint64_t ts, ::openmldb::base::Node<uint64_t, DataBlock*>** node);
 
-    void GcEntryFreeList(uint64_t version, uint64_t& gc_idx_cnt,  // NOLINT
-                         uint64_t& gc_record_cnt,                 // NOLINT
-                         uint64_t& gc_record_byte_size);          // NOLINT
+    void GcEntryFreeList(uint64_t version, uint64_t& gc_idx_cnt,                            // NOLINT
+                         uint64_t& gc_record_cnt,                                           // NOLINT
+                         uint64_t& gc_record_byte_size);                                    // NOLINT
     void FreeEntry(::openmldb::base::Node<Slice, void*>* entry_node, uint64_t& gc_idx_cnt,  // NOLINT
-                   uint64_t& gc_record_cnt,         // NOLINT
-                   uint64_t& gc_record_byte_size);  // NOLINT
+                   uint64_t& gc_record_cnt,                                                 // NOLINT
+                   uint64_t& gc_record_byte_size);                                          // NOLINT
 
  private:
     KeyEntries* entries_;

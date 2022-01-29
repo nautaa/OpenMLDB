@@ -49,9 +49,7 @@ class DBSDKTest : public ::testing::Test {
  public:
     DBSDKTest() : mc_(new MiniCluster(6181)) {}
     ~DBSDKTest() override { delete mc_; }
-    void SetUp() override {
-        ASSERT_TRUE(mc_->SetUp());
-    }
+    void SetUp() override { ASSERT_TRUE(mc_->SetUp()); }
     void TearDown() override { mc_->Close(); }
 
     void CreateTable() {

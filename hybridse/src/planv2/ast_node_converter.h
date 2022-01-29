@@ -109,7 +109,7 @@ base::Status ConvertCreateIndexStatement(const zetasql::ASTCreateIndexStatement*
                                          node::CreateIndexNode** output);
 base::Status ConvertAstOptionsListToMap(const zetasql::ASTOptionsList* options, node::NodeManager* node_manager,
                                         std::shared_ptr<node::OptionsMap> options_map);
-base::Status ConvertTargetName(const zetasql::ASTTargetName* node, std::vector<absl::string_view>& names); // NOLINT
+base::Status ConvertTargetName(const zetasql::ASTTargetName* node, std::vector<absl::string_view>& names);  // NOLINT
 }  // namespace plan
 }  // namespace hybridse
 #endif  // HYBRIDSE_SRC_PLANV2_AST_NODE_CONVERTER_H_

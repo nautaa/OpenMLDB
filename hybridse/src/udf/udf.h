@@ -17,8 +17,10 @@
 #ifndef HYBRIDSE_SRC_UDF_UDF_H_
 #define HYBRIDSE_SRC_UDF_UDF_H_
 #include <stdint.h>
+
 #include <string>
 #include <tuple>
+
 #include "boost/lexical_cast.hpp"
 #include "codec/list_iterator_codec.h"
 #include "codec/type_codec.h"
@@ -220,21 +222,14 @@ int32_t weekofyear(hybridse::codec::Date *ts);
 
 float Cotf(float x);
 
-void date_format(codec::Date *date, const std::string &format,
-                 hybridse::codec::StringRef *output);
-void date_format(codec::Timestamp *timestamp, const std::string &format,
-                 hybridse::codec::StringRef *output);
+void date_format(codec::Date *date, const std::string &format, hybridse::codec::StringRef *output);
+void date_format(codec::Timestamp *timestamp, const std::string &format, hybridse::codec::StringRef *output);
 
-void date_format(codec::Timestamp *timestamp,
-                 hybridse::codec::StringRef *format,
-                 hybridse::codec::StringRef *output);
-void date_format(codec::Date *date, hybridse::codec::StringRef *format,
-                 hybridse::codec::StringRef *output);
+void date_format(codec::Timestamp *timestamp, hybridse::codec::StringRef *format, hybridse::codec::StringRef *output);
+void date_format(codec::Date *date, hybridse::codec::StringRef *format, hybridse::codec::StringRef *output);
 
-void timestamp_to_string(codec::Timestamp *timestamp,
-                         hybridse::codec::StringRef *output);
-void timestamp_to_date(codec::Timestamp *timestamp,
-                       hybridse::codec::Date *output, bool *is_null);
+void timestamp_to_string(codec::Timestamp *timestamp, hybridse::codec::StringRef *output);
+void timestamp_to_date(codec::Timestamp *timestamp, hybridse::codec::Date *output, bool *is_null);
 
 void date_to_string(codec::Date *date, hybridse::codec::StringRef *output);
 
@@ -243,16 +238,11 @@ void like(codec::StringRef *name, codec::StringRef *pattern, bool *out, bool *is
 void ilike(codec::StringRef *name, codec::StringRef *pattern, codec::StringRef *escape, bool *out, bool *is_null);
 void ilike(codec::StringRef *name, codec::StringRef *pattern, bool *out, bool *is_null);
 
-void date_to_timestamp(codec::Date *date, hybridse::codec::Timestamp *output,
-                       bool *is_null);
-void string_to_date(codec::StringRef *str, hybridse::codec::Date *output,
-                    bool *is_null);
-void string_to_timestamp(codec::StringRef *str,
-                         hybridse::codec::Timestamp *output, bool *is_null);
-void sub_string(hybridse::codec::StringRef *str, int32_t pos,
-                hybridse::codec::StringRef *output);
-void sub_string(hybridse::codec::StringRef *str, int32_t pos, int32_t len,
-                hybridse::codec::StringRef *output);
+void date_to_timestamp(codec::Date *date, hybridse::codec::Timestamp *output, bool *is_null);
+void string_to_date(codec::StringRef *str, hybridse::codec::Date *output, bool *is_null);
+void string_to_timestamp(codec::StringRef *str, hybridse::codec::Timestamp *output, bool *is_null);
+void sub_string(hybridse::codec::StringRef *str, int32_t pos, hybridse::codec::StringRef *output);
+void sub_string(hybridse::codec::StringRef *str, int32_t pos, int32_t len, hybridse::codec::StringRef *output);
 int32_t strcmp(hybridse::codec::StringRef *s1, hybridse::codec::StringRef *s2);
 void bool_to_string(bool v, hybridse::codec::StringRef *output);
 void string_to_bool(codec::StringRef *str, bool *out, bool *is_null_ptr);
@@ -291,7 +281,7 @@ uint32_t to_string_len(const V &v);
 
 }  // namespace v1
 
-void RegisterNativeUdfToModule(hybridse::node::NodeManager* nm);
+void RegisterNativeUdfToModule(hybridse::node::NodeManager *nm);
 }  // namespace udf
 }  // namespace hybridse
 

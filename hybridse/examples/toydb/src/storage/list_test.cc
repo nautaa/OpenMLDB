@@ -15,10 +15,13 @@
  */
 
 #include "storage/list.h"
+
 #include <sys/time.h>
 #include <time.h>
+
 #include <random>
 #include <string>
+
 #include "gtest/gtest.h"
 #include "storage/skiplist.h"
 

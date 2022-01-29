@@ -1066,8 +1066,6 @@ void NameServerImpl::UpdateTablets(const std::vector<std::string>& endpoints) {
         }
     }
 
-
-
     auto it = tablet_endpoints.begin();
     for (; it != tablet_endpoints.end(); ++it) {
         alive.insert(*it);
@@ -3653,8 +3651,7 @@ void NameServerImpl::CreateTable(RpcController* controller, const CreateTableReq
     auto status = schema::SchemaAdapter::CheckTableMeta(*table_info);
     if (!status.OK()) {
         PDLOG(WARNING, status.msg.c_str());
-        base::SetResponseStatus(base::ReturnCode::kInvalidParameter, "check TableMeta failed! " + status.msg,
-                response);
+        base::SetResponseStatus(base::ReturnCode::kInvalidParameter, "check TableMeta failed! " + status.msg, response);
         return;
     }
     if (!request->has_zone_info()) {
@@ -3726,8 +3723,6 @@ void NameServerImpl::CreateTable(RpcController* controller, const CreateTableReq
         response->set_msg(response->msg());
     }
 }
-
-
 
 bool NameServerImpl::SaveTableInfo(std::shared_ptr<TableInfo> table_info) {
     std::string table_value;
@@ -8821,9 +8816,9 @@ bool NameServerImpl::UpdateZkTableNodeWithoutNotify(const TableInfo* table_info)
     return true;
 }
 
-base::Status NameServerImpl::AddMultiIndexs(const std::string& db, const std::string& name,
-        std::shared_ptr<TableInfo> table_info,
-        const ::google::protobuf::RepeatedPtrField<openmldb::common::ColumnKey>& column_keys) {
+base::Status NameServerImpl::AddMultiIndexs(
+    const std::string& db, const std::string& name, std::shared_ptr<TableInfo> table_info,
+    const ::google::protobuf::RepeatedPtrField<openmldb::common::ColumnKey>& column_keys) {
     auto status = schema::IndexUtil::CheckUnique(column_keys);
     if (!status.OK()) {
         return status;
@@ -8860,8 +8855,7 @@ base::Status NameServerImpl::AddMultiIndexs(const std::string& db, const std::st
             }
             auto status = tablet->client_->AddMultiIndex(tid, pid, indexs, nullptr);
             if (!status.OK()) {
-                LOG(WARNING) << "add index failed. tid " << tid << " pid " << pid <<
-                    " endpoint " << meta.endpoint();
+                LOG(WARNING) << "add index failed. tid " << tid << " pid " << pid << " endpoint " << meta.endpoint();
                 return status;
             }
             endpoint_set.insert(meta.endpoint());

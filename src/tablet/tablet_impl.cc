@@ -5137,7 +5137,7 @@ void TabletImpl::BulkLoad(RpcController* controller, const ::openmldb::api::Bulk
 void TabletImpl::CreateAggregator(RpcController* controller, const ::openmldb::api::CreateAggregatorRequest* request,
                              ::openmldb::api::CreateAggregatorResponse* response, Closure* done) {
     brpc::ClosureGuard done_guard(done);
-    const ::openmldb::api::TableMeta* base_meta = &request->base_table_meta();
+    std::string msg;
     std::shared_ptr<Table> aggr_table = GetTable(request->aggr_table_tid(), request->aggr_table_pid());
     if (!aggr_table) {
         response->set_code(::openmldb::base::ReturnCode::kTableIsNotExist);
@@ -5145,14 +5145,52 @@ void TabletImpl::CreateAggregator(RpcController* controller, const ::openmldb::a
         PDLOG(WARNING, "table is not exist. tid %u, pid %u", request->aggr_table_tid(), request->aggr_table_pid());
         return;
     }
+    if (!CreateAggregatorInternal(request, aggr_table, msg)) {
+        response->set_code(::openmldb::base::ReturnCode::kError);
+        response->set_msg(msg.c_str());
+        return;
+    }
+
+    std::string root_path;
+
+    bool ok = ChooseDBRootPath(request->aggr_table_tid(), request->aggr_table_pid(), root_path);
+    if (!ok) {
+        response->set_code(::openmldb::base::ReturnCode::kFailToGetDbRootPath);
+        response->set_msg("fail to get table db root path");
+        PDLOG(WARNING, "table db path is not found. tid %u, pid %u", request->aggr_table_tid(), request->aggr_table_pid());
+    }
+    std::string db_path = GetDBPath(root_path, request->aggr_table_tid(), request->aggr_table_pid());
+    if (!::openmldb::base::IsExists(db_path)) {
+        response->set_code(::openmldb::base::ReturnCode::kTableDbPathIsNotExist);
+        response->set_msg("table db path is not exist");
+    }
+    std::string aggr_info;
+    google::protobuf::TextFormat::PrintToString(*request, &aggr_info);
+    std::string full_path = db_path + "/aggr_info.txt";
+
+    FILE* fd_write = fopen(full_path.c_str(), "w");
+    if (fd_write == NULL) {
+        PDLOG(WARNING, "fail to open file %s. err[%d: %s]", full_path.c_str(), errno, strerror(errno));
+    }
+    if (fputs(aggr_info.c_str(), fd_write) == EOF) {
+        PDLOG(WARNING, "write error. path[%s], err[%d: %s]", full_path.c_str(), errno, strerror(errno));
+        fclose(fd_write);
+    }
+    fclose(fd_write);
+    response->set_code(::openmldb::base::ReturnCode::kOk);
+    return;
+}
+bool TabletImpl::CreateAggregatorInternal(const ::openmldb::api::CreateAggregatorRequest* request,
+                                  std::shared_ptr<Table> aggr_table,
+                                  std::string& msg) {
+    const ::openmldb::api::TableMeta* base_meta = &request->base_table_meta();
     auto aggregator = ::openmldb::storage::CreateAggregator(*base_meta, *aggr_table->GetTableMeta(),
                                                             aggr_table, request->index_pos(),
                                                             request->aggr_col(), request->aggr_func(),
                                                             request->order_by_col(), request->bucket_size());
     if (!aggregator) {
-        response->set_code(::openmldb::base::ReturnCode::kError);
-        response->set_msg("create aggregator failed");
-        return;
+        msg.assign("create aggregator failed");
+        return false;
     }
     uint64_t uid = (uint64_t) base_meta->tid() << 32 | base_meta->pid();
     {
@@ -5162,8 +5200,7 @@ void TabletImpl::CreateAggregator(RpcController* controller, const ::openmldb::a
         }
         aggregators_[uid]->push_back(aggregator);
     }
-    response->set_code(::openmldb::base::ReturnCode::kOk);
-    return;
+    return true;
 }
 }  // namespace tablet
 }  // namespace openmldb

@@ -399,6 +399,10 @@ class TabletImpl : public ::openmldb::api::TabletServer {
     bool UpdateAggrs(uint32_t tid, uint32_t pid, const std::string& value,
                      const ::openmldb::storage::Dimensions& dimensions, uint64_t log_offset);
 
+    bool CreateAggregatorInternal(const ::openmldb::api::CreateAggregatorRequest* request,
+                                  std::shared_ptr<Table> aggr_table,
+                                  std::string& msg);
+
     inline bool IsClusterMode() const {
         return startup_mode_ == ::openmldb::type::StartupMode::kCluster;
     }

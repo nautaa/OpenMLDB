@@ -177,30 +177,6 @@ bool Aggregator::GetAggrBufferFromRowView(const codec::RowView& row_view, const 
 bool Aggregator::FlushAggrBuffer(const std::string& key, const AggrBuffer& buffer) {
     std::string encoded_row;
     std::string aggr_val;
-    switch (aggr_col_type_) {
-        case DataType::kSmallInt:
-        case DataType::kInt:
-        case DataType::kBigInt: {
-            int64_t tmp_val = buffer.aggr_val_.vlong;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
-            break;
-        }
-        case DataType::kFloat: {
-            float tmp_val = buffer.aggr_val_.vfloat;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
-            break;
-        }
-        case DataType::kDouble: {
-            double tmp_val = buffer.aggr_val_.vdouble;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
-            break;
-        }
-        default: {
-            PDLOG(ERROR, "Unsupported data type");
-            return false;
-        }
-    }
-
     int str_length = key.size() + aggr_val.size();
     uint32_t row_size = row_builder_.CalTotalLength(str_length);
     encoded_row.resize(row_size);
@@ -211,7 +187,10 @@ bool Aggregator::FlushAggrBuffer(const std::string& key, const AggrBuffer& buffe
         row_builder_.AppendTimestamp(buffer.ts_begin_);
         row_builder_.AppendTimestamp(buffer.ts_end_);
         row_builder_.AppendInt32(buffer.aggr_cnt_);
-        row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
+        if (!EncodeAggrVal(buffer)) { 
+            PDLOG(ERROR, "Enocde aggr value to row failed");
+            return false;
+        }
         row_builder_.AppendInt64(buffer.binlog_offset_);
     }
 
@@ -321,6 +300,340 @@ bool SumAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             return false;
         }
     }
+    return true;
+}
+
+bool SumAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
+    std::string aggr_val;
+    switch (aggr_col_type_) {
+        case DataType::kSmallInt:
+        case DataType::kInt:
+        case DataType::kBigInt: {
+            int64_t tmp_val = buffer.aggr_val_.vlong;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
+            break;
+        }
+        case DataType::kFloat: {
+            float tmp_val = buffer.aggr_val_.vfloat;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
+            break;
+        }
+        case DataType::kDouble: {
+            double tmp_val = buffer.aggr_val_.vdouble;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
+            break;
+        }
+        default: {
+            PDLOG(ERROR, "Unsupported data type");
+            return false;
+        }
+    }
+    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
+    return true;
+}
+
+MinMaxBaseAggregator::MinMaxBaseAggregator(const ::openmldb::api::TableMeta& base_meta, const ::openmldb::api::TableMeta& aggr_meta,
+                             std::shared_ptr<Table> aggr_table, const uint32_t& index_pos, const std::string& aggr_col,
+                             const AggrType& aggr_type, const std::string& ts_col, WindowType window_tpye,
+                             uint32_t window_size)
+    : Aggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
+
+bool MinMaxBaseAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
+    if (buffer.AggrValEmpty()) {
+        row_builder_.AppendNULL();
+        return true;
+    }
+    std::string aggr_val;
+    switch (aggr_col_type_) {
+        case DataType::kSmallInt: {
+            int16_t tmp_val = buffer.aggr_val_.vsmallint;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int16_t));
+            break;
+        }
+        case DataType::kInt: {
+            int32_t tmp_val = buffer.aggr_val_.vint;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
+            break;
+        }
+        case DataType::kBigInt: {
+            int64_t tmp_val = buffer.aggr_val_.vlong;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
+            break;
+        }
+        case DataType::kFloat: {
+            float tmp_val = buffer.aggr_val_.vfloat;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
+            break;
+        }
+        case DataType::kDouble: {
+            double tmp_val = buffer.aggr_val_.vdouble;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
+            break;
+        }
+        case DataType::kString:
+        case DataType::kVarchar: {
+            aggr_val.assign(buffer.str_buf.c_str(), buffer.str_buf.size());
+            break;
+        }
+        default: {
+            PDLOG(ERROR, "Unsupported data type");
+            return false;
+        }
+    }
+    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
+    return true;
+
+}
+
+MinAggregator::MinAggregator(const ::openmldb::api::TableMeta& base_meta, const ::openmldb::api::TableMeta& aggr_meta,
+                             std::shared_ptr<Table> aggr_table, const uint32_t& index_pos, const std::string& aggr_col,
+                             const AggrType& aggr_type, const std::string& ts_col, WindowType window_tpye,
+                             uint32_t window_size)
+    : MinMaxBaseAggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
+
+bool MinAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) {
+    if(row_view.IsNULL(row_ptr, aggr_col_idx_)) {
+        return true;
+    }
+    switch (aggr_col_type_) {
+        case DataType::kSmallInt: {
+            int16_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vsmallint) {
+                aggr_buffer->aggr_val_.vsmallint = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kInt: {
+            int32_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vint) {
+                aggr_buffer->aggr_val_.vint = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kBigInt: {
+            int64_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vlong) {
+                aggr_buffer->aggr_val_.vlong = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kFloat: {
+            float val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vfloat) {
+                aggr_buffer->aggr_val_.vfloat = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kDouble: {
+            double val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vdouble) {
+                aggr_buffer->aggr_val_.vdouble = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kString:
+        case DataType::kVarchar: {
+            char* ch = NULL;
+            uint32_t ch_length = 0;
+            row_view.GetValue(row_ptr, aggr_col_idx_, &ch, &ch_length);
+            if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_buffer->str_buf.c_str()) < 0) {
+                aggr_buffer->str_buf.assign(ch, ch_length);
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        default: {
+            PDLOG(ERROR, "Unsupported data type");
+            return false;
+        }
+    }
+    return true;
+}
+
+MaxAggregator::MaxAggregator(const ::openmldb::api::TableMeta& base_meta, const ::openmldb::api::TableMeta& aggr_meta,
+                             std::shared_ptr<Table> aggr_table, const uint32_t& index_pos, const std::string& aggr_col,
+                             const AggrType& aggr_type, const std::string& ts_col, WindowType window_tpye,
+                             uint32_t window_size)
+    : MinMaxBaseAggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
+
+bool MaxAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) {
+    if(row_view.IsNULL(row_ptr, aggr_col_idx_)) {
+        return true;
+    }
+    switch (aggr_col_type_) {
+        case DataType::kSmallInt: {
+            int16_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vsmallint) {
+                aggr_buffer->aggr_val_.vsmallint = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kInt: {
+            int32_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vint) {
+                aggr_buffer->aggr_val_.vint = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kBigInt: {
+            int64_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vlong) {
+                aggr_buffer->aggr_val_.vlong = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kFloat: {
+            float val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vfloat) {
+                aggr_buffer->aggr_val_.vfloat = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kDouble: {
+            double val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vdouble) {
+                aggr_buffer->aggr_val_.vdouble = val;
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        case DataType::kString:
+        case DataType::kVarchar: {
+            char* ch = NULL;
+            uint32_t ch_length = 0;
+            row_view.GetValue(row_ptr, aggr_col_idx_, &ch, &ch_length);
+            if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_buffer->str_buf.c_str()) > 0) {
+                aggr_buffer->str_buf.assign(ch, ch_length);
+                aggr_buffer->non_null_cnt++;
+            }
+            break;
+        }
+        default: {
+            PDLOG(ERROR, "Unsupported data type");
+            return false;
+        }
+    }
+    return true;
+}
+
+CountAggregator::CountAggregator(const ::openmldb::api::TableMeta& base_meta, const ::openmldb::api::TableMeta& aggr_meta,
+                             std::shared_ptr<Table> aggr_table, const uint32_t& index_pos, const std::string& aggr_col,
+                             const AggrType& aggr_type, const std::string& ts_col, WindowType window_tpye,
+                             uint32_t window_size)
+    : Aggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
+
+bool CountAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
+    std::string aggr_val;
+    int32_t tmp_val = buffer.non_null_cnt;
+    aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
+    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
+    return true;
+
+}
+
+bool CountAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) {
+    if(!row_view.IsNULL(row_ptr, aggr_col_idx_)) {
+        aggr_buffer->non_null_cnt++;
+    }
+    return true;
+}
+
+AvgAggregator::AvgAggregator(const ::openmldb::api::TableMeta& base_meta, const ::openmldb::api::TableMeta& aggr_meta,
+                             std::shared_ptr<Table> aggr_table, const uint32_t& index_pos, const std::string& aggr_col,
+                             const AggrType& aggr_type, const std::string& ts_col, WindowType window_tpye,
+                             uint32_t window_size)
+    : Aggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
+
+bool AvgAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) {
+    if(row_view.IsNULL(row_ptr, aggr_col_idx_)) {
+        return true;
+    }
+    switch (aggr_col_type_) {
+        case DataType::kSmallInt: {
+            int16_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            aggr_buffer->aggr_val_.vlong += val;
+            break;
+        }
+        case DataType::kInt: {
+            int32_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            aggr_buffer->aggr_val_.vlong += val;
+            break;
+        }
+        case DataType::kBigInt: {
+            int64_t val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            aggr_buffer->aggr_val_.vlong += val;
+            break;
+        }
+        case DataType::kFloat: {
+            float val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            aggr_buffer->aggr_val_.vfloat += val;
+            break;
+        }
+        case DataType::kDouble: {
+            double val;
+            row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
+            aggr_buffer->aggr_val_.vdouble += val;
+            break;
+        }
+        default: {
+            PDLOG(ERROR, "Unsupported data type");
+            return false;
+        }
+    }
+    aggr_buffer->non_null_cnt++;
+    return true;
+}
+
+bool AvgAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
+    std::string aggr_val;
+    switch (aggr_col_type_) {
+        case DataType::kSmallInt:
+        case DataType::kInt:
+        case DataType::kBigInt: {
+            int64_t tmp_val = buffer.aggr_val_.vlong;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
+            break;
+        }
+        case DataType::kFloat: {
+            float tmp_val = buffer.aggr_val_.vfloat;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
+            break;
+        }
+        case DataType::kDouble: {
+            double tmp_val = buffer.aggr_val_.vdouble;
+            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
+            break;
+        }
+        default: {
+            PDLOG(ERROR, "Unsupported data type");
+            return false;
+        }
+    }
+    aggr_val.append(reinterpret_cast<char*>(const_cast<int32_t*>(&buffer.non_null_cnt)), sizeof(int32_t));
+    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
     return true;
 }
 

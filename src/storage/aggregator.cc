@@ -76,10 +76,13 @@ bool Aggregator::Update(const std::string& key, const std::string& row, const ui
     AggrBufferLocked* aggr_buffer_lock;
     {
         std::lock_guard<std::mutex> lock(mu_);
-        if (aggr_buffer_map_.find(key) == aggr_buffer_map_.end()) {
-            aggr_buffer_map_.emplace(key, AggrBufferLocked{});
+        auto it = aggr_buffer_map_.find(key);
+        if (it == aggr_buffer_map_.end()) {
+            auto insert_pair = aggr_buffer_map_.emplace(key, AggrBufferLocked{});
+            aggr_buffer_lock = &insert_pair.first->second;
+        } else {
+            aggr_buffer_lock = &it->second;
         }
-        aggr_buffer_lock = &aggr_buffer_map_.at(key);
     }
 
     std::unique_lock<std::mutex> lock(*aggr_buffer_lock->mu_);
@@ -212,8 +215,7 @@ bool Aggregator::UpdateFlushedBuffer(const std::string& key, const int8_t* base_
     AggrBuffer tmp_buffer;
     if (it->Valid()) {
         auto val = it->GetValue();
-        std::string origin_data = val.ToString();
-        int8_t* aggr_row_ptr = reinterpret_cast<int8_t*>(const_cast<char*>(origin_data.c_str()));
+        int8_t* aggr_row_ptr = reinterpret_cast<int8_t*>(const_cast<char*>(val.data()));
 
         bool ok = GetAggrBufferFromRowView(aggr_row_view_, aggr_row_ptr, &tmp_buffer);
         if (!ok) {
@@ -261,7 +263,7 @@ SumAggregator::SumAggregator(const ::openmldb::api::TableMeta& base_meta, const 
     : Aggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
 
 bool SumAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) {
-    if(row_view.IsNULL(row_ptr, aggr_col_idx_)) {
+    if (row_view.IsNULL(row_ptr, aggr_col_idx_)) {
         return true;
     }
     switch (aggr_col_type_) {
@@ -654,7 +656,7 @@ std::shared_ptr<Aggregator> CreateAggregator(const ::openmldb::api::TableMeta& b
             PDLOG(ERROR, "Bucket size is empty");
             return std::shared_ptr<Aggregator>();
         }
-        char time_unit = bucket_size.back();
+        char time_unit = tolower(bucket_size.back());
         std::string time_size = bucket_size.substr(0, bucket_size.size() - 1);
         boost::trim(time_size);
         if (!::openmldb::base::IsNumber(time_size)) {

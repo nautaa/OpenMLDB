@@ -180,22 +180,25 @@ bool Aggregator::GetAggrBufferFromRowView(const codec::RowView& row_view, const 
 bool Aggregator::FlushAggrBuffer(const std::string& key, const AggrBuffer& buffer) {
     std::string encoded_row;
     std::string aggr_val;
+    if (!EncodeAggrVal(buffer, &aggr_val)) {
+        PDLOG(ERROR, "Enocde aggr value to row failed");
+        return false;
+    }
     int str_length = key.size() + aggr_val.size();
     uint32_t row_size = row_builder_.CalTotalLength(str_length);
     encoded_row.resize(row_size);
-    {
-        std::lock_guard<std::mutex> lock(rb_mu_);
-        row_builder_.SetBuffer(reinterpret_cast<int8_t*>(&(encoded_row[0])), row_size);
-        row_builder_.AppendString(key.c_str(), key.size());
-        row_builder_.AppendTimestamp(buffer.ts_begin_);
-        row_builder_.AppendTimestamp(buffer.ts_end_);
-        row_builder_.AppendInt32(buffer.aggr_cnt_);
-        if (!EncodeAggrVal(buffer)) { 
-            PDLOG(ERROR, "Enocde aggr value to row failed");
-            return false;
-        }
-        row_builder_.AppendInt64(buffer.binlog_offset_);
+    int8_t* row_ptr = reinterpret_cast<int8_t*>(&(encoded_row[0]));
+    row_builder_.InitExternalBuffer(row_ptr, row_size);
+    row_builder_.SetString(row_ptr, row_size, 0, key.c_str(), key.size());
+    row_builder_.SetTimestamp(row_ptr, 1, buffer.ts_begin_);
+    row_builder_.SetTimestamp(row_ptr, 2, buffer.ts_end_);
+    if ((aggr_type_ == AggrType::kMax || aggr_type_ == AggrType::kMin) && buffer.AggrValEmpty()) {
+        row_builder_.SetNULL(row_ptr, row_size, 4);
+    } else {
+        row_builder_.SetString(row_ptr, row_size, 4, aggr_val.c_str(), aggr_val.size());
     }
+    row_builder_.SetInt32(row_ptr, 3, buffer.aggr_cnt_);
+    row_builder_.SetInt64(row_ptr, 5, buffer.binlog_offset_);
 
     int64_t time = ::baidu::common::timer::get_micros() / 1000;
     dimensions_.Mutable(0)->set_key(key);
@@ -305,24 +308,23 @@ bool SumAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
     return true;
 }
 
-bool SumAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
-    std::string aggr_val;
+bool SumAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) {
     switch (aggr_col_type_) {
         case DataType::kSmallInt:
         case DataType::kInt:
         case DataType::kBigInt: {
             int64_t tmp_val = buffer.aggr_val_.vlong;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
             break;
         }
         case DataType::kFloat: {
             float tmp_val = buffer.aggr_val_.vfloat;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
             break;
         }
         case DataType::kDouble: {
             double tmp_val = buffer.aggr_val_.vdouble;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
             break;
         }
         default: {
@@ -330,7 +332,6 @@ bool SumAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
             return false;
         }
     }
-    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
     return true;
 }
 
@@ -340,41 +341,36 @@ MinMaxBaseAggregator::MinMaxBaseAggregator(const ::openmldb::api::TableMeta& bas
                              uint32_t window_size)
     : Aggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
 
-bool MinMaxBaseAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
-    if (buffer.AggrValEmpty()) {
-        row_builder_.AppendNULL();
-        return true;
-    }
-    std::string aggr_val;
+bool MinMaxBaseAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) {
     switch (aggr_col_type_) {
         case DataType::kSmallInt: {
             int16_t tmp_val = buffer.aggr_val_.vsmallint;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int16_t));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int16_t));
             break;
         }
         case DataType::kInt: {
             int32_t tmp_val = buffer.aggr_val_.vint;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
             break;
         }
         case DataType::kBigInt: {
             int64_t tmp_val = buffer.aggr_val_.vlong;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
             break;
         }
         case DataType::kFloat: {
             float tmp_val = buffer.aggr_val_.vfloat;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
             break;
         }
         case DataType::kDouble: {
             double tmp_val = buffer.aggr_val_.vdouble;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
             break;
         }
         case DataType::kString:
         case DataType::kVarchar: {
-            aggr_val.assign(buffer.str_buf.c_str(), buffer.str_buf.size());
+            aggr_val->assign(buffer.str_buf.c_str(), buffer.str_buf.size());
             break;
         }
         default: {
@@ -382,9 +378,7 @@ bool MinMaxBaseAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
             return false;
         }
     }
-    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
     return true;
-
 }
 
 MinAggregator::MinAggregator(const ::openmldb::api::TableMeta& base_meta, const ::openmldb::api::TableMeta& aggr_meta,
@@ -543,11 +537,9 @@ CountAggregator::CountAggregator(const ::openmldb::api::TableMeta& base_meta, co
                              uint32_t window_size)
     : Aggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
 
-bool CountAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
-    std::string aggr_val;
+bool CountAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) {
     int32_t tmp_val = buffer.non_null_cnt;
-    aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
-    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
+    aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
     return true;
 
 }
@@ -609,24 +601,23 @@ bool AvgAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
     return true;
 }
 
-bool AvgAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
-    std::string aggr_val;
+bool AvgAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) {
     switch (aggr_col_type_) {
         case DataType::kSmallInt:
         case DataType::kInt:
         case DataType::kBigInt: {
             int64_t tmp_val = buffer.aggr_val_.vlong;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
             break;
         }
         case DataType::kFloat: {
             float tmp_val = buffer.aggr_val_.vfloat;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(float));
             break;
         }
         case DataType::kDouble: {
             double tmp_val = buffer.aggr_val_.vdouble;
-            aggr_val.assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
+            aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(double));
             break;
         }
         default: {
@@ -634,8 +625,7 @@ bool AvgAggregator::EncodeAggrVal(const AggrBuffer& buffer) {
             return false;
         }
     }
-    aggr_val.append(reinterpret_cast<char*>(const_cast<int32_t*>(&buffer.non_null_cnt)), sizeof(int32_t));
-    row_builder_.AppendString(aggr_val.c_str(), aggr_val.size());
+    aggr_val->append(reinterpret_cast<char*>(const_cast<int32_t*>(&buffer.non_null_cnt)), sizeof(int32_t));
     return true;
 }
 

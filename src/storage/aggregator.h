@@ -33,6 +33,7 @@ namespace storage {
 
 using Dimensions = google::protobuf::RepeatedPtrField<::openmldb::api::Dimension>;
 using ::openmldb::type::DataType;
+const int AGG_VAL_IDX = 4;
 enum class AggrType {
     kSum = 1,
     kMin = 2,
@@ -125,7 +126,7 @@ class Aggregator {
     virtual bool UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) {
         return false;
     }
-    virtual bool EncodeAggrVal(const AggrBuffer& buffer) {
+    virtual bool EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) {
         return false;
     }
 
@@ -158,7 +159,7 @@ class SumAggregator : public Aggregator {
  private:
     bool UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) override;
 
-    bool EncodeAggrVal(const AggrBuffer& buffer) override;
+    bool EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) override;
 };
 
 class MinMaxBaseAggregator : public Aggregator {
@@ -170,7 +171,7 @@ class MinMaxBaseAggregator : public Aggregator {
     ~MinMaxBaseAggregator() = default;
 
  private:
-    bool EncodeAggrVal(const AggrBuffer& buffer) override;
+    bool EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) override;
 };
 class MinAggregator : public MinMaxBaseAggregator {
  public:
@@ -209,7 +210,7 @@ class CountAggregator : public Aggregator {
  private:
     bool UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) override;
 
-    bool EncodeAggrVal(const AggrBuffer& buffer) override;
+    bool EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) override;
 };
 
 class AvgAggregator : public Aggregator {
@@ -223,7 +224,7 @@ class AvgAggregator : public Aggregator {
  private:
     bool UpdateAggrVal(const codec::RowView& row_view, const int8_t* row_ptr, AggrBuffer* aggr_buffer) override;
 
-    bool EncodeAggrVal(const AggrBuffer& buffer) override;
+    bool EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) override;
 };
 
 std::shared_ptr<Aggregator> CreateAggregator(const ::openmldb::api::TableMeta& base_meta,

@@ -87,9 +87,7 @@ RowBuilder::RowBuilder(const Schema& schema)
 
 void RowBuilder::SetSchemaVersion(uint8_t version) { schema_version_ = version; }
 
-bool RowBuilder::InitExternalBuffer(int8_t* buf, uint32_t size) {
-    return SetBuffer(buf, size, true);
-}
+bool RowBuilder::InitExternalBuffer(int8_t* buf, uint32_t size) { return SetBuffer(buf, size, true); }
 
 bool RowBuilder::SetBuffer(int8_t* buf, uint32_t size) {
     buf_ = buf;
@@ -97,7 +95,7 @@ bool RowBuilder::SetBuffer(int8_t* buf, uint32_t size) {
     cnt_ = 0;
     str_addr_length_ = GetAddrLength(size);
     str_offset_ = str_field_start_offset_ + str_addr_length_ * str_field_cnt_;
-    return SetBuffer(buf_, size, true); 
+    return SetBuffer(buf_, size, true);
 }
 
 bool RowBuilder::SetBuffer(int8_t* buf, uint32_t size, bool need_clear) {
@@ -152,9 +150,7 @@ bool RowBuilder::AppendDate(int32_t date) {
     return true;
 }
 
-bool RowBuilder::SetDate(uint32_t index, int32_t date) {
-    return SetDate(buf_, index, date);
-}
+bool RowBuilder::SetDate(uint32_t index, int32_t date) { return SetDate(buf_, index, date); }
 
 bool RowBuilder::SetDate(int8_t* buf, uint32_t index, int32_t date) {
     if (!Check(index, ::openmldb::type::kDate)) return false;
@@ -188,9 +184,7 @@ bool RowBuilder::SetDate(int8_t* buf, uint32_t index, uint32_t year, uint32_t mo
     return true;
 }
 
-void RowBuilder::SetField(uint32_t index) {
-    SetField(buf_, index);
-}
+void RowBuilder::SetField(uint32_t index) { SetField(buf_, index); }
 
 void RowBuilder::SetField(int8_t* buf, uint32_t index) {
     int8_t* ptr = buf + HEADER_LENGTH + (index >> 3);
@@ -236,9 +230,7 @@ bool RowBuilder::SetNULL(int8_t* buf, uint32_t size, uint32_t index) {
     return true;
 }
 
-void RowBuilder::SetStrOffset(uint32_t str_pos) {
-    SetStrOffset(buf_, size_, str_pos, str_offset_);
-}
+void RowBuilder::SetStrOffset(uint32_t str_pos) { SetStrOffset(buf_, size_, str_pos, str_offset_); }
 
 void RowBuilder::SetStrOffset(int8_t* buf, uint32_t size, uint32_t str_pos, uint32_t str_offset) {
     if (str_pos >= str_field_cnt_) {
@@ -287,9 +279,7 @@ bool RowBuilder::AppendBool(bool val) {
     return true;
 }
 
-bool RowBuilder::SetBool(uint32_t index, bool val) {
-    return SetBool(buf_, index, val);
-}
+bool RowBuilder::SetBool(uint32_t index, bool val) { return SetBool(buf_, index, val); }
 
 bool RowBuilder::SetBool(int8_t* buf, uint32_t index, bool val) {
     if (!Check(index, ::openmldb::type::kBool)) return false;
@@ -305,9 +295,7 @@ bool RowBuilder::AppendInt16(int16_t val) {
     return true;
 }
 
-bool RowBuilder::SetInt16(uint32_t index, int16_t val) {
-    return SetInt16(buf_, index, val);
-}
+bool RowBuilder::SetInt16(uint32_t index, int16_t val) { return SetInt16(buf_, index, val); }
 
 bool RowBuilder::SetInt16(int8_t* buf, uint32_t index, int16_t val) {
     if (!Check(index, ::openmldb::type::kSmallInt)) return false;
@@ -323,9 +311,7 @@ bool RowBuilder::AppendInt32(int32_t val) {
     return true;
 }
 
-bool RowBuilder::SetInt32(uint32_t index, int32_t val) {
-    return SetInt32(buf_, index, val);
-}
+bool RowBuilder::SetInt32(uint32_t index, int32_t val) { return SetInt32(buf_, index, val); }
 
 bool RowBuilder::SetInt32(int8_t* buf, uint32_t index, int32_t val) {
     if (!Check(index, ::openmldb::type::kInt)) return false;
@@ -341,9 +327,7 @@ bool RowBuilder::AppendInt64(int64_t val) {
     return true;
 }
 
-bool RowBuilder::SetInt64(uint32_t index, int64_t val) {
-    return SetInt64(buf_, index, val);
-}
+bool RowBuilder::SetInt64(uint32_t index, int64_t val) { return SetInt64(buf_, index, val); }
 
 bool RowBuilder::SetInt64(int8_t* buf, uint32_t index, int64_t val) {
     if (!Check(index, ::openmldb::type::kBigInt)) return false;
@@ -359,9 +343,7 @@ bool RowBuilder::AppendTimestamp(int64_t val) {
     return true;
 }
 
-bool RowBuilder::SetTimestamp(uint32_t index, int64_t val) {
-    return SetTimestamp(buf_, index, val);
-}
+bool RowBuilder::SetTimestamp(uint32_t index, int64_t val) { return SetTimestamp(buf_, index, val); }
 
 bool RowBuilder::SetTimestamp(int8_t* buf, uint32_t index, int64_t val) {
     if (!Check(index, ::openmldb::type::kTimestamp)) return false;
@@ -377,9 +359,7 @@ bool RowBuilder::AppendFloat(float val) {
     return true;
 }
 
-bool RowBuilder::SetFloat(uint32_t index, float val) {
-    return SetFloat(buf_, index, val);
-}
+bool RowBuilder::SetFloat(uint32_t index, float val) { return SetFloat(buf_, index, val); }
 
 bool RowBuilder::SetFloat(int8_t* buf, uint32_t index, float val) {
     if (!Check(index, ::openmldb::type::kFloat)) return false;
@@ -395,9 +375,7 @@ bool RowBuilder::AppendDouble(double val) {
     return true;
 }
 
-bool RowBuilder::SetDouble(uint32_t index, double val) {
-    return SetDouble(buf_, index, val);
-}
+bool RowBuilder::SetDouble(uint32_t index, double val) { return SetDouble(buf_, index, val); }
 
 bool RowBuilder::SetDouble(int8_t* buf, uint32_t index, double val) {
     if (!Check(index, ::openmldb::type::kDouble)) return false;
@@ -1003,9 +981,7 @@ int32_t GetStrField(const int8_t* row, uint32_t field_offset, uint32_t next_str_
             }
             break;
         }
-        default: {
-            return -2;
-        }
+        default: { return -2; }
     }
     const int8_t* ptr = row + str_offset;
     *data = (int8_t*)(ptr);  // NOLINT
@@ -1164,9 +1140,7 @@ bool RowProject::Project(const int8_t* row_ptr, uint32_t size, int8_t** output_p
                 if (ret == 0) row_builder_->AppendString(val, size);
                 break;
             }
-            default: {
-                PDLOG(WARNING, "not supported type");
-            }
+            default: { PDLOG(WARNING, "not supported type"); }
         }
         if (ret != 0) {
             delete[] ptr;

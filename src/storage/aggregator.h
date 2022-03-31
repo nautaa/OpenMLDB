@@ -54,6 +54,7 @@ union AggrVal {
     double vdouble;
 };
 
+// TODO(yuhang): efficient memory usage buffer, replace AggrVal union.
 struct AggrBuffer {
     AggrVal aggr_val_;
     int64_t ts_begin_;

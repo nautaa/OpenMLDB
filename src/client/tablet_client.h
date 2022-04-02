@@ -284,6 +284,8 @@ class TabletClient : public Client {
                           uint32_t aggr_tid, uint32_t aggr_pid, uint32_t index_pos,
                           const ::openmldb::base::LongWindowInfo& window_info);
 
+    bool GetAndFlushDeployStats(::openmldb::api::DeployStatsResponse* res);
+
  private:
     ::openmldb::RpcClient<::openmldb::api::TabletServer_Stub> client_;
     std::vector<uint64_t> percentile_;

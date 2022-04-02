@@ -349,11 +349,13 @@ bool MinMaxBaseAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* 
             aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int16_t));
             break;
         }
+        case DataType::kDate:
         case DataType::kInt: {
             int32_t tmp_val = buffer.aggr_val_.vint;
             aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
             break;
         }
+        case DataType::kTimestamp:
         case DataType::kBigInt: {
             int64_t tmp_val = buffer.aggr_val_.vlong;
             aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
@@ -399,25 +401,24 @@ bool MinAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vsmallint) {
                 aggr_buffer->aggr_val_.vsmallint = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
+        case DataType::kDate:
         case DataType::kInt: {
             int32_t val;
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vint) {
                 aggr_buffer->aggr_val_.vint = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
+        case DataType::kTimestamp:
         case DataType::kBigInt: {
             int64_t val;
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vlong) {
                 aggr_buffer->aggr_val_.vlong = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -426,7 +427,6 @@ bool MinAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vfloat) {
                 aggr_buffer->aggr_val_.vfloat = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -435,7 +435,6 @@ bool MinAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val < aggr_buffer->aggr_val_.vdouble) {
                 aggr_buffer->aggr_val_.vdouble = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -446,7 +445,6 @@ bool MinAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, &ch, &ch_length);
             if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_buffer->str_buf.c_str()) < 0) {
                 aggr_buffer->str_buf.assign(ch, ch_length);
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -455,6 +453,7 @@ bool MinAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             return false;
         }
     }
+    aggr_buffer->non_null_cnt++;
     return true;
 }
 
@@ -475,25 +474,24 @@ bool MaxAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vsmallint) {
                 aggr_buffer->aggr_val_.vsmallint = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
+        case DataType::kDate:
         case DataType::kInt: {
             int32_t val;
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vint) {
                 aggr_buffer->aggr_val_.vint = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
+        case DataType::kTimestamp:
         case DataType::kBigInt: {
             int64_t val;
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vlong) {
                 aggr_buffer->aggr_val_.vlong = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -502,7 +500,6 @@ bool MaxAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vfloat) {
                 aggr_buffer->aggr_val_.vfloat = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -511,7 +508,6 @@ bool MaxAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, aggr_col_type_, &val);
             if (aggr_buffer->AggrValEmpty() || val > aggr_buffer->aggr_val_.vdouble) {
                 aggr_buffer->aggr_val_.vdouble = val;
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -522,7 +518,6 @@ bool MaxAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             row_view.GetValue(row_ptr, aggr_col_idx_, &ch, &ch_length);
             if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_buffer->str_buf.c_str()) > 0) {
                 aggr_buffer->str_buf.assign(ch, ch_length);
-                aggr_buffer->non_null_cnt++;
             }
             break;
         }
@@ -531,6 +526,7 @@ bool MaxAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             return false;
         }
     }
+    aggr_buffer->non_null_cnt++;
     return true;
 }
 
@@ -541,8 +537,8 @@ CountAggregator::CountAggregator(const ::openmldb::api::TableMeta& base_meta,
     : Aggregator(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, aggr_type, ts_col, window_tpye, window_size) {}
 
 bool CountAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_val) {
-    int32_t tmp_val = buffer.non_null_cnt;
-    aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int32_t));
+    int64_t tmp_val = buffer.non_null_cnt;
+    aggr_val->assign(reinterpret_cast<char*>(&tmp_val), sizeof(int64_t));
     return true;
 }
 
@@ -627,7 +623,7 @@ bool AvgAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* aggr_va
             return false;
         }
     }
-    aggr_val->append(reinterpret_cast<char*>(const_cast<int32_t*>(&buffer.non_null_cnt)), sizeof(int32_t));
+    aggr_val->append(reinterpret_cast<char*>(const_cast<int64_t*>(&buffer.non_null_cnt)), sizeof(int64_t));
     return true;
 }
 
@@ -676,8 +672,20 @@ std::shared_ptr<Aggregator> CreateAggregator(const ::openmldb::api::TableMeta& b
     }
 
     // TODO(yuhang): support more aggr_type
-    if (aggr_func == "sum") {
+    if (aggr_type == "sum") {
         return std::make_shared<SumAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kSum,
+                                               ts_col, window_type, window_size);
+    } else if (aggr_type == "min") {
+        return std::make_shared<MinAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kMin,
+                                               ts_col, window_type, window_size);
+    } else if (aggr_type == "max") {
+        return std::make_shared<MaxAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kMax,
+                                               ts_col, window_type, window_size);
+    } else if (aggr_type == "count") {
+        return std::make_shared<CountAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kCount,
+                                               ts_col, window_type, window_size);
+    } else if (aggr_type == "avg") {
+        return std::make_shared<AvgAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kAvg,
                                                ts_col, window_type, window_size);
     } else {
         PDLOG(ERROR, "Unsupported aggregate function type");

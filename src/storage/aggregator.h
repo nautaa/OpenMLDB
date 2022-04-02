@@ -63,7 +63,7 @@ struct AggrBuffer {
     int32_t aggr_cnt_;
     uint64_t binlog_offset_;
     std::string str_buf;
-    int32_t non_null_cnt;
+    int64_t non_null_cnt;
     AggrBuffer()
         : aggr_val_(), ts_begin_(-1), ts_end_(0), aggr_cnt_(0), binlog_offset_(0), str_buf(), non_null_cnt(0) {}
     void clear() {

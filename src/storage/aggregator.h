@@ -47,32 +47,30 @@ enum class WindowType {
     kRowsRange = 2,
 };
 
-union AggrVal {
-    int16_t vsmallint;
-    int32_t vint;
-    int64_t vlong;
-    float vfloat;
-    double vdouble;
-};
-
-// TODO(yuhang): efficient memory usage buffer, replace AggrVal union.
 struct AggrBuffer {
-    AggrVal aggr_val_;
+    union AggrVal {
+        int16_t vsmallint;
+        int32_t vint;
+        int64_t vlong;
+        float vfloat;
+        double vdouble;
+        struct {
+            uint32_t len;
+            char* data;
+        } vstring;
+    } aggr_val_;
     int64_t ts_begin_;
     int64_t ts_end_;
     int32_t aggr_cnt_;
     uint64_t binlog_offset_;
-    std::string str_buf;
     int64_t non_null_cnt;
-    AggrBuffer()
-        : aggr_val_(), ts_begin_(-1), ts_end_(0), aggr_cnt_(0), binlog_offset_(0), str_buf(), non_null_cnt(0) {}
+    AggrBuffer() : aggr_val_(), ts_begin_(-1), ts_end_(0), aggr_cnt_(0), binlog_offset_(0), non_null_cnt(0) {}
     void clear() {
         memset(&aggr_val_, 0, sizeof(aggr_val_));
         ts_begin_ = -1;
         ts_end_ = 0;
         aggr_cnt_ = 0;
         binlog_offset_ = 0;
-        str_buf.clear();
         non_null_cnt = 0;
     }
     bool AggrValEmpty() const { return non_null_cnt == 0; }
@@ -89,7 +87,7 @@ class Aggregator {
                std::shared_ptr<Table> aggr_table, const uint32_t& index_pos, const std::string& aggr_col,
                const AggrType& aggr_type, const std::string& ts_col, WindowType window_tpye, uint32_t window_size);
 
-    ~Aggregator() = default;
+    ~Aggregator();
 
     bool Update(const std::string& key, const std::string& row, const uint64_t& offset);
 

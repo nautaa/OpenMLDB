@@ -55,6 +55,14 @@ Aggregator::Aggregator(const ::openmldb::api::TableMeta& base_meta, const ::open
     dimension->set_idx(0);
 }
 
+Aggregator::~Aggregator() {
+    if (aggr_col_type_ == DataType::kString || aggr_col_type_ == DataType::kVarchar) {
+        for (const auto& it : aggr_buffer_map_) {
+            delete[] it.second.buffer_.aggr_val_.vstring.data;
+        }
+    }
+}
+
 bool Aggregator::Update(const std::string& key, const std::string& row, const uint64_t& offset) {
     int8_t* row_ptr = reinterpret_cast<int8_t*>(const_cast<char*>(row.c_str()));
     int64_t cur_ts;
@@ -373,7 +381,7 @@ bool MinMaxBaseAggregator::EncodeAggrVal(const AggrBuffer& buffer, std::string* 
         }
         case DataType::kString:
         case DataType::kVarchar: {
-            aggr_val->assign(buffer.str_buf.c_str(), buffer.str_buf.size());
+            aggr_val->assign(buffer.aggr_val_.vstring.data, buffer.aggr_val_.vstring.len);
             break;
         }
         default: {
@@ -443,8 +451,17 @@ bool MinAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             char* ch = NULL;
             uint32_t ch_length = 0;
             row_view.GetValue(row_ptr, aggr_col_idx_, &ch, &ch_length);
-            if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_buffer->str_buf.c_str()) < 0) {
-                aggr_buffer->str_buf.assign(ch, ch_length);
+            auto& aggr_val = aggr_buffer->aggr_val_.vstring;
+            if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_val.data) < 0) {
+                if (aggr_val.data != NULL && ch_length > aggr_val.len) {
+                    delete aggr_val.data;
+                    aggr_val.data = NULL;
+                }
+                if (aggr_val.data == NULL) {
+                    aggr_val.data = new char[ch_length];
+                }
+                aggr_val.len = ch_length;
+                memcpy(aggr_val.data, ch, ch_length);
             }
             break;
         }
@@ -516,8 +533,17 @@ bool MaxAggregator::UpdateAggrVal(const codec::RowView& row_view, const int8_t* 
             char* ch = NULL;
             uint32_t ch_length = 0;
             row_view.GetValue(row_ptr, aggr_col_idx_, &ch, &ch_length);
-            if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_buffer->str_buf.c_str()) > 0) {
-                aggr_buffer->str_buf.assign(ch, ch_length);
+            auto& aggr_val = aggr_buffer->aggr_val_.vstring;
+            if (aggr_buffer->AggrValEmpty() || strcmp(ch, aggr_val.data) > 0) {
+                if (aggr_val.data != NULL && ch_length > aggr_val.len) {
+                    delete[] aggr_val.data;
+                    aggr_val.data = NULL;
+                }
+                if (aggr_val.data == NULL) {
+                    aggr_val.data = new char[ch_length];
+                }
+                aggr_val.len = ch_length;
+                memcpy(aggr_val.data, ch, ch_length);
             }
             break;
         }
@@ -671,7 +697,6 @@ std::shared_ptr<Aggregator> CreateAggregator(const ::openmldb::api::TableMeta& b
         }
     }
 
-    // TODO(yuhang): support more aggr_type
     if (aggr_type == "sum") {
         return std::make_shared<SumAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kSum,
                                                ts_col, window_type, window_size);
@@ -682,8 +707,8 @@ std::shared_ptr<Aggregator> CreateAggregator(const ::openmldb::api::TableMeta& b
         return std::make_shared<MaxAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kMax,
                                                ts_col, window_type, window_size);
     } else if (aggr_type == "count") {
-        return std::make_shared<CountAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kCount,
-                                               ts_col, window_type, window_size);
+        return std::make_shared<CountAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col,
+                                                 AggrType::kCount, ts_col, window_type, window_size);
     } else if (aggr_type == "avg") {
         return std::make_shared<AvgAggregator>(base_meta, aggr_meta, aggr_table, index_pos, aggr_col, AggrType::kAvg,
                                                ts_col, window_type, window_size);

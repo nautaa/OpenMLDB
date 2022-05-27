@@ -3,6 +3,14 @@
 	"build": {
 		"dockerfile": "Dockerfile",
 	},
+	"settings": {
+		"C_Cpp.default.includePath": [
+			"${workspaceFolder}/**",
+                	"/deps/usr/include"
+		],
+		"C_Cpp.default.configurationProvider": "ms-vscode.cmake-tools",
+		"C_Cpp.default.cppStandard": "c++17"
+	},
 	// Visual Studio Code extensions (plugins) to be installed.
 	"extensions": [
 		"ms-vscode.cpptools",

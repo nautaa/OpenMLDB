@@ -1,3 +1,11 @@
 {
-    "dockerFile": "Dockerfile"
+	"name": "OpenMLDB codespaces",
+	"build": {
+		"dockerfile": "Dockerfile",
+	},
+	// Visual Studio Code extensions (plugins) to be installed.
+	"extensions": [
+		"ms-vscode.cpptools",
+		"ms-vscode.cmake-tools"
+	]
 }
